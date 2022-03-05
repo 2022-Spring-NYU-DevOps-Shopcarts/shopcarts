@@ -9,6 +9,9 @@ import sys
 import logging
 from flask import Flask
 
+parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
+sys.path.insert(0,parentdir) 
+
 # Create Flask application
 app = Flask(__name__)
 app.config.from_object("config")
