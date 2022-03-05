@@ -66,7 +66,7 @@ class YourResourceModel(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.name = data["name"]
+            self.name = data["name"] + ""
         except KeyError as error:
             raise DataValidationError(
                 "Invalid YourResourceModel: missing " + error.args[0]

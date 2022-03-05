@@ -44,4 +44,6 @@ except Exception as error:
     # gunicorn requires exit code 4 to stop spawning workers when they die
     sys.exit(4)
 
+# app.run(host='0.0.0.0', port=5000, debug=True)
+
 app.logger.info("Service initialized!")
