@@ -9,6 +9,9 @@ import sys
 import logging
 from flask import Flask
 
+parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
+sys.path.insert(0,parentdir) 
+
 # Create Flask application
 app = Flask(__name__)
 app.config.from_object("config")
@@ -40,5 +43,7 @@ except Exception as error:
     app.logger.critical("%s: Cannot continue", error)
     # gunicorn requires exit code 4 to stop spawning workers when they die
     sys.exit(4)
+
+# app.run(host='0.0.0.0', port=5000, debug=True)
 
 app.logger.info("Service initialized!")
