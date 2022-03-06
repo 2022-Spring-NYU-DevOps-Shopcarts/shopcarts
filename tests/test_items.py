@@ -2,6 +2,7 @@
 Test cases for Item in Shopcart
 
 """
+from csv import unregister_dialect
 import logging
 import unittest
 import os
@@ -52,7 +53,7 @@ class TestItem(unittest.TestCase):
         self.assertEqual(data["price"], 1000)
 
     def test_deserialize(self):
-        data = {"item_name" : "rings", "quantity" : 2, "price" : 1000}
+        data = {"item_name" : "rings", "quantity" : 2, "price" : 1000, "user_id" : 0}
         item = Item()
         item.deserialize(data)
         self.assertEqual(item.item_name, "rings")

@@ -5,9 +5,10 @@ All of the models are stored in this module
 
 Attributes Explanations:
 
-user_id: a user id, primary key for shopcart, each user have only one shopcart
+id: primary key for item
+user_id: a user id, primary key for shopcart, foreign key for item
 name: name of a shopcart
-item_name: name of an item, primary key for item
+item_name: name of an item
 quantity: quantity of an item
 price: price of an item
 """
@@ -27,14 +28,16 @@ class DataValidationError(Exception):
 
 class Item(db.Model):
     """
-    Class that represents a shopcart
+    Class that represents an item
     """
     app = None
     # Item Table Schema
-    item_name = db.Column(db.String(63), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('shopcart.user_id'), nullable=False)
+    item_name = db.Column(db.String(63))
     quantity = db.Column(db.Integer)
     price = db.Column(db.Float)
-    user_id = db.Column(db.Integer, db.ForeignKey('shopcart.user_id'))
+    
 
     def __repr__(self):
         return "<Item %s, quantity=[%s], price=[%s]>" % (self.item_name, self.quantity, self.price)
@@ -43,7 +46,9 @@ class Item(db.Model):
         """ Serializes an item into a dictionary """
         return {"item_name": self.item_name, 
         "quantity": self.quantity,
-        "price": self.price
+        "price": self.price,
+        "id": self.id,
+        "user_id": self.user_id
         }
 
     def deserialize(self, data):
@@ -54,6 +59,7 @@ class Item(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
+            self.user_id = data["user_id"]
             self.item_name = data["item_name"] + ""
             self.quantity = data["quantity"]
             self.price = data["price"]
@@ -95,7 +101,7 @@ class Shopcart(db.Model):
         db.session.add(self)
         db.session.commit()
     
-    def update(self):
+    def save(self):
         """
         Updates a Shopcart to the database
         """
