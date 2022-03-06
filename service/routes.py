@@ -13,7 +13,7 @@ from . import status  # HTTP Status Codes
 # For this example we'll use SQLAlchemy, a popular ORM that supports a
 # variety of backends including SQLite, MySQL, and PostgreSQL
 from flask_sqlalchemy import SQLAlchemy
-from service.models import YourResourceModel, DataValidationError
+from service.models import Shopcart, DataValidationError
 
 # Import Flask application
 from . import app
@@ -123,7 +123,7 @@ def read_shopcarts():
 @app.route("/shopcarts", methods=["PUT"])
 def update_shopcarts():
     """TODO: currently is dummy code
-    Updates a ciunter in the database
+    Updates a counter in the database
 
     Args:
         name (str): the name of the counter to update
@@ -180,4 +180,4 @@ def delete_shopcarts():
 def init_db():
     """ Initializes the SQLAlchemy app """
     global app
-    YourResourceModel.init_db(app)
+    Shopcart.init_db(app)

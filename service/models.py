@@ -1,7 +1,15 @@
 """
-Models for YourResourceModel
+Models for Shopcart
 
 All of the models are stored in this module
+
+Attributes Explanations:
+
+user_id: a user id, primary key for shopcart, each user have only one shopcart
+name: name of a shopcart
+item_name: name of an item, primary key for item
+quantity: quantity of an item
+price: price of an item
 """
 import logging
 from flask_sqlalchemy import SQLAlchemy
@@ -17,63 +25,114 @@ class DataValidationError(Exception):
 
     pass
 
-
-class YourResourceModel(db.Model):
+class Item(db.Model):
     """
-    Class that represents a <your resource model name>
+    Class that represents a shopcart
+    """
+    app = None
+    # Item Table Schema
+    item_name = db.Column(db.String(63), primary_key=True)
+    quantity = db.Column(db.Integer)
+    price = db.Column(db.Float)
+    user_id = db.Column(db.Integer, db.ForeignKey('shopcart.user_id'))
+
+    def __repr__(self):
+        return "<Item %s, quantity=[%s], price=[%s]>" % (self.item_name, self.quantity, self.price)
+
+    def serialize(self):
+        """ Serializes an item into a dictionary """
+        return {"item_name": self.item_name, 
+        "quantity": self.quantity,
+        "price": self.price
+        }
+
+    def deserialize(self, data):
+        """
+        Deserializes an item from a dictionary
+
+        Args:
+            data (dict): A dictionary containing the resource data
+        """
+        try:
+            self.item_name = data["item_name"] + ""
+            self.quantity = data["quantity"]
+            self.price = data["price"]
+        except KeyError as error:
+            raise DataValidationError(
+                "Invalid item: missing " + error.args[0]
+            )
+        except TypeError as error:
+            raise DataValidationError(
+                "Invalid item: body of request contained bad or no data"
+            )
+        return self
+
+    
+
+
+class Shopcart(db.Model):
+    """
+    Class that represents a shopcart
     """
 
     app = None
 
-    # Table Schema
-    id = db.Column(db.Integer, primary_key=True)
+    # Shopcart Table Schema
+    user_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(63))
+    items = db.relationship('Item', backref='item', cascade="all, delete", lazy=True)
+
 
     def __repr__(self):
-        return "<YourResourceModel %r id=[%s]>" % (self.name, self.id)
+        return "<Shopcart %r id=[%s]>" % (self.name, self.user_id)
 
     def create(self):
         """
-        Creates a YourResourceModel to the database
+        Creates a Shopcart to the database
         """
         logger.info("Creating %s", self.name)
-        self.id = None  # id must be none to generate next primary key
+        # self.id = None  # id must be none to generate next primary key
         db.session.add(self)
         db.session.commit()
 
     def save(self):
         """
-        Updates a YourResourceModel to the database
+        Updates a Shopcart to the database
         """
         logger.info("Saving %s", self.name)
         db.session.commit()
 
     def delete(self):
-        """ Removes a YourResourceModel from the data store """
+        """ Removes a Shopcart from the data store """
         logger.info("Deleting %s", self.name)
         db.session.delete(self)
         db.session.commit()
 
     def serialize(self):
-        """ Serializes a YourResourceModel into a dictionary """
-        return {"id": self.id, "name": self.name}
+        """ Serializes a Shopcart into a dictionary """
+        return {"user_id": self.user_id, 
+        "name": self.name,
+        "items": [item.serialize() for item in self.items]
+        }
 
     def deserialize(self, data):
         """
-        Deserializes a YourResourceModel from a dictionary
+        Deserializes a Shopcart from a dictionary
 
         Args:
             data (dict): A dictionary containing the resource data
         """
         try:
             self.name = data["name"] + ""
+            self.user_id = data["user_id"]
+            self.items = data["items"]
         except KeyError as error:
             raise DataValidationError(
-                "Invalid YourResourceModel: missing " + error.args[0]
+                "Invalid Shopcart: missing " + error.args[0]
             )
         except TypeError as error:
             raise DataValidationError(
-                "Invalid YourResourceModel: body of request contained bad or no data"
+                "Invalid Shopcart: body of request contained bad or no data"
             )
         return self
 
@@ -89,28 +148,28 @@ class YourResourceModel(db.Model):
 
     @classmethod
     def all(cls):
-        """ Returns all of the YourResourceModels in the database """
-        logger.info("Processing all YourResourceModels")
+        """ Returns all of the Shopcarts in the database """
+        logger.info("Processing all Shopcarts")
         return cls.query.all()
 
     @classmethod
     def find(cls, by_id):
-        """ Finds a YourResourceModel by it's ID """
+        """ Finds a Shopcart by it's ID """
         logger.info("Processing lookup for id %s ...", by_id)
         return cls.query.get(by_id)
 
     @classmethod
     def find_or_404(cls, by_id):
-        """ Find a YourResourceModel by it's id """
+        """ Find a Shopcart by it's id """
         logger.info("Processing lookup or 404 for id %s ...", by_id)
         return cls.query.get_or_404(by_id)
 
     @classmethod
     def find_by_name(cls, name):
-        """Returns all YourResourceModels with the given name
+        """Returns all Shopcarts with the given name
 
         Args:
-            name (string): the name of the YourResourceModels you want to match
+            name (string): the name of the Shopcarts you want to match
         """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.name == name)
