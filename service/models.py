@@ -94,8 +94,8 @@ class Shopcart(db.Model):
         # self.id = None  # id must be none to generate next primary key
         db.session.add(self)
         db.session.commit()
-
-    def save(self):
+    
+    def update(self):
         """
         Updates a Shopcart to the database
         """
