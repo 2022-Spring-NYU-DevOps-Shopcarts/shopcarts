@@ -41,17 +41,13 @@ def index():
 ############################################################
 
 #-----------------------------------------------------------
-# Service skeleton demonstrating GET, POST, PUT, DELETE
+# Service skeletons demonstrating GET, POST, PUT, DELETE in 
+# comments below, can use as template for future
+"""
 # Get shopcarts
 #-----------------------------------------------------------
 @app.route("/shopcarts", methods=["GET"])
 def list_shopcarts():
-    """TODO: currently is dummy code
-    Lists all of the shopcarts in the database
-
-    Returns:
-        list: an array of shopcart names
-    """
     #app.logger.info("Request to list all shopcarts...")
 
     # Get the database key names as a list
@@ -65,15 +61,7 @@ def list_shopcarts():
 #-----------------------------------------------------------
 @app.route("/shopcarts", methods=["POST"])
 def create_shopcarts():
-    """ TODO: currently is dummy code
-    Creates a new counter and stores it in the database
-
-    Args:
-        name (str): the name of the counter to create
-
-    Returns:
-        dict: the counter and it's value
-    """
+   
     #app.logger.info(f"Request to Create counter {name}...")
 
     # See if the counter already exists and send an error if it does
@@ -94,15 +82,7 @@ def create_shopcarts():
 #-----------------------------------------------------------
 @app.route("/shopcarts/<name>", methods=["GET"])
 def read_shopcarts():
-    """TODO: currently is dummy code
-    Reads a counter from the database
-
-    Args:
-        name (str): the name of the counter to read
-
-    Returns:
-        dict: the counter and it's value
-    """
+   
     #app.logger.info(f"Request to Read counter {name}...")
 
     # Get the current counter
@@ -122,15 +102,7 @@ def read_shopcarts():
 #-----------------------------------------------------------
 @app.route("/shopcarts", methods=["PUT"])
 def update_shopcarts():
-    """TODO: currently is dummy code
-    Updates a ciunter in the database
-
-    Args:
-        name (str): the name of the counter to update
-
-    Returns:
-        dict: the counter and it's value
-    """
+   
     #app.logger.info(f"Request to Update counter {name}...")
 
     # Get the current counter
@@ -150,15 +122,7 @@ def update_shopcarts():
 #-----------------------------------------------------------
 @app.route("/shopcarts", methods=["DELETE"])
 def delete_shopcarts():
-    """TODO: currently is dummy code
-    Delete a counter from the database
-
-    Args:
-        name (str): the name of the counter to delete
-
-    Returns:
-        str: always returns an empty string
-    """
+  
     #app.logger.info(f"Request to Delete counter {name}...")
 
     # Get the current counter

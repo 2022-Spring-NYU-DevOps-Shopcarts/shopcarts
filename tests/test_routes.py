@@ -45,28 +45,31 @@ class ShopcartsServerTest(TestCase):
         """ Test index call """
         resp = self.app.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-
+    
+    """ Example test cases in this docstring, can use as template for future
     def test_shopcarts_get(self):
-        """ Test GET on /shopcarts"""
+        
         resp = self.app.get("/shopcarts")
         data = resp.get_json()
         self.assertEqual(data, "GET call received at /shopcarts.")
 
     def test_shopcarts_post(self):
-        """ Test POST on /shopcarts"""
+
         resp = self.app.post("/shopcarts")
         data = resp.get_json()
         self.assertEqual(data, "POST call received at /shopcarts.")
 
     def test_shopcarts_put(self):
-        """ Test PUT on /shopcarts"""
+
         resp = self.app.put("/shopcarts")
         data = resp.get_json()
         self.assertEqual(data, "PUT call received at /shopcarts.")
 
     def test_shopcarts_delete(self):
-        """ Test DELETE on /shopcarts"""
+
         resp = self.app.delete("/shopcarts")
         data = resp.get_json()
         self.assertEqual(data, "DELETE call received at /shopcarts.")
         
+
+    """
