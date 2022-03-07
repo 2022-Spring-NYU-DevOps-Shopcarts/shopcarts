@@ -73,12 +73,17 @@ class Shopcart(db.Model):
 
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
-        return {"user_id": self.user_id, 
-        "item_id": self.item_id,
-        "item_name": self.item_name,
-        "quantity": self.quantity,
-        "price": self.price
-        }
+        if self.item_id != -1:
+            return {"user_id": self.user_id, 
+            "item_id": self.item_id,
+            "item_name": self.item_name,
+            "quantity": self.quantity,
+            "price": self.price
+            }
+        else:
+            return {"user_id": self.user_id, 
+            "item_id": self.item_id,
+            }
 
     def deserialize(self, data):
         """
