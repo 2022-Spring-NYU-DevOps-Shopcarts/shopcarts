@@ -1,7 +1,7 @@
 """
 My Service
 
-TODO: Describe what your service does here
+Describe what your service does here
 """
 
 import os
