@@ -5,9 +5,9 @@ All of the models are stored in this module
 
 Attributes Explanations:
 
-id: primary key for item
-user_id: a user id, primary key for shopcart, foreign key for item
-name: name of a shopcart
+item_id: an item id
+user_id: a user id, primary key for shopcart
+user_id + item_id serves as the compound primary key in our Shopcart-Item table
 item_name: name of an item
 quantity: quantity of an item
 price: price of an item
@@ -26,53 +26,6 @@ class DataValidationError(Exception):
 
     pass
 
-class Item(db.Model):
-    """
-    Class that represents an item
-    """
-    app = None
-    # Item Table Schema
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('shopcart.user_id'), nullable=False)
-    item_name = db.Column(db.String(63))
-    quantity = db.Column(db.Integer)
-    price = db.Column(db.Float)
-    
-
-    def __repr__(self):
-        return "<Item %s, quantity=[%s], price=[%s]>" % (self.item_name, self.quantity, self.price)
-
-    def serialize(self):
-        """ Serializes an item into a dictionary """
-        return {"item_name": self.item_name, 
-        "quantity": self.quantity,
-        "price": self.price,
-        "id": self.id,
-        "user_id": self.user_id
-        }
-
-    def deserialize(self, data):
-        """
-        Deserializes an item from a dictionary
-
-        Args:
-            data (dict): A dictionary containing the resource data
-        """
-        try:
-            self.user_id = data["user_id"]
-            self.item_name = data["item_name"] + ""
-            self.quantity = data["quantity"]
-            self.price = data["price"]
-        except KeyError as error:
-            raise DataValidationError(
-                "Invalid item: missing " + error.args[0]
-            )
-        except TypeError as error:
-            raise DataValidationError(
-                "Invalid item: body of request contained bad or no data"
-            )
-        return self
-
     
 
 
@@ -83,21 +36,22 @@ class Shopcart(db.Model):
 
     app = None
 
-    # Shopcart Table Schema
+    # Shopcart-Item Table Schema
     user_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(63))
-    items = db.relationship('Item', backref='item', cascade="all, delete", lazy=True)
+    item_id = db.Column(db.Integer, primary_key=True)
+    item_name = db.Column(db.String(63))
+    quantity = db.Column(db.Integer)
+    price = db.Column(db.Float)
 
 
     def __repr__(self):
-        return "<Shopcart %r id=[%s]>" % (self.name, self.user_id)
+        return "<Shopcart for user %s>" % self.user_id
 
     def create(self):
         """
         Creates a Shopcart to the database
         """
-        logger.info("Creating %s", self.name)
-        # self.id = None  # id must be none to generate next primary key
+        logger.info("Creating shopcart for user %s", self.user_id)
         db.session.add(self)
         db.session.commit()
     
@@ -105,20 +59,22 @@ class Shopcart(db.Model):
         """
         Updates a Shopcart to the database
         """
-        logger.info("Saving %s", self.name)
+        logger.info("Saving shopcart for user %s", self.user_id)
         db.session.commit()
 
     def delete(self):
         """ Removes a Shopcart from the data store """
-        logger.info("Deleting %s", self.name)
+        logger.info("Deleting shopcart for user %s", self.user_id)
         db.session.delete(self)
         db.session.commit()
 
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
         return {"user_id": self.user_id, 
-        "name": self.name,
-        "items": [item.serialize() for item in self.items]
+        "item_id": self.item_id,
+        "item_name": self.item_name,
+        "quantity": self.quantity,
+        "price": self.price
         }
 
     def deserialize(self, data):
@@ -129,9 +85,11 @@ class Shopcart(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.name = data["name"] + ""
             self.user_id = data["user_id"]
-            self.items = data["items"]
+            self.item_id = data["item_id"]
+            self.item_name = data["item_name"] + ""
+            self.quantity = data["quantity"]
+            self.price = data["price"]
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Shopcart: missing " + error.args[0]
@@ -159,23 +117,15 @@ class Shopcart(db.Model):
         return cls.query.all()
 
     @classmethod
-    def find(cls, by_id):
-        """ Finds a Shopcart by it's ID """
-        logger.info("Processing lookup for id %s ...", by_id)
-        return cls.query.get(by_id)
+    def find(cls, user_id, item_id):
+        """ Finds an item by user_id and item_id """
+        logger.info("Processing lookup for user id %s item id %s...", user_id, item_id)
+        return cls.query.filter((cls.user_id == user_id) & (cls.item_id == item_id))
+
 
     @classmethod
-    def find_or_404(cls, by_id):
-        """ Find a Shopcart by it's id """
-        logger.info("Processing lookup or 404 for id %s ...", by_id)
-        return cls.query.get_or_404(by_id)
+    def find_or_404(cls, uid, iid):
+        """ Find an item by user_id and item_id """
+        logger.info("Processing lookup or 404 for user id %s item id %s...", uid, iid)
+        return cls.query.get_or_404(uid, iid)
 
-    @classmethod
-    def find_by_name(cls, name):
-        """Returns all Shopcarts with the given name
-
-        Args:
-            name (string): the name of the Shopcarts you want to match
-        """
-        logger.info("Processing name query for %s ...", name)
-        return cls.query.filter(cls.name == name)
