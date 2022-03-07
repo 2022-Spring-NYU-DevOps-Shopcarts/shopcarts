@@ -63,9 +63,9 @@ class TestShopcart(unittest.TestCase):
         self.assertEqual(res, "<Product %s in Shopcart for user %s>"
          % (item_in_shopcart.item_id, item_in_shopcart.user_id))
 
-   
+
     def test_create_a_shopcart(self):
-        """Create a shopcart record and assert that it exists"""
+        """Create a shopcart and assert that it exists"""
         shopcart = Shopcart(user_id = 0, item_id = -1)
         logging.debug(shopcart)
         self.assertTrue(shopcart is not None)
@@ -97,7 +97,7 @@ class TestShopcart(unittest.TestCase):
         logging.debug(item_in_shopcart)
         shopcarts = Shopcart.all()
         self.assertEqual(len(shopcarts), 2)
-        
+
 
     def test_update_a_shopcart_update_item(self):
         """ Update a Shopcart, change item quantity"""
@@ -166,7 +166,7 @@ class TestShopcart(unittest.TestCase):
         self.assertEqual(shopcart.quantity, 2)
         self.assertEqual(shopcart.price, 20.5)
 
-    
+
     def test_deserialize_missing_data(self):
         """Test deserialization of a Shopcart with missing data"""
         data = {"user_id" : 1, "item_id" : 2, "item_name" : "bottle", "quantity" : 2}
@@ -182,7 +182,7 @@ class TestShopcart(unittest.TestCase):
         logging.debug(shopcart)
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
 
-    
+
     def test_find(self):
         """ Test Finds a Shopcart-Item by user id, item id """
         shopcart_base = ShopcartFactory()
