@@ -45,7 +45,10 @@ class Shopcart(db.Model):
 
 
     def __repr__(self):
-        return "<Shopcart for user %s>" % self.user_id
+        if self.item_id == -1:
+            return "<Shopcart for user %s>" % self.user_id
+        else:
+            return "<Product %s in Shopcart for user %s>" % (self.item_id, self.user_id)
 
     def create(self):
         """
@@ -85,11 +88,38 @@ class Shopcart(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.user_id = data["user_id"]
-            self.item_id = data["item_id"]
-            self.item_name = data["item_name"] + ""
-            self.quantity = data["quantity"]
-            self.price = data["price"]
+            if isinstance(data["user_id"], int):
+                self.user_id = data["user_id"]
+            else:
+                raise DataValidationError(
+                    "Invalid type for int [user_id]: "
+                    + str(type(data["user_id"]))
+                )
+            if isinstance(data["item_id"], int):
+                self.item_id = data["item_id"]
+            else:
+                raise DataValidationError(
+                    "Invalid type for int [item_id]: "
+                    + str(type(data["item_id"]))
+                )
+
+            if self.item_id != -1:
+                self.item_name = data["item_name"] + ""
+                if isinstance(data["quantity"], int):
+                    self.quantity = data["quantity"]
+                else:
+                    raise DataValidationError(
+                        "Invalid type for int [quantity]: "
+                        + str(type(data["quantity"]))
+                    )
+                if isinstance(data["price"], float):
+                    self.price = data["price"]
+                else:
+                    raise DataValidationError(
+                        "Invalid type for float [price]: "
+                        + str(type(data["price"]))
+                    )
+                
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Shopcart: missing " + error.args[0]
@@ -120,12 +150,12 @@ class Shopcart(db.Model):
     def find(cls, user_id, item_id):
         """ Finds an item by user_id and item_id """
         logger.info("Processing lookup for user id %s item id %s...", user_id, item_id)
-        return cls.query.filter((cls.user_id == user_id) & (cls.item_id == item_id))
+        return cls.query.filter((cls.user_id == user_id) & (cls.item_id == item_id)).first()
 
 
     @classmethod
-    def find_or_404(cls, uid, iid):
+    def find_or_404(cls, user_id, item_id):
         """ Find an item by user_id and item_id """
-        logger.info("Processing lookup or 404 for user id %s item id %s...", uid, iid)
-        return cls.query.get_or_404(uid, iid)
+        logger.info("Processing lookup or 404 for user id %s item id %s...", user_id, item_id)
+        return cls.query.filter((cls.user_id == user_id) & (cls.item_id == item_id)).first_or_404()
 

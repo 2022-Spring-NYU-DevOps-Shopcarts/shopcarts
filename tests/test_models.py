@@ -10,6 +10,7 @@ from werkzeug.exceptions import NotFound
 from sqlalchemy import null, true
 from service.models import Shopcart, DataValidationError, db
 from service import app
+from .factories import ShopcartFactory, ItemFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/shopcarts"
@@ -51,29 +52,32 @@ class TestShopcart(unittest.TestCase):
 
     def test_repr(self):
         """ Test __repr__ """
-        shopcart = Shopcart(user_id = 0, item_id = 0, item_name = "rings", quantity = 2, price = 1000)
+        shopcart = ShopcartFactory()
         res = shopcart.__repr__()
         logging.debug(shopcart)
-        self.assertEqual(res, "<Shopcart for user 0>")
+        self.assertEqual(res, "<Shopcart for user %s>" % shopcart.user_id)
+
+        item_in_shopcart = ItemFactory(user_id=shopcart.user_id)
+        res = item_in_shopcart.__repr__()
+        logging.debug(item_in_shopcart)
+        self.assertEqual(res, "<Product %s in Shopcart for user %s>"
+         % (item_in_shopcart.item_id, item_in_shopcart.user_id))
 
    
     def test_create_a_shopcart(self):
-        """Create a shopcart and assert that it exists"""
-        shopcart = Shopcart(user_id = 0, item_id = 0, item_name = "rings", quantity = 2, price = 1000)
+        """Create a shopcart record and assert that it exists"""
+        shopcart = ShopcartFactory()
         logging.debug(shopcart)
         self.assertTrue(shopcart is not None)
-        self.assertEqual(shopcart.user_id, 0)
-        self.assertEqual(shopcart.item_id, 0)
-        self.assertEqual(shopcart.item_name, "rings")
-        self.assertEqual(shopcart.quantity, 2)
-        self.assertEqual(shopcart.price, 1000)
+        self.assertEqual(shopcart.user_id, shopcart.user_id)
+        self.assertEqual(shopcart.item_id, shopcart.item_id)
 
 
     def test_add_a_shopcart(self):
         """ Test create a Shopcart with no item, add it to the database"""
         shopcarts = Shopcart.all()
         self.assertEqual(shopcarts, [])
-        shopcart = Shopcart(user_id = 0, item_id = 0, item_name = "rings", quantity = 2, price = 1000)
+        shopcart = ShopcartFactory()
         logging.debug(shopcart)
         shopcart.create()
         shopcarts = Shopcart.all()
@@ -82,24 +86,29 @@ class TestShopcart(unittest.TestCase):
         
     def test_update_a_shopcart_add_item(self):
         """ Update a Shopcart, change item quantity"""
-        shopcart = Shopcart(user_id = 0, item_id = 0, item_name = "rings", quantity = 2, price = 1000)
+        shopcart = ShopcartFactory()
         shopcart.create()
         logging.debug(shopcart)
+        item_in_shopcart = ItemFactory(user_id=shopcart.user_id)
+        item_in_shopcart.create()
+        logging.debug(item_in_shopcart)
+
         # Change it and save it
-        shopcart.quantity = 3
-        shopcart.save()
+        item_in_shopcart.quantity += 3
+        item_in_shopcart.save()
+
         # Fetch it back and make sure the user id hasn't changed
         # but the data did change
         shopcarts = Shopcart.all()
-        self.assertEqual(len(shopcarts), 1)
-        self.assertEqual(shopcarts[0].user_id, 0)
-        self.assertEqual(shopcarts[0].item_name, "rings")
-        self.assertEqual(shopcarts[0].quantity, 3)
+        self.assertEqual(len(shopcarts), 2)
+        item = Shopcart.find(item_in_shopcart.user_id, item_in_shopcart.item_id)
+        self.assertEqual(item.item_name, item_in_shopcart.item_name)
+        self.assertEqual(item.quantity, item_in_shopcart.quantity)
         
 
     def test_delete_a_shopcart(self):
         """ Delete a Shopcart"""
-        shopcart = Shopcart(user_id = 0, item_id = 0, item_name = "rings", quantity = 2, price = 1000)
+        shopcart = ShopcartFactory()
         shopcart.create()
         self.assertEqual(len(Shopcart.all()), 1)
         logging.debug(shopcart)
@@ -110,7 +119,7 @@ class TestShopcart(unittest.TestCase):
 
     def test_serialize_a_shopcart(self):
         """Test serialization of a Shopcart"""
-        shopcart = Shopcart(user_id = 0, item_id = 0, item_name = "rings", quantity = 2, price = 1000)
+        shopcart = ItemFactory()
         data = shopcart.serialize()
         logging.debug(shopcart)
         self.assertNotEqual(data, None)
@@ -158,9 +167,9 @@ class TestShopcart(unittest.TestCase):
     
     def test_find(self):
         """ Test Finds a Shopcart-Item by user id, item id """
-        shopcart1 = Shopcart(user_id = 0, item_id = 0, item_name = "rings", quantity = 2, price = 1000)
-        shopcart2 = Shopcart(user_id = 1, item_id = 1, item_name = "bottle", quantity = 1, price = 20.5)
-        shopcart3 = Shopcart(user_id = 2, item_id = 2, item_name = "phone", quantity = 1, price = 666)
+        shopcart1 = ItemFactory()
+        shopcart2 = ItemFactory()
+        shopcart3 = ItemFactory()
         shopcarts = [shopcart1, shopcart2, shopcart3]
         for shopcart in shopcarts:
             shopcart.create()
@@ -176,7 +185,7 @@ class TestShopcart(unittest.TestCase):
         self.assertEqual(shopcart.price, shopcarts[1].price)
 
 
-    # def test_find_or_404_not_found(self):
-    #     """Test Find or return 404 found"""
-    #     self.assertRaises(NotFound, Shopcart.find_or_404, 0)
+    def test_find_or_404_not_found(self):
+        """Test Find or return 404 found"""
+        self.assertRaises(NotFound, Shopcart.find_or_404, 0, -1)
     
