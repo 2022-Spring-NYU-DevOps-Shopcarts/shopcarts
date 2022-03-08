@@ -114,7 +114,7 @@ class TestShopcart(unittest.TestCase):
         # but the data did change
         shopcarts = Shopcart.all()
         self.assertEqual(len(shopcarts), 2)
-        item = Shopcart.find(item_in_shopcart.user_id, item_in_shopcart.item_id)
+        item = Shopcart.find_item(item_in_shopcart.user_id, item_in_shopcart.item_id)
         self.assertEqual(item.item_name, item_in_shopcart.item_name)
         self.assertEqual(item.quantity, item_in_shopcart.quantity)
 
@@ -182,8 +182,47 @@ class TestShopcart(unittest.TestCase):
         logging.debug(shopcart)
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
 
+    
+    def test_find_shopcart(self):
+        """ Test Finds a Shopcart by user id """
+        shopcart_base = ShopcartFactory()
+        shopcart_base.create()
+        shopcart1 = ItemFactory(user_id = shopcart_base.user_id, item_id = 0)
+        shopcart2 = ItemFactory(user_id = shopcart_base.user_id, item_id = 1)
+        shopcart3 = ItemFactory(user_id = shopcart_base.user_id, item_id = 2)
+        shopcarts = [shopcart1, shopcart2, shopcart3]
+        for shopcart in shopcarts:
+            shopcart.create()
+        # make sure they got saved
+        self.assertEqual(len(Shopcart.all()), 4)
+        retrieved_shopcarts = Shopcart.find_shopcart(shopcart_base.user_id)
+        # check each shopcart info got matched
+        for i in range(1, len(retrieved_shopcarts)):
+            self.assertIsNot(retrieved_shopcarts[i], None)
+            self.assertEqual(retrieved_shopcarts[i].user_id, shopcarts[i-1].user_id)
+            self.assertEqual(retrieved_shopcarts[i].item_id, shopcarts[i-1].item_id)
+            self.assertEqual(retrieved_shopcarts[i].item_name, shopcarts[i-1].item_name)
+            self.assertEqual(retrieved_shopcarts[i].quantity, shopcarts[i-1].quantity)
+            self.assertEqual(retrieved_shopcarts[i].price, shopcarts[i-1].price)
 
-    def test_find(self):
+    
+    def test_find_shopcart_or_404_found(self):
+        """ Test Found a Shopcart by user id """
+        shopcart_base = ShopcartFactory()
+        shopcart_base.create()
+        self.assertEqual(len(Shopcart.all()), 1)
+        retrieved_shopcart = Shopcart.find_shopcart_or_404(shopcart_base.user_id)
+        self.assertIsNotNone(retrieved_shopcart)
+        self.assertEqual(retrieved_shopcart.user_id, shopcart_base.user_id)
+        self.assertEqual(retrieved_shopcart.item_id, shopcart_base.item_id)
+
+
+    def test_find_shopcart_or_404_not_found(self):
+        """ Test Do not find a Shopcart by user id """
+        self.assertRaises(NotFound, Shopcart.find_shopcart_or_404, 0)
+
+
+    def test_find_item(self):
         """ Test Finds a Shopcart-Item by user id, item id """
         shopcart_base = ShopcartFactory()
         shopcart_base.create()
@@ -196,7 +235,29 @@ class TestShopcart(unittest.TestCase):
         # make sure they got saved
         self.assertEqual(len(Shopcart.all()), 4)
         # find the second shopcart in the list
-        shopcart = Shopcart.find(shopcarts[1].user_id, shopcarts[1].item_id)
+        shopcart = Shopcart.find_item(shopcarts[1].user_id, shopcarts[1].item_id)
+        self.assertIsNot(shopcart, None)
+        self.assertEqual(shopcart.user_id, shopcarts[1].user_id)
+        self.assertEqual(shopcart.item_id, shopcarts[1].item_id)
+        self.assertEqual(shopcart.item_name, shopcarts[1].item_name)
+        self.assertEqual(shopcart.quantity, shopcarts[1].quantity)
+        self.assertEqual(shopcart.price, shopcarts[1].price)
+
+    
+    def test_find_item_or_404_found(self):
+        """ Test Found a Shopcart-Item by user id, item id """
+        shopcart_base = ShopcartFactory()
+        shopcart_base.create()
+        shopcart1 = ItemFactory(user_id = shopcart_base.user_id, item_id = 0)
+        shopcart2 = ItemFactory(user_id = shopcart_base.user_id, item_id = 1)
+        shopcart3 = ItemFactory(user_id = shopcart_base.user_id, item_id = 2)
+        shopcarts = [shopcart1, shopcart2, shopcart3]
+        for shopcart in shopcarts:
+            shopcart.create()
+        # make sure they got saved
+        self.assertEqual(len(Shopcart.all()), 4)
+        # find the second shopcart in the list
+        shopcart = Shopcart.find_item_or_404(shopcarts[1].user_id, shopcarts[1].item_id)
         self.assertIsNot(shopcart, None)
         self.assertEqual(shopcart.user_id, shopcarts[1].user_id)
         self.assertEqual(shopcart.item_id, shopcarts[1].item_id)
@@ -205,7 +266,7 @@ class TestShopcart(unittest.TestCase):
         self.assertEqual(shopcart.price, shopcarts[1].price)
 
 
-    def test_find_or_404_not_found(self):
-        """Test Find or return 404 found"""
-        self.assertRaises(NotFound, Shopcart.find_or_404, 0, -1)
+    def test_find_item_or_404_not_found(self):
+        """Test 404 for item"""
+        self.assertRaises(NotFound, Shopcart.find_item_or_404, 0, -1)
     

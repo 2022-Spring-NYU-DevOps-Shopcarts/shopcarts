@@ -150,16 +150,29 @@ class Shopcart(db.Model):
         """ Returns all of the Shopcarts in the database """
         logger.info("Processing all Shopcarts")
         return cls.query.all()
+    
+    @classmethod
+    def find_shopcart(cls, user_id):
+        """ Finds a shopcart (including items it has) by user_id """
+        logger.info("Processing lookup for user id %s...", user_id)
+        return cls.query.filter(cls.user_id == user_id).all()
 
     @classmethod
-    def find(cls, user_id, item_id):
+    def find_shopcart_or_404(cls, user_id):
+        """ Finds a shopcart (not including items) by user_id """
+        logger.info("Processing lookup for user id %s...", user_id)
+        return cls.query.filter((cls.user_id == user_id) & (cls.item_id == -1)).first_or_404()
+    
+
+    @classmethod
+    def find_item(cls, user_id, item_id):
         """ Finds an item by user_id and item_id """
         logger.info("Processing lookup for user id %s item id %s...", user_id, item_id)
         return cls.query.filter((cls.user_id == user_id) & (cls.item_id == item_id)).first()
 
 
     @classmethod
-    def find_or_404(cls, user_id, item_id):
+    def find_item_or_404(cls, user_id, item_id):
         """ Find an item by user_id and item_id """
         logger.info("Processing lookup or 404 for user id %s item id %s...", user_id, item_id)
         return cls.query.filter((cls.user_id == user_id) & (cls.item_id == item_id)).first_or_404()
