@@ -257,7 +257,7 @@ class TestShopcart(unittest.TestCase):
         # make sure they got saved
         self.assertEqual(len(Shopcart.all()), 4)
         # find the second shopcart in the list
-        shopcart = Shopcart.find_item(shopcarts[1].user_id, shopcarts[1].item_id)
+        shopcart = Shopcart.find_item_or_404(shopcarts[1].user_id, shopcarts[1].item_id)
         self.assertIsNot(shopcart, None)
         self.assertEqual(shopcart.user_id, shopcarts[1].user_id)
         self.assertEqual(shopcart.item_id, shopcarts[1].item_id)
