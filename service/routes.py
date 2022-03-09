@@ -4,9 +4,11 @@ My Service
 Describe what your service does here
 """
 
+from multiprocessing.sharedctypes import Value
 import os
 import sys
 import logging
+from typing import Type
 from werkzeug.exceptions import NotFound
 from flask import Flask, jsonify, request, url_for, make_response, abort
 from service.error_handlers import not_found
@@ -83,62 +85,65 @@ def update_shopcart(shopcart_id):
     check_content_type("application/json")
     item_quantity = request.get_json()
     item_id = item_quantity["item_id"]
-    quantity = item_quantity["quantity"]
+    try:
+        assert isinstance(item_quantity["quantity"], int)
+        assert item_quantity["quantity"] >= 0
+    except (TypeError, AssertionError):
+        app.logger.error("Quantity %s must be a non-negative integer.", item_quantity["quantity"])
+        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+    quantity = int(item_quantity["quantity"])
     app.logger.info(
         "Request to modify shopcart id %s: change quantity of \
         item id %s to %s...", shopcart_id, item_id, quantity
     )    
     try:
         shopcart = Shopcart.find_shopcart_or_404(shopcart_id)
-
     except NotFound:
         app.logger.error("Shopcart %s not found.", item_id)
         return make_response(jsonify(""), status.HTTP_404_NOT_FOUND)
+
     user_id = shopcart_id
-    if isinstance(item_id, int) and quantity >= 0:
-        try:
-            item = Shopcart.find_item_or_404(user_id, item_id)
-            if quantity == 0:
-                app.logger.info(
-                "Deleting item %s from cart %s...",
+    try:
+        item = Shopcart.find_item_or_404(user_id, item_id)
+        if quantity == 0:
+            app.logger.info(
+            "Deleting item %s from cart %s...",
+            item_id, user_id
+            )
+            item.delete()
+            return make_response(
+                jsonify(""), status.HTTP_200_OK
+            )
+        else:
+            app.logger.info(
+                "Updating item %s to quantity %s in cart %s...",
+                item_id, quantity, shopcart_id
+                )
+            item.quantity = quantity
+            item.create()
+            return make_response(
+                jsonify(item.serialize()), status.HTTP_200_OK)
+    except NotFound:
+        if quantity == 0:
+            app.logger.info("No changes to cart %s", user_id)
+            return make_response(
+                jsonify(""), status.HTTP_200_OK
+                )
+        else:
+            app.logger.info(
+                "Item %s not found in cart %s, creating...",
                 item_id, user_id
                 )
-                item.delete()
-                return make_response(
-                    jsonify(""), status.HTTP_200_OK
+            item =  Shopcart(
+                user_id = user_id,
+                item_id = item_id,
+                quantity = quantity
                 )
-            else:
-                app.logger.info(
-                    "Updating item %s to quantity %s in cart %s...",
-                    item_id, user_id, quantity
-                    )
-                item.quantity = quantity
-                return make_response(
-                    jsonify(item.serialize()), status.HTTP_200_OK)
-
-        except NotFound:
-            if quantity == 0:
-                app.logger.info("No changes to cart %s", user_id)
-                return make_response(
-                    jsonify(""), status.HTTP_200_OK
-                    )
-            else:
-                app.logger.info(
-                    "Item %s not found in cart %s, creating...",
-                    item_id, user_id
-                    )
-                item =  Shopcart(
-                    user_id = user_id,
-                    item_id = item_id,
-                    quantity = quantity
-                    )
-                return make_response(
-                    jsonify(item.serialize()), 
-                    status.HTTP_200_OK
-                )
-    else:
-        app.logger.error("Invalid quantity: %s", quantity)
-        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+            item.create()
+            return make_response(
+                jsonify(item.serialize()), 
+                status.HTTP_200_OK
+            )
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
