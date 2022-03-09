@@ -38,16 +38,10 @@ from . import app
 @app.route("/")
 def index():
     """ Root URL response """
-    info = "name: Shopcarts Service\nversion: 1.0\nresource URLs: /shopcarts/<user-id>\n"
-    info += "\nAllows different users to store items in their shopcarts.\n"
-    info += "\nUsage:\n"
-    info += "POST   on /shopcarts: creates new shopcart based on body data\n"
-    info += "GET    on /shopcarts: returns list of all shopcarts\n"
-    info += "PUT    on /shopcarts/<user-id>: add/delete items in <user-id> shopcart\n"
-    info += "GET    on /shopcarts/<user-id>: returns items in <user-id> shopcart\n"
-    info += "DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart\n"
+    info = {"name": "Shopcarts Service", "version": "1.0", "resource URL": "/shopcarts"} 
+    app.logger.info("Root URL response")
     return (
-        jsonify(info),status.HTTP_200_OK,
+        make_response(jsonify(info),status.HTTP_200_OK)
     )
 
 ######################################################################
