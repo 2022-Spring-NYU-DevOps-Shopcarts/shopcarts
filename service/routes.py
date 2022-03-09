@@ -14,7 +14,6 @@ from . import status  # HTTP Status Codes
 # variety of backends including SQLite, MySQL, and PostgreSQL
 from flask_sqlalchemy import SQLAlchemy
 from service.models import Shopcart, DataValidationError
-from werkzeug.exceptions import NotFound
 
 # Import Flask application
 from . import app
@@ -53,7 +52,7 @@ def create_shopcarts():
     )
 
 ######################################################################
-# RETRIEVE A SHOPCART
+# RETRIEVE A PET
 ######################################################################
 @app.route("/shopcarts/<int:shopcart_id>", methods=["GET"])
 def get_shopcarts(shopcart_id):
@@ -61,12 +60,6 @@ def get_shopcarts(shopcart_id):
     Retrieve a single Shopcart
     This endpoint will return a Shopcart based on it's id
     """
-    app.logger.info("Request for shopcart with id: %s", shopcart_id)
-    shopcart = Shopcart.find_shopcart(shopcart_id) #This is the list of shopcarts which user_id == shopcart_id
-    if not shopcart:
-        raise NotFound("Shopcart with id '{}' was not found.".format(shopcart_id))
-    app.logger.info("Returning shopcart: %s", shopcart_id)
-    return make_response(jsonify([sc.serialize() for sc in shopcart if sc.item_id != -1]), status.HTTP_200_OK) #As 1 user is attached to 1 user_id
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
