@@ -52,6 +52,20 @@ class TestYourResourceServer(TestCase):
         db.session.remove()
         db.drop_all()
     
+    def _create_shopcarts(self, count):
+        """Factory method to create shopcarts in bulk"""
+        shopcarts = []
+        for i in range(count):
+            test_shopcart = ShopcartFactory()
+            resp = self.app.post(
+                BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+            )
+            self.assertEqual(
+                resp.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
+            )
+            shopcarts.append(test_shopcart)
+        return shopcarts
+
     def _create_items(self, count):
         """Factory method to create items in shopcart in bulk"""
         shopcart = ShopcartFactory()
@@ -77,7 +91,15 @@ class TestYourResourceServer(TestCase):
         """ Test index call """
         resp = self.app.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-     
+
+    def test_get_shopcart_list(self):
+        """Get a list of Shopcart"""
+        self._create_shopcarts(3)
+        resp = self.app.get(BASE_URL)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 3)
+
     def test_get_shopcart(self):
         """Get a shopcart"""
         # get the id of a shopcart

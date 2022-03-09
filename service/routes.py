@@ -53,6 +53,18 @@ def create_shopcarts():
     )
 
 ######################################################################
+# LIST ALL PETS
+######################################################################
+@app.route("/shopcarts", methods=["GET"])
+def list_shopcarts():
+    """Returns all of the Shopcarts"""
+    app.logger.info("Request for shopcart list")
+    shopcarts = Shopcart.all()
+    results = [shopcart.serialize() for shopcart in shopcarts]
+    app.logger.info("Returning %d shopcarts", len(results))
+    return make_response(jsonify(results), status.HTTP_200_OK)
+
+######################################################################
 # RETRIEVE A SHOPCART
 ######################################################################
 @app.route("/shopcarts/<int:shopcart_id>", methods=["GET"])
