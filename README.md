@@ -1,7 +1,7 @@
 ## name: Shopcarts Service
 version: 1.0
 
-resource URLs: /shopcarts/<user-id>
+resource URLs: ```/shopcarts/<user-id>```
 
 Allows different users to store items in their shopcarts.
 
