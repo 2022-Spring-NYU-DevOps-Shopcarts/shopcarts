@@ -9,10 +9,12 @@ import os
 import logging
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
+from flask import jsonify
 from service import status  # HTTP Status Codes
 from service.models import db
 from service.routes import app, init_db
 from .factories import ShopcartFactory, ItemFactory
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/testdb"
@@ -104,3 +106,129 @@ class TestYourResourceServer(TestCase):
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_update_shopcart(self):
+        """Update a shopcart with a new item"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        url = BASE_URL + "/" + str(test_shopcart.user_id)
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        # Check the data is correct
+        new_item = resp.get_json()
+        self.assertEqual(new_item["user_id"], test_shopcart.user_id, "User IDs do not match")
+        self.assertEqual(new_item["item_id"], item_in_shopcart.item_id, "Item IDs do not match")
+        self.assertEqual(new_item["quantity"], item_in_shopcart.quantity, "Quantities do not match")
+
+    def test_update_shopcart_quantity(self):
+        """Update a shopcart with correct quantity"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        item_in_shopcart.quantity = 1
+        url = BASE_URL + "/" + str(test_shopcart.user_id)
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart.quantity = 3
+        url = BASE_URL + "/" + str(test_shopcart.user_id)
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        new_item = resp.get_json()
+        self.assertEqual(new_item["user_id"], test_shopcart.user_id, "User IDs do not match")
+        self.assertEqual(new_item["item_id"], item_in_shopcart.item_id, "Item IDs do not match")
+        self.assertEqual(new_item["quantity"], item_in_shopcart.quantity, "Quantities do not match")
+
+    def test_update_shopcart_bad_quantity(self):
+        """Attempts to update a shopcart with bad quantity"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        item_in_shopcart.quantity = 1.5
+        logging.debug("New quantity is %s...", item_in_shopcart.quantity)
+        url = BASE_URL + "/" + str(test_shopcart.user_id)
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+        self.assertEqual(resp.get_json(), "")
+
+    def test_update_shopcart_negative_quantity(self):
+        """Attempts to update a shopcart with negative quantity"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        item_in_shopcart.quantity = -1
+        logging.debug("New quantity is %s...", item_in_shopcart.quantity)
+        url = BASE_URL + "/" + str(test_shopcart.user_id)
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+        self.assertEqual(resp.get_json(), "")
+
+    def test_update_shopcart_zero_quantity(self):
+        """Update an item in shopcart to 0 quantity"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id, quantity = 3)
+        url = BASE_URL + "/" + str(test_shopcart.user_id)
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart.quantity = 0
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.get_json(), "")
+
+    def test_update_shopcart_zero_quantity_no_change(self):
+        """Update a non-existent item in shopcart to 0 quantity (nothing happens)."""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id, quantity = 0)
+        url = BASE_URL + "/" + str(test_shopcart.user_id)
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart.quantity = 0
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.get_json(), "")
+
+    def test_update_shopcart_not_found(self):
+        """Attempts update on a non-existent shopcart"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        url = BASE_URL + "/" + str(test_shopcart.user_id)
+        resp = self.app.put(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(resp.get_json(), "")
