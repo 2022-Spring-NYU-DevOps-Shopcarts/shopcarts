@@ -46,8 +46,9 @@ def index():
     info += "PUT    on /shopcarts/<user-id>: add/delete items in <user-id> shopcart\n"
     info += "GET    on /shopcarts/<user-id>: returns items in <user-id> shopcart\n"
     info += "DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart\n"
+    app.logger.info("Root URL response")
     return (
-        jsonify(info),status.HTTP_200_OK,
+        make_response(jsonify({"Info": info}),status.HTTP_200_OK)
     )
 
 ######################################################################
