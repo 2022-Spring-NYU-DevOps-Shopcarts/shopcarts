@@ -365,4 +365,4 @@ class TestYourResourceServer(TestCase):
     def test_delete_shopcart_not_found(self):
         """Delete a Shopcart that's not found"""
         resp = self.app.delete("/shopcarts/0")
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
