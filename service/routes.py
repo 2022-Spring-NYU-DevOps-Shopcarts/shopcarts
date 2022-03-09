@@ -105,11 +105,7 @@ def delete_shopcarts(shopcart_id):
     """
     app.logger.info("Request to delete shopcart with id: %s", shopcart_id)
     shopcart = Shopcart.find_shopcart(shopcart_id) 
-    if not shopcart:
-        raise NotFound(
-            "Shopcart with id '{}' was not found.".format(shopcart_id)
-            )
-    else:
+    if shopcart:
         for item in shopcart:
             item.delete()
     return make_response("", status.HTTP_204_NO_CONTENT)
