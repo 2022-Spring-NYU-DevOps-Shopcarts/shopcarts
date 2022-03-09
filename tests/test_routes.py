@@ -343,3 +343,26 @@ class TestYourResourceServer(TestCase):
             url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
         )
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_empty_shopcart(self):
+        """Test delete an existing shopcart with no other items added"""
+        shopcart = ShopcartFactory()
+        shopcart.create()
+        resp = self.app.delete(
+            "/shopcarts/{}".format(shopcart.user_id),
+            content_type = "shopcarts/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_shopcart_with_items(self):
+        shopcart = self._create_items(3)
+        resp = self.app.delete(
+            "/shopcarts/{}".format(shopcart[0].user_id),
+            content_type = "shopcarts/json"
+        )
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_shopcart_not_found(self):
+        """Delete a Shopcart that's not found"""
+        resp = self.app.delete("/shopcarts/0")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
