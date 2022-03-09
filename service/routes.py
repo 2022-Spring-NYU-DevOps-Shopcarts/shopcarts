@@ -66,7 +66,7 @@ def get_shopcarts(shopcart_id):
     if not shopcart:
         raise NotFound("Shopcart with id '{}' was not found.".format(shopcart_id))
     app.logger.info("Returning shopcart: %s", shopcart_id)
-    return make_response(jsonify(shopcart[0].serialize()), status.HTTP_200_OK) #As 1 user is attached to 1 user_id
+    return make_response(jsonify([sc.serialize() for sc in shopcart if sc.item_id != -1]), status.HTTP_200_OK) #As 1 user is attached to 1 user_id
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

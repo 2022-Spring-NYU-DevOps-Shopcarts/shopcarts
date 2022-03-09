@@ -162,18 +162,6 @@ class Shopcart(db.Model):
         """ Finds a shopcart (not including items) by user_id """
         logger.info("Processing lookup for user id %s...", user_id)
         return cls.query.filter((cls.user_id == user_id) & (cls.item_id == -1)).first_or_404()
-    
-    @classmethod
-    def find(cls, user_id:int):
-        """ Finds a shopcart (including items it has) by user_id """
-        logger.info("Processing lookup for user id %s...", user_id)
-        return cls.query.get(user_id)
-
-    @classmethod
-    def find_or_404(cls, user_id:int):
-        """ Finds a shopcart (not including items) by user_id """
-        logger.info("Processing lookup for user id %s...", user_id)
-        return cls.query.get_or_404(user_id)
  
     @classmethod
     def find_item(cls, user_id, item_id):

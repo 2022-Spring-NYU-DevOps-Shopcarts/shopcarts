@@ -10,7 +10,7 @@ import logging
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from service import status  # HTTP Status Codes
-from service.models import db
+from service.models import Shopcart, db
 from service.routes import app, init_db
 from .factories import ShopcartFactory, ItemFactory
 
@@ -54,20 +54,20 @@ class TestYourResourceServer(TestCase):
     
     def _create_items(self, count):
         """Factory method to create items in shopcart in bulk"""
-        shopcart = []
-        for _ in range(count):
-            test_items = ItemFactory()
+        shopcart = ShopcartFactory()
+        shopcarts = []
+        for i in range(count):
+            test_item = ItemFactory(user_id = shopcart.user_id, item_id = i)
             resp = self.app.post(
-                BASE_URL, json=test_items.serialize(), content_type=CONTENT_TYPE_JSON
+                BASE_URL, json=test_item.serialize(), content_type=CONTENT_TYPE_JSON
             )
             self.assertEqual(
                 resp.status_code, status.HTTP_201_CREATED, "Could not create test items in shopcart"
             )
-            new_shopcart = resp.get_json()
-            test_items.id = new_shopcart["user_id"]
-            # test_items.item_id = new_shopcart["item_id"]
-            shopcart.append(test_items)
-        return shopcart
+            shopcarts.append(test_item)
+        return shopcarts
+
+
 
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
@@ -81,13 +81,19 @@ class TestYourResourceServer(TestCase):
     def test_get_shopcart(self):
         """Get a shopcart"""
         # get the id of a shopcart
-        test_shopcart = self._create_items(1)[0]
+        test_shopcart = self._create_items(3)
         resp = self.app.get(
-            "/shopcarts/{}".format(test_shopcart.id), content_type=CONTENT_TYPE_JSON
+            "/shopcarts/{}".format(test_shopcart[0].user_id), content_type=CONTENT_TYPE_JSON
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(data["user_id"], test_shopcart.id)
+        self.assertEqual(len(data),len(test_shopcart))
+        for i in range(len(test_shopcart)):
+            self.assertEqual(data[i]['item_id'], test_shopcart[i].item_id)
+            self.assertEqual(data[i]['item_name'], test_shopcart[i].item_name)
+            self.assertEqual(data[i]['quantity'], test_shopcart[i].quantity)
+            self.assertEqual(data[i]['price'], test_shopcart[i].price)
+
 
     def test_get_shopcart_not_found(self):
         """Get a Shopcart thats not found"""
