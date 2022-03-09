@@ -76,7 +76,7 @@ def get_shopcarts(shopcart_id):
 # UPDATE A SHOPCART
 ######################################################################
 @app.route("/shopcarts/<int:shopcart_id>", methods = ["PUT"])
-def update_shopcart(shopcart_id):
+def update_shopcarts(shopcart_id):
     """
     Updates shopcart with the relevant shopcart_id to quantity
 
