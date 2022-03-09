@@ -51,6 +51,23 @@ class TestYourResourceServer(TestCase):
         """ This runs after each test """
         db.session.remove()
         db.drop_all()
+    
+    def _create_items(self, count):
+        """Factory method to create items in shopcart in bulk"""
+        shopcart = []
+        for _ in range(count):
+            test_items = ItemFactory()
+            resp = self.app.post(
+                BASE_URL, json=test_items.serialize(), content_type=CONTENT_TYPE_JSON
+            )
+            self.assertEqual(
+                resp.status_code, status.HTTP_201_CREATED, "Could not create test items in shopcart"
+            )
+            new_shopcart = resp.get_json()
+            test_items.id = new_shopcart["user_id"]
+            # test_items.item_id = new_shopcart["item_id"]
+            shopcart.append(test_items)
+        return shopcart
 
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
@@ -60,6 +77,27 @@ class TestYourResourceServer(TestCase):
         """ Test index call """
         resp = self.app.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+     
+    def test_get_shopcart(self):
+        """Get a shopcart"""
+        # get the id of a shopcart
+        test_shopcart = self._create_items(1)[0]
+        resp = self.app.get(
+            "/shopcarts/{}".format(test_shopcart.id), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data["user_id"], test_shopcart.id)
+
+    def test_get_shopcart_not_found(self):
+        """Get a Shopcart thats not found"""
+        resp = self.app.get("/shopcarts/0")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_method_not_supported(self):
+        """Test Method Not Supported"""
+        resp = self.app.put(BASE_URL, json={}, content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_create_shopcart(self):
         """Create a new Shopcart"""
