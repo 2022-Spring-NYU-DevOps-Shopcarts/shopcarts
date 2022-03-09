@@ -46,6 +46,10 @@ def create_shopcarts():
     check_content_type("application/json")
     shopcart = Shopcart()
     shopcart.deserialize(request.get_json())
+    if shopcart.item_id != -1:
+         return make_response(
+            jsonify(""), status.HTTP_400_BAD_REQUEST
+        )
     shopcart.create()
     message = shopcart.serialize()
     location_url = url_for("get_shopcarts", shopcart_id=shopcart.user_id, _external=True)
@@ -56,14 +60,39 @@ def create_shopcarts():
     )
 
 ######################################################################
-# RETRIEVE A PET
+# LIST ALL SHOPCARTS
+######################################################################
+@app.route("/shopcarts", methods=["GET"])
+def list_shopcarts():
+    """Returns all of the Shopcarts"""
+    app.logger.info("Request for shopcart list")
+    shopcarts = Shopcart.all()
+    results = [shopcart.serialize() for shopcart in shopcarts]
+    app.logger.info("Returning %d shopcarts", len(results))
+    return make_response(jsonify(results), status.HTTP_200_OK)
+
+######################################################################
+# RETRIEVE A SHOPCART
 ######################################################################
 @app.route("/shopcarts/<int:shopcart_id>", methods=["GET"])
 def get_shopcarts(shopcart_id):
     """
     Retrieve a single Shopcart
-    This endpoint will return a Shopcart based on it's id
+    This endpoint will return a Shopcart based on its id
     """
+    app.logger.info("Request for shopcart with id: %s", shopcart_id)
+    #This is the list of shopcarts which user_id == shopcart_id
+    shopcart = Shopcart.find_shopcart(shopcart_id) 
+    if not shopcart:
+        raise NotFound(
+            "Shopcart with id '{}' was not found.".format(shopcart_id)
+            )
+    app.logger.info("Returning shopcart: %s", shopcart_id)
+    #As 1 user is attached to 1 user_id
+    return make_response(jsonify(
+        [sc.serialize() for sc in shopcart if sc.item_id != -1]),
+        status.HTTP_200_OK
+        ) 
 
 ######################################################################
 # UPDATE A SHOPCART
@@ -75,11 +104,15 @@ def update_shopcarts(shopcart_id):
 
     Args:
         shopcart_id (int): The shopcart to be updated
-        body of API call (JSON): [item_id, quantity]
+        body of API call (JSON): 
+            item_id (int)
+            quantity (int) 
+            item_name 
+            price (float)
 
     Returns:
         status code: 200 if successful, 404 if cart not found,
-            406 if quantity is not a non-negative integer.
+            406 if data type errors.
         message (JSON): new state of shopcart or empty if cart not found
     """
     check_content_type("application/json")
@@ -89,19 +122,18 @@ def update_shopcarts(shopcart_id):
         assert isinstance(item_quantity["quantity"], int)
         assert item_quantity["quantity"] >= 0
     except (TypeError, AssertionError):
-        app.logger.error("Quantity %s must be a non-negative integer.", item_quantity["quantity"])
+        app.logger.error(
+            "Quantity %s must be a non-negative integer.",
+            item_quantity["quantity"]
+            )
         return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
     quantity = int(item_quantity["quantity"])
     app.logger.info(
         "Request to modify shopcart id %s: change quantity of \
         item id %s to %s...", shopcart_id, item_id, quantity
     )    
-    try:
-        shopcart = Shopcart.find_shopcart_or_404(shopcart_id)
-    except NotFound:
-        app.logger.error("Shopcart %s not found.", item_id)
-        return make_response(jsonify(""), status.HTTP_404_NOT_FOUND)
-
+    # Make sure this shopcart exists
+    Shopcart.find_shopcart_or_404(shopcart_id)
     user_id = shopcart_id
     try:
         item = Shopcart.find_item_or_404(user_id, item_id)
@@ -122,7 +154,8 @@ def update_shopcarts(shopcart_id):
             item.quantity = quantity
             item.create()
             return make_response(
-                jsonify(item.serialize()), status.HTTP_200_OK)
+                jsonify(item.serialize()), status.HTTP_200_OK
+                )
     except NotFound:
         if quantity == 0:
             app.logger.info("No changes to cart %s", user_id)
@@ -134,9 +167,21 @@ def update_shopcarts(shopcart_id):
                 "Item %s not found in cart %s, creating...",
                 item_id, user_id
                 )
+            item_name = item_quantity["item_name"]
+            try:
+                assert isinstance(item_quantity["price"], float)
+                assert item_quantity["price"] >= 0
+            except (TypeError, AssertionError):
+                app.logger.error(
+                    "Price %s must be a non-negative number.", item_quantity["price"]
+                    )
+                return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+            price = float(item_quantity["price"])
             item =  Shopcart(
                 user_id = user_id,
                 item_id = item_id,
+                item_name = item_name,
+                price = price,
                 quantity = quantity
                 )
             item.create()
