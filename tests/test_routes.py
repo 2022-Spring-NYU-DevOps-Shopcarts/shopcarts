@@ -101,7 +101,8 @@ class TestYourResourceServer(TestCase):
 
     def test_get_shopcart_list(self):
         """Get a list of Shopcart"""
-        self._create_shopcarts(3)
+        self._create_shopcarts(2)
+        self._create_items(3) #one more shopcart with items
         resp = self.app.get(BASE_URL)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
