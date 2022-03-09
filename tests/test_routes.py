@@ -78,7 +78,9 @@ class TestYourResourceServer(TestCase):
         for i in range(count):
             test_item = ItemFactory(user_id = shopcart.user_id, item_id = i)
             resp = self.app.put(
-                "{0}/{1}".format(BASE_URL, shopcart.user_id), json=test_item.serialize(), content_type=CONTENT_TYPE_JSON
+                "{0}/{1}".format(BASE_URL, shopcart.user_id),
+                json=test_item.serialize(),
+                content_type=CONTENT_TYPE_JSON
             )
             self.assertEqual(
                 resp.status_code, status.HTTP_200_OK, "Could not create test items in shopcart"
