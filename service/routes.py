@@ -47,7 +47,7 @@ def index():
     info += "GET    on /shopcarts/<user-id>: returns items in <user-id> shopcart\n"
     info += "DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart\n"
     return (
-        info,status.HTTP_200_OK,
+        jsonify(info),status.HTTP_200_OK,
     )
 
 ######################################################################
