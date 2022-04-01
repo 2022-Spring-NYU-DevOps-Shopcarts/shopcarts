@@ -152,6 +152,12 @@ class Shopcart(db.Model):
         return cls.query.all()
     
     @classmethod
+    def all_shopcart(cls):
+        """ Returns all of the Shopcarts in the database """
+        logger.info("Processing all Shopcarts")
+        return cls.query.filter(cls.item_id == -1).all()
+    
+    @classmethod
     def find_shopcart(cls, user_id):
         """ Finds a shopcart (including items it has) by user_id """
         logger.info("Processing lookup for user id %s...", user_id)

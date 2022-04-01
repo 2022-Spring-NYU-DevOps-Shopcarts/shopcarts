@@ -1,7 +1,17 @@
 """
-My Service
+name: Shopcarts Service
+version: 1.0
+resource URLs: /shopcarts/<user-id>
 
-Describe what your service does here
+Allows different users to store items in their shopcarts.
+
+Usage: 
+    POST   on /shopcarts: creates new shopcart based on body data
+    GET    on /shopcarts: returns list of all shopcarts
+    PUT    on /shopcarts/<user-id>: add/delete items in <user-id> shopcart
+    GET    on /shopcarts/<user-id>: returns items in <user-id> shopcart
+    DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart
+
 """
 
 from multiprocessing.sharedctypes import Value
@@ -28,9 +38,10 @@ from . import app
 @app.route("/")
 def index():
     """ Root URL response """
+    info = {"name": "Shopcarts Service", "version": "1.0", "resource URL": "/shopcarts"} 
+    app.logger.info("Root URL response")
     return (
-        "Reminder: return some useful information in json format about the service here",
-        status.HTTP_200_OK,
+        make_response(jsonify(info),status.HTTP_200_OK)
     )
 
 ######################################################################
@@ -66,7 +77,7 @@ def create_shopcarts():
 def list_shopcarts():
     """Returns all of the Shopcarts"""
     app.logger.info("Request for shopcart list")
-    shopcarts = Shopcart.all()
+    shopcarts = Shopcart.all_shopcart()
     results = [shopcart.serialize() for shopcart in shopcarts]
     app.logger.info("Returning %d shopcarts", len(results))
     return make_response(jsonify(results), status.HTTP_200_OK)
