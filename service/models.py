@@ -45,10 +45,7 @@ class Shopcart(db.Model):
 
 
     def __repr__(self):
-        if self.item_id == -1:
-            return "<Shopcart for user %s>" % self.user_id
-        else:
-            return "<Product %s in Shopcart for user %s>" % (self.item_id, self.user_id)
+        return "<Product %s in Shopcart for user %s>" % (self.item_id, self.user_id)
 
     def create(self):
         """
@@ -73,17 +70,12 @@ class Shopcart(db.Model):
 
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
-        if self.item_id != -1:
-            return {"user_id": self.user_id, 
+        return {"user_id": self.user_id, 
             "item_id": self.item_id,
             "item_name": self.item_name,
             "quantity": self.quantity,
-            "price": self.price
-            }
-        else:
-            return {"user_id": self.user_id, 
-            "item_id": self.item_id,
-            }
+            "price": self.price}
+        
 
     def deserialize(self, data):
         """
@@ -108,22 +100,21 @@ class Shopcart(db.Model):
                     + str(type(data["item_id"]))
                 )
 
-            if self.item_id != -1:
-                self.item_name = data["item_name"] + ""
-                if isinstance(data["quantity"], int):
-                    self.quantity = data["quantity"]
-                else:
-                    raise DataValidationError(
+            self.item_name = data["item_name"] + ""
+            if isinstance(data["quantity"], int):
+                self.quantity = data["quantity"]
+            else:
+                raise DataValidationError(
                         "Invalid type for int [quantity]: "
                         + str(type(data["quantity"]))
-                    )
-                if isinstance(data["price"], float):
-                    self.price = data["price"]
-                else:
-                    raise DataValidationError(
+                )
+            if isinstance(data["price"], float):
+                self.price = data["price"]
+            else:
+                raise DataValidationError(
                         "Invalid type for float [price]: "
                         + str(type(data["price"]))
-                    )
+                )
                 
         except KeyError as error:
             raise DataValidationError(
@@ -147,15 +138,15 @@ class Shopcart(db.Model):
 
     @classmethod
     def all(cls):
-        """ Returns all of the Shopcarts in the database """
-        logger.info("Processing all Shopcarts")
+        """ Returns all of the Shopcart items in the database """
+        logger.info("Processing all Shopcart items")
         return cls.query.all()
     
     @classmethod
     def all_shopcart(cls):
-        """ Returns all of the Shopcarts in the database """
+        """ Returns all of the non-empty Shopcarts in the database """
         logger.info("Processing all Shopcarts")
-        return cls.query.filter(cls.item_id == -1).all()
+        return cls.query.with_entities(cls.user_id).distinct().all()
     
     @classmethod
     def find_shopcart(cls, user_id):
@@ -165,9 +156,9 @@ class Shopcart(db.Model):
 
     @classmethod
     def find_shopcart_or_404(cls, user_id):
-        """ Finds a shopcart (not including items) by user_id """
+        """ Finds a shopcart (first item if found) by user_id """
         logger.info("Processing lookup for user id %s...", user_id)
-        return cls.query.filter((cls.user_id == user_id) & (cls.item_id == -1)).first_or_404()
+        return cls.query.filter(cls.user_id == user_id).first_or_404()
     
 
     @classmethod
