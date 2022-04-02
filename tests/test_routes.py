@@ -148,7 +148,7 @@ class TestYourResourceServer(TestCase):
         self.assertIsNotNone(location)
         # Check the data is correct
         new_shopcart = resp.get_json()
-        self.assertEqual(new_shopcart, 10023, "User IDs do not match")
+        self.assertEqual(new_shopcart, [], "Expect to return an empty list")
         #self.assertEqual(new_shopcart["item_id"], test_shopcart.item_id, "item IDs do not match")
         # Check that the location header was correct
         # test_item = ItemFactory(user_id = test_shopcart.user_id, item_id = test_shopcart.item_id+1)
@@ -174,7 +174,7 @@ class TestYourResourceServer(TestCase):
         self.assertIsNotNone(location)
         # Check the data is correct
         new_shopcart = resp.get_json()
-        self.assertEqual(new_shopcart, shopcart.user_id, "User IDs do not match")
+        self.assertEqual(new_shopcart[0]["user_id"], shopcart.user_id, "User IDs do not match")
 
     def test_create_shopcart_with_item_list(self):
         """Create a new Shopcart with a list of items"""
@@ -196,7 +196,7 @@ class TestYourResourceServer(TestCase):
         self.assertIsNotNone(location)
         # Check the data is correct
         new_shopcart = resp.get_json()
-        self.assertEqual(new_shopcart, shopcart.user_id, "User IDs do not match")
+        self.assertEqual(new_shopcart[0]["user_id"], shopcart.user_id, "User IDs do not match")
 
     def test_create_shopcart_no_data(self):
         """Create a Shopcart with missing data"""
@@ -220,6 +220,24 @@ class TestYourResourceServer(TestCase):
         test_shopcart = ItemFactory()
         logging.debug(test_shopcart)
         test_shopcart.item_id = "test"
+        resp = self.app.post(
+            BASE_URL,
+                json=test_shopcart.serialize(),
+                content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    def test_create_shopcart_already_exist(self):
+        """Create a Shopcart that already has items in it"""
+        # create a shopcart with an item
+        test_shopcart = ItemFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL,
+                json=test_shopcart.serialize(),
+                content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         resp = self.app.post(
             BASE_URL,
                 json=test_shopcart.serialize(),

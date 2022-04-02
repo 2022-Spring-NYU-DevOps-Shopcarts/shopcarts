@@ -108,7 +108,7 @@ class Shopcart(db.Model):
                         "Invalid type for int [quantity]: "
                         + str(type(data["quantity"]))
                 )
-            if isinstance(data["price"], float):
+            if isinstance(data["price"], float) or isinstance(data["price"], int):
                 self.price = data["price"]
             else:
                 raise DataValidationError(
@@ -118,11 +118,11 @@ class Shopcart(db.Model):
                 
         except KeyError as error:
             raise DataValidationError(
-                "Invalid Shopcart: missing " + error.args[0]
+                "Invalid Shopcart item: missing " + error.args[0]
             )
         except TypeError as error:
             raise DataValidationError(
-                "Invalid Shopcart: body of request contained bad or no data"
+                "Invalid Shopcart item: body of request contained bad or no data"
             )
         return self
 
