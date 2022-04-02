@@ -19,7 +19,6 @@ import os
 import sys
 import logging
 from typing import Type
-from xxlimited import Str
 from werkzeug.exceptions import NotFound
 from flask import Flask, jsonify, request, url_for, make_response, abort
 from service.error_handlers import not_found
