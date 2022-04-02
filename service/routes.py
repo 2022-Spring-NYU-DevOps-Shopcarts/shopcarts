@@ -19,6 +19,7 @@ import os
 import sys
 import logging
 from typing import Type
+from xxlimited import Str
 from werkzeug.exceptions import NotFound
 from flask import Flask, jsonify, request, url_for, make_response, abort
 from service.error_handlers import not_found
@@ -122,7 +123,7 @@ def delete_shopcarts(shopcart_id):
     return make_response("", status.HTTP_204_NO_CONTENT)
 
 ######################################################################
-# UPDATE A SHOPCART
+# UPDATE A SHOPCART (#TODO: TO BE FIXED)
 ######################################################################
 @app.route("/shopcarts/<int:shopcart_id>", methods = ["PUT"])
 def update_shopcarts(shopcart_id):
@@ -216,6 +217,86 @@ def update_shopcarts(shopcart_id):
                 jsonify(item.serialize()), 
                 status.HTTP_200_OK
             )
+
+
+######################################################################
+# CREATE AN ITEM
+######################################################################
+@app.route("/shopcarts/<int:shopcart_id>/items", methods = ["POST"])
+def create_items(shopcart_id):
+    """
+    #TODO: docstring
+    Updates shopcart with the relevant shopcart_id to quantity
+
+    Args:
+        shopcart_id (int): The shopcart to be updated
+        body of API call (JSON): 
+            item_id (int)
+            quantity (int) 
+            item_name 
+            price (float)
+
+    Returns:
+        status code: 200 if successful, 404 if cart not found,
+            406 if data type errors.
+        message (JSON): new state of shopcart or empty if cart not found
+    """
+    check_content_type("application/json")
+    item = request.get_json()
+    app.logger.info("Received item %s...", item)
+    try:
+        assert isinstance(item["quantity"], int)
+        assert item["quantity"] > 0      
+    except (TypeError, AssertionError):
+        app.logger.error(
+            "Quantity %s must be a positive integer.",
+            item["quantity"]
+            )
+        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+    try:
+        assert isinstance(item["item_id"], int)
+        assert item["item_id"] >= 0
+    except (TypeError, AssertionError):
+        app.logger.error(
+            "Item_id %s must be a non-negative integer.",
+            item["item_id"]
+            )
+        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+    try:
+        assert isinstance(item["item_name"], Str)
+    except AssertionError:
+        app.logger.error(
+            "Item_name %s must be a string.",
+            item["item_name"]
+            )
+        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+    try:
+        assert isinstance(item["price"], int) or isinstance(item["price"], float)
+        assert item["quantity"] >= 0      
+    except (TypeError, AssertionError):
+        app.logger.error(
+            "Price %s must be a non-negative integer.",
+            item["price"]
+            )
+        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+
+    #TODO: assert item_id not already in this cart after GET implemented
+    item =  Shopcart(
+        user_id = shopcart_id,
+        item_id = int(item["item_id"]),
+        item_name = item["item_name"],
+        price = float(item["price"]),
+        quantity = int(item["quantity"])
+        )
+
+    app.logger.info(
+        "Request to create item %s with user_id %s,  item_name %s, price %s, \
+            quantity %s...", item.item_id, item.user_id, item.item_name, item.price, item.quantity
+    )    
+    item.create()
+    return make_response(
+        jsonify(item.serialize()), status.HTTP_200_OK
+        )
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

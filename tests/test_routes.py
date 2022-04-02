@@ -367,3 +367,136 @@ class TestYourResourceServer(TestCase):
         """Delete a Shopcart that's not found"""
         resp = self.app.delete("/shopcarts/0")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_create_item(self):
+        """Creates an item"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        logging.debug(item_in_shopcart)
+        logging.debug(item_in_shopcart.item_id)
+        logging.debug(item_in_shopcart.item_name)
+        logging.debug(item_in_shopcart.user_id)
+        logging.debug(item_in_shopcart.price)
+        logging.debug(item_in_shopcart.quantity)
+        url = BASE_URL + "/" + str(test_shopcart.user_id) + "/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        new_item = resp.get_json()
+        self.assertEqual(new_item["user_id"], test_shopcart.user_id, "User IDs do not match")
+        self.assertEqual(new_item["item_id"], item_in_shopcart.item_id, "Item IDs do not match")
+        self.assertEqual(new_item["quantity"], item_in_shopcart.quantity, "Quantities do not match")
+        self.assertAlmostEqual(new_item["price"], item_in_shopcart.price, "Prices do not match")
+    
+    def test_create_item_bad_name(self):
+        """Attempts to create an item with non-string name"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        item_in_shopcart.item_name = 9
+        logging.debug(item_in_shopcart)
+        url = BASE_URL + "/" + str(test_shopcart.user_id) + "/items"
+        resp = self.app.post(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+    
+    def test_create_item_bad_id(self):
+        """Attempts to create an item with a non-positive int id"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        item_in_shopcart.item_id = "foo"
+        logging.debug(item_in_shopcart)
+        url = BASE_URL + "/" + str(test_shopcart.user_id) + "/items"
+        resp = self.app.post(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+
+    def test_create_item_bad_quantity(self):
+        """Attempts to create an item with a non-positive int id"""
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        item_in_shopcart.quantity = 0
+        logging.debug(item_in_shopcart)
+        url = BASE_URL + "/" + str(test_shopcart.user_id) + "/items"
+        resp = self.app.post(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+
+    def test_create_item_negative_price(self):
+        """Attempts to create an item with a negative float """
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        item_in_shopcart.price = -0.5
+        logging.debug(item_in_shopcart)
+        url = BASE_URL + "/" + str(test_shopcart.user_id) + "/items"
+        resp = self.app.post(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+        
+    def test_create_item_bad_price(self):
+        """Attempts to create an item with a string as price """
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id)
+        item_in_shopcart.price = "bar"
+        logging.debug(item_in_shopcart)
+        url = BASE_URL + "/" + str(test_shopcart.user_id) + "/items"
+        resp = self.app.post(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+
+    """ # TODO: Uncomment below after GET item implemented
+        # and duplicate item_id checking implemented
+    def test_create_item_duplicate_id(self):       
+        # TODO: docstring goes here
+        test_shopcart = ShopcartFactory()
+        logging.debug(test_shopcart)
+        resp = self.app.post(
+            BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id, item_id = 1)
+        logging.debug(item_in_shopcart)
+        url = BASE_URL + "/" + str(test_shopcart.user_id) + "/items"
+        resp = self.app.post(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        item_in_shopcart = ItemFactory(user_id = test_shopcart.user_id, item_id = 1)
+        logging.debug(item_in_shopcart)
+        url = BASE_URL + "/" + str(test_shopcart.user_id) + "/items"
+        resp = self.app.post(
+            url, json=item_in_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
+    """
+    
