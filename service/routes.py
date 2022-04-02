@@ -55,19 +55,31 @@ def create_shopcarts():
     """
     app.logger.info("Request to create a shopcart")
     check_content_type("application/json")
-    shopcart = Shopcart()
-    shopcart.deserialize(request.get_json())
-    if shopcart.item_id != -1:
+    req = request.get_json()
+    if not "user_id" in req.keys() or not isinstance(req["user_id"], int):
          return make_response(
             jsonify(""), status.HTTP_400_BAD_REQUEST
         )
-    shopcart.create()
-    message = shopcart.serialize()
-    location_url = url_for("get_shopcarts", shopcart_id=shopcart.user_id, _external=True)
+    
+    shopcarts = []
 
-    app.logger.info("Shopcart with ID [%s] created.", shopcart.user_id)
+    if ("item_id" in req.keys()):
+        shopcart = Shopcart()
+        shopcart.deserialize(req)
+        shopcart.create()
+    
+    elif ("items" in req.keys()):
+        shopcarts = req["items"]
+
+    for s in shopcarts:
+        shopcart = Shopcart()
+        shopcart.deserialize(s)
+        shopcart.create()
+    location_url = url_for("get_shopcarts", shopcart_id=req["user_id"], _external=True)
+    
+    app.logger.info("Shopcart with ID [%s] created.", req["user_id"])
     return make_response(
-        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+        jsonify(req["user_id"]), status.HTTP_201_CREATED, {"Location": location_url}
     )
 
 ######################################################################
@@ -76,11 +88,11 @@ def create_shopcarts():
 @app.route("/shopcarts", methods=["GET"])
 def list_shopcarts():
     """Returns all of the Shopcarts"""
-    app.logger.info("Request for shopcart list")
-    shopcarts = Shopcart.all_shopcart()
-    results = [shopcart.serialize() for shopcart in shopcarts]
-    app.logger.info("Returning %d shopcarts", len(results))
-    return make_response(jsonify(results), status.HTTP_200_OK)
+    # app.logger.info("Request for shopcart list")
+    # shopcarts = Shopcart.all_shopcart()
+    # results = [shopcart.serialize() for shopcart in shopcarts]
+    # app.logger.info("Returning %d shopcarts", len(results))
+    # return make_response(jsonify(results), status.HTTP_200_OK)
 
 ######################################################################
 # RETRIEVE A SHOPCART
@@ -101,7 +113,7 @@ def get_shopcarts(shopcart_id):
     app.logger.info("Returning shopcart: %s", shopcart_id)
     #As 1 user is attached to 1 user_id
     return make_response(jsonify(
-        [sc.serialize() for sc in shopcart if sc.item_id != -1]),
+        [sc.serialize() for sc in shopcart]),
         status.HTTP_200_OK
         ) 
 
@@ -142,80 +154,80 @@ def update_shopcarts(shopcart_id):
             406 if data type errors.
         message (JSON): new state of shopcart or empty if cart not found
     """
-    check_content_type("application/json")
-    item_quantity = request.get_json()
-    item_id = item_quantity["item_id"]
-    try:
-        assert isinstance(item_quantity["quantity"], int)
-        assert item_quantity["quantity"] >= 0
-    except (TypeError, AssertionError):
-        app.logger.error(
-            "Quantity %s must be a non-negative integer.",
-            item_quantity["quantity"]
-            )
-        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
-    quantity = int(item_quantity["quantity"])
-    app.logger.info(
-        "Request to modify shopcart id %s: change quantity of \
-        item id %s to %s...", shopcart_id, item_id, quantity
-    )    
-    # Make sure this shopcart exists
-    Shopcart.find_shopcart_or_404(shopcart_id)
-    user_id = shopcart_id
-    try:
-        item = Shopcart.find_item_or_404(user_id, item_id)
-        if quantity == 0:
-            app.logger.info(
-            "Deleting item %s from cart %s...",
-            item_id, user_id
-            )
-            item.delete()
-            return make_response(
-                jsonify(""), status.HTTP_200_OK
-            )
-        else:
-            app.logger.info(
-                "Updating item %s to quantity %s in cart %s...",
-                item_id, quantity, shopcart_id
-                )
-            item.quantity = quantity
-            item.create()
-            return make_response(
-                jsonify(item.serialize()), status.HTTP_200_OK
-                )
-    except NotFound:
-        if quantity == 0:
-            app.logger.info("No changes to cart %s", user_id)
-            return make_response(
-                jsonify(""), status.HTTP_200_OK
-                )
-        else:
-            app.logger.info(
-                "Item %s not found in cart %s, creating...",
-                item_id, user_id
-                )
-            item_name = item_quantity["item_name"]
-            try:
-                assert isinstance(item_quantity["price"], float)
-                assert item_quantity["price"] >= 0
-            except (TypeError, AssertionError):
-                app.logger.error(
-                    "Price %s must be a non-negative number.", item_quantity["price"]
-                    )
-                return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
-            price = float(item_quantity["price"])
-            item =  Shopcart(
-                user_id = user_id,
-                item_id = item_id,
-                item_name = item_name,
-                price = price,
-                quantity = quantity
-                )
-            item.create()
-            return make_response(
-                jsonify(item.serialize()), 
-                status.HTTP_200_OK
-            )
+    # check_content_type("application/json")
+    # item_quantity = request.get_json()
+    # item_id = item_quantity["item_id"]
+    # try:
+    #     assert isinstance(item_quantity["quantity"], int)
+    #     assert item_quantity["quantity"] >= 0
+    # except (TypeError, AssertionError):
+    #     app.logger.error(
+    #         "Quantity %s must be a non-negative integer.",
+    #         item_quantity["quantity"]
+    #         )
+    #     return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+    # quantity = int(item_quantity["quantity"])
+    # app.logger.info(
+    #     "Request to modify shopcart id %s: change quantity of \
+    #     item id %s to %s...", shopcart_id, item_id, quantity
+    # )    
+    # # Make sure this shopcart exists
+    # Shopcart.find_shopcart_or_404(shopcart_id)
+    # user_id = shopcart_id
+    # try:
+    #     item = Shopcart.find_item_or_404(user_id, item_id)
+    #     if quantity == 0:
+    #         app.logger.info(
+    #         "Deleting item %s from cart %s...",
+    #         item_id, user_id
+    #         )
+    #         item.delete()
+    #         return make_response(
+    #             jsonify(""), status.HTTP_200_OK
+    #         )
+    #     else:
+    #         app.logger.info(
+    #             "Updating item %s to quantity %s in cart %s...",
+    #             item_id, quantity, shopcart_id
+    #             )
+    #         item.quantity = quantity
+    #         item.create()
+    #         return make_response(
+    #             jsonify(item.serialize()), status.HTTP_200_OK
+    #             )
+    # except NotFound:
+    #     if quantity == 0:
+    #         app.logger.info("No changes to cart %s", user_id)
+    #         return make_response(
+    #             jsonify(""), status.HTTP_200_OK
+    #             )
+    #     else:
+    #         app.logger.info(
+    #             "Item %s not found in cart %s, creating...",
+    #             item_id, user_id
+    #             )
+    #         item_name = item_quantity["item_name"]
+    #         try:
+    #             assert isinstance(item_quantity["price"], float)
+    #             assert item_quantity["price"] >= 0
+    #         except (TypeError, AssertionError):
+    #             app.logger.error(
+    #                 "Price %s must be a non-negative number.", item_quantity["price"]
+    #                 )
+    #             return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+    #         price = float(item_quantity["price"])
+    #         item =  Shopcart(
+    #             user_id = user_id,
+    #             item_id = item_id,
+    #             item_name = item_name,
+    #             price = price,
+    #             quantity = quantity
+    #             )
+    #         item.create()
+    #         return make_response(
+    #             jsonify(item.serialize()), 
+    #             status.HTTP_200_OK
+    #         )
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
