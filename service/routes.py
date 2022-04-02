@@ -57,29 +57,31 @@ def create_shopcarts():
     check_content_type("application/json")
     req = request.get_json()
     if not "user_id" in req.keys() or not isinstance(req["user_id"], int):
-         return make_response(
-            jsonify(""), status.HTTP_400_BAD_REQUEST
+        abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id.")
+    if Shopcart.find_shopcart(req["user_id"]):
+        user_id = req["user_id"]
+        abort(
+            status.HTTP_400_BAD_REQUEST, 
+            f"User with id '{user_id}' already has a non-empty shopcart.",
         )
     
     shopcarts = []
-
-    if ("item_id" in req.keys()):
-        shopcart = Shopcart()
-        shopcart.deserialize(req)
-        shopcart.create()
-    
-    elif ("items" in req.keys()):
+    shopcarts_deserialize = []
+    if "item_id" in req.keys():
+        shopcarts.append(req)
+    elif "items" in req.keys():
         shopcarts = req["items"]
-
     for s in shopcarts:
-        shopcart = Shopcart()
-        shopcart.deserialize(s)
-        shopcart.create()
+        if s["user_id"] == req["user_id"]:
+            shopcart = Shopcart()
+            shopcart.deserialize(s)
+            shopcart.create()
+            shopcarts_deserialize.append(shopcart)
     location_url = url_for("get_shopcarts", shopcart_id=req["user_id"], _external=True)
-    
     app.logger.info("Shopcart with ID [%s] created.", req["user_id"])
+    results = [shopcart.serialize() for shopcart in shopcarts_deserialize]
     return make_response(
-        jsonify(req["user_id"]), status.HTTP_201_CREATED, {"Location": location_url}
+        jsonify(results), status.HTTP_201_CREATED, {"Location": location_url}
     )
 
 ######################################################################
