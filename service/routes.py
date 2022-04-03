@@ -316,7 +316,7 @@ def update_items(shopcart_id, item_id):
     if not "quantity" in req.keys() and not "price" in req.keys():
         abort(status.HTTP_400_BAD_REQUEST, "Must have either quantity or price.")
     if "quantity" in req.keys():
-        if not isinstance(req["quantity"], int) or req["quantity"] < 0:
+        if not isinstance(req["quantity"], int) or req["quantity"] <= 0:
             abort(status.HTTP_400_BAD_REQUEST, "Invalid quantity.")
         else:
             quantity = req["quantity"]
