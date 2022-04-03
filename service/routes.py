@@ -286,6 +286,37 @@ def create_items(shopcart_id):
     return make_response(
         jsonify(new_item.serialize()), status.HTTP_201_CREATED
         )
+######################################################################
+# READ AN ITEM
+######################################################################
+@app.route("/shopcarts/<int:shopcart_id>/items/<int:item_id>", methods = ["GET"])
+def read_an_item(shopcart_id, item_id):
+    """
+    Read an item{item_id} in a certain shopcart{shopcart_id}.
+
+    Args:
+        shopcart_id (int): the shopcart which contains the item
+        item_id (int): the item need to be read
+
+    Returns:
+        status code: 200 OK if successful
+        message (JSON): {int: item_id, string: name, float: price, int: quantity} if successful, 
+                        empty if not.
+    """
+    app.logger.info("Request for an item with id: %s in shopcart with id: %s", item_id, shopcart_id)
+    shopcart = Shopcart.find_shopcart(shopcart_id) 
+    if not shopcart:
+        raise NotFound(
+            "Shopcart with id '{}' was not found.".format(shopcart_id)
+            )
+    item = Shopcart.find_item(shopcart_id, item_id)
+    if not item:
+        raise NotFound(
+            "Item with the id '{}' in shopcart'{}' was not found".format(item_id,shopcart_id) 
+        )
+    return make_response(jsonify(item.serialize()),
+        status.HTTP_200_OK
+        ) 
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
