@@ -13,21 +13,10 @@ Usage:
     DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart
 
 """
-
-from multiprocessing.sharedctypes import Value
-import os
-import sys
-import logging
-from typing import Type
 from werkzeug.exceptions import NotFound
-from flask import Flask, jsonify, request, url_for, make_response, abort
-from service.error_handlers import not_found
+from flask import jsonify, request, url_for, make_response, abort
+from service.models import Shopcart
 from . import status  # HTTP Status Codes
-
-# For this example we'll use SQLAlchemy, a popular ORM that supports a
-# variety of backends including SQLite, MySQL, and PostgreSQL
-from flask_sqlalchemy import SQLAlchemy
-from service.models import Shopcart, DataValidationError
 
 # Import Flask application
 from . import app
@@ -136,7 +125,7 @@ def delete_shopcarts(shopcart_id):
     return make_response("", status.HTTP_204_NO_CONTENT)
 
 ######################################################################
-# UPDATE A SHOPCART
+# UPDATE A SHOPCART (#TODO: TO BE FIXED)
 ######################################################################
 @app.route("/shopcarts/<int:shopcart_id>", methods = ["PUT"])
 def update_shopcarts(shopcart_id):
@@ -231,6 +220,73 @@ def update_shopcarts(shopcart_id):
     #             status.HTTP_200_OK
     #         )
 
+
+######################################################################
+# CREATE AN ITEM
+######################################################################
+@app.route("/shopcarts/<int:shopcart_id>/items", methods = ["POST"])
+def create_items(shopcart_id):
+    """
+    Create new item in shopcart {shopcart_id}.
+
+    Args:
+        shopcart_id (int): The shopcart to be updated
+        body of API call (JSON): 
+            item_id (int)
+            quantity (int) 
+            item_name (string)
+            price (float)
+
+    Returns:
+        status code: 201 if successful, 409 if already exists,
+            400 if data type errors.
+        message (JSON): new item if successful, empty if not.
+    """
+    check_content_type("application/json")
+    item = request.get_json()
+    app.logger.info("Received item %s...", item)
+    try:
+        assert isinstance(item["quantity"], int)
+        assert item["quantity"] > 0      
+    except (TypeError, AssertionError, KeyError):
+        app.logger.error("Quantity must be a positive integer.")
+        abort(status.HTTP_400_BAD_REQUEST, "Quantity must be a positive integer.")
+    try:
+        assert isinstance(item["item_id"], int)
+        assert item["item_id"] >= 0
+    except (TypeError, AssertionError, KeyError):
+        app.logger.error("Item_id must be a non-negative integer.")
+        abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
+    try:
+        assert isinstance(item["item_name"], str)
+    except (AssertionError, KeyError):
+        app.logger.error("Item_name must be a string.")
+        abort(status.HTTP_400_BAD_REQUEST, "Item_name must be a string.")
+    try:
+        assert isinstance(item["price"], int) or isinstance(item["price"], float)
+        assert item["price"] >= 0
+    except (TypeError, AssertionError, KeyError):
+        app.logger.error("Price must be a non-negative integer.")
+        abort(status.HTTP_400_BAD_REQUEST, "Price must be a non-negative integer.")
+
+    if Shopcart.find_item(shopcart_id, item["item_id"]):
+        item_id = item["item_id"]
+        abort(
+            status.HTTP_409_CONFLICT, 
+            f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'."
+        )
+    item["user_id"] = shopcart_id
+    app.logger.info(
+        "Creating item %s with user_id %s, item_name %s, price %s, quantity %s...",
+        item["item_id"], item["user_id"], item["item_name"], item["price"], item["quantity"]
+    )    
+    new_item = Shopcart()
+    new_item.deserialize(item)
+    new_item.create()
+    return make_response(
+        jsonify(new_item.serialize()), status.HTTP_201_CREATED
+        )
+
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
@@ -252,4 +308,4 @@ def check_content_type(media_type):
         "Content-Type must be {}".format(media_type),
     )
    
-    
+   
