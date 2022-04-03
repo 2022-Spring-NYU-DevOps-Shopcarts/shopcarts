@@ -534,7 +534,6 @@ class TestYourResourceServer(TestCase):
     
     def test_read_an_item(self):
         """Read an item in a certain shopcart"""
-        # get the items of a shopcart
         test_shopcart = self._create_items(1)
         resp = self.app.get(
             "{0}/{1}/items/{2}".format(BASE_URL, test_shopcart[0].user_id,test_shopcart[0].item_id), content_type=CONTENT_TYPE_JSON
@@ -547,6 +546,6 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data['price'], test_shopcart[0].price)
 
     def test_read_an_item_not_found(self):
-        """Get a Shopcart thats not found"""
+        """Read an item thats not found"""
         resp = self.app.get("/shopcarts/0/items/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
