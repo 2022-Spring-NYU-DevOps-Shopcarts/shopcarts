@@ -235,7 +235,7 @@ def create_items(shopcart_id):
             item_id (int)
             quantity (int) 
             item_name (string)
-            price (float)
+            price (float/int)
 
     Returns:
         status code: 201 if successful, 409 if already exists,
@@ -286,6 +286,69 @@ def create_items(shopcart_id):
     return make_response(
         jsonify(new_item.serialize()), status.HTTP_201_CREATED
         )
+
+######################################################################
+# UPDATE AN ITEM
+######################################################################
+@app.route("/shopcarts/<int:shopcart_id>/items/<int:item_id>", methods = ["PUT"])
+def update_items(shopcart_id, item_id):
+    """
+    Update an existing item in shopcart {shopcart_id}.
+    Update quantity and/or price
+
+    Args:
+        shopcart_id (int): The shopcart to be updated
+        body of API call (JSON): 
+            quantity (int) 
+            price (float/int)
+
+            have either quantity or price, or both
+
+    Returns:
+        status code: 201 if successful, 
+        404 if the requested shopcart_id or item_id does not exist,
+        400 if data type errors.
+        message (JSON): new item if successful, otherwise error messages
+    """
+    app.logger.info("Request to update an item")
+    check_content_type("application/json")
+    req = request.get_json()
+    if not "quantity" in req.keys() and not "price" in req.keys():
+        abort(status.HTTP_400_BAD_REQUEST, "Must have either quantity or price.")
+    if "quantity" in req.keys():
+        if not isinstance(req["quantity"], int) or req["quantity"] < 0:
+            abort(status.HTTP_400_BAD_REQUEST, "Invalid quantity.")
+        else:
+            quantity = req["quantity"]
+    if "price" in req.keys():
+        if (not isinstance(req["price"], int) and not isinstance(req["price"], float)) or req["price"] < 0:
+            abort(status.HTTP_400_BAD_REQUEST, "Invalid price.")
+        else:
+            price = req["price"]
+    
+    # Make sure the shopcart exists
+    shopcart = Shopcart.find_shopcart(shopcart_id)
+    if not shopcart:
+        abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {shopcart_id} was not found.")
+    # Make sure the item exists
+    item = Shopcart.find_item(shopcart_id, item_id)
+    if not item:
+        abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
+    
+    # Now proceed to update
+    if quantity:
+        item.quantity = quantity
+        app.logger.info("item {item_id}'s quantity is changed to {quantity}")
+    if price:
+        item.price = price
+        app.logger.info("item {item_id}'s price is changed to {price}")
+    item.create()
+    return make_response(jsonify(item.serialize(), status.HTTP_201_CREATED))
+    
+                  
+    
+
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
