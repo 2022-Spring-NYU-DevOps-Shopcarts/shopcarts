@@ -560,6 +560,7 @@ class TestYourResourceServer(TestCase):
         new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
         req.pop("quantity")
         req.pop("price")
+        req.pop("item_name")
         new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
         resp = self.app.put(
             new_url, json=req, content_type=CONTENT_TYPE_JSON
@@ -584,9 +585,9 @@ class TestYourResourceServer(TestCase):
 
         # test updating with a negative quantity
         req["quantity"] = -1
+        req.pop("item_name")
         item_id = req.pop("item_id")
         new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-
         resp = self.app.put(
             new_url, json=req, content_type=CONTENT_TYPE_JSON
         )
@@ -610,9 +611,9 @@ class TestYourResourceServer(TestCase):
 
             # test updating with a negative quantity
             req["quantity"] = 3.5
+            req.pop("item_name")
             item_id = req.pop("item_id")
             new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-
             resp = self.app.put(
                 new_url, json=req, content_type=CONTENT_TYPE_JSON
             )
@@ -636,6 +637,7 @@ class TestYourResourceServer(TestCase):
 
             # test updating with a negative quantity
             req["price"] = -1
+            req.pop("item_name")
             item_id = req.pop("item_id")
             new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
@@ -663,6 +665,7 @@ class TestYourResourceServer(TestCase):
             # test updating with a valid price
             req["price"] = 23
             req.pop("quantity")
+            req.pop("item_name")
             item_id = req.pop("item_id")
             new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
@@ -690,6 +693,7 @@ class TestYourResourceServer(TestCase):
             # test updating with a valid quantity
             req["quantity"] = 12
             req.pop("price")
+            req.pop("item_name")
             item_id = req.pop("item_id")
             new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
@@ -717,6 +721,7 @@ class TestYourResourceServer(TestCase):
             # test updating with a valid price and a valid quantity
             req["quantity"] = 12
             req["price"] = 24
+            req.pop("item_name")
             item_id = req.pop("item_id")
             new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
@@ -744,6 +749,7 @@ class TestYourResourceServer(TestCase):
             # test updating with a valid price and a valid quantity
             req["quantity"] = 12
             req["price"] = 24
+            req.pop("item_name")
             user_id = 100000000000
             item_id = req.pop("item_id")
             new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
@@ -772,6 +778,7 @@ class TestYourResourceServer(TestCase):
             # test updating with a valid price and a valid quantity
             req["quantity"] = 12
             req["price"] = 24
+            req.pop("item_name")
             item_id = 100000001
             new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
