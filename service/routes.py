@@ -13,21 +13,10 @@ Usage:
     DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart
 
 """
-
-from multiprocessing.sharedctypes import Value
-import os
-import sys
-import logging
-from typing import Type
 from werkzeug.exceptions import NotFound
-from flask import Flask, jsonify, request, url_for, make_response, abort
-from service.error_handlers import not_found
+from flask import jsonify, request, url_for, make_response, abort
+from service.models import Shopcart
 from . import status  # HTTP Status Codes
-
-# For this example we'll use SQLAlchemy, a popular ORM that supports a
-# variety of backends including SQLite, MySQL, and PostgreSQL
-from flask_sqlalchemy import SQLAlchemy
-from service.models import Shopcart, DataValidationError
 
 # Import Flask application
 from . import app
@@ -238,21 +227,20 @@ def update_shopcarts(shopcart_id):
 @app.route("/shopcarts/<int:shopcart_id>/items", methods = ["POST"])
 def create_items(shopcart_id):
     """
-    #TODO: docstring
-    Updates shopcart with the relevant shopcart_id to quantity
+    Create new item in shopcart {shopcart_id}.
 
     Args:
         shopcart_id (int): The shopcart to be updated
         body of API call (JSON): 
             item_id (int)
             quantity (int) 
-            item_name 
+            item_name (string)
             price (float)
 
     Returns:
-        status code: 200 if successful, 404 if cart not found,
-            406 if data type errors.
-        message (JSON): new state of shopcart or empty if cart not found
+        status code: 201 if successful, 409 if already exists,
+            400 if data type errors.
+        message (JSON): new item if successful, empty if not.
     """
     check_content_type("application/json")
     item = request.get_json()
@@ -260,55 +248,43 @@ def create_items(shopcart_id):
     try:
         assert isinstance(item["quantity"], int)
         assert item["quantity"] > 0      
-    except (TypeError, AssertionError):
-        app.logger.error(
-            "Quantity %s must be a positive integer.",
-            item["quantity"]
-            )
-        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+    except (TypeError, AssertionError, KeyError):
+        app.logger.error("Quantity must be a positive integer.")
+        abort(status.HTTP_400_BAD_REQUEST, "Quantity must be a positive integer.")
     try:
         assert isinstance(item["item_id"], int)
         assert item["item_id"] >= 0
-    except (TypeError, AssertionError):
-        app.logger.error(
-            "Item_id %s must be a non-negative integer.",
-            item["item_id"]
-            )
-        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+    except (TypeError, AssertionError, KeyError):
+        app.logger.error("Item_id must be a non-negative integer.")
+        abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
     try:
-        assert isinstance(item["item_name"], Str)
-    except AssertionError:
-        app.logger.error(
-            "Item_name %s must be a string.",
-            item["item_name"]
-            )
-        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+        assert isinstance(item["item_name"], str)
+    except (AssertionError, KeyError):
+        app.logger.error("Item_name must be a string.")
+        abort(status.HTTP_400_BAD_REQUEST, "Item_name must be a string.")
     try:
         assert isinstance(item["price"], int) or isinstance(item["price"], float)
-        assert item["quantity"] >= 0      
-    except (TypeError, AssertionError):
-        app.logger.error(
-            "Price %s must be a non-negative integer.",
-            item["price"]
-            )
-        return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
+        assert item["price"] >= 0
+    except (TypeError, AssertionError, KeyError):
+        app.logger.error("Price must be a non-negative integer.")
+        abort(status.HTTP_400_BAD_REQUEST, "Price must be a non-negative integer.")
 
-    #TODO: assert item_id not already in this cart after GET implemented
-    item =  Shopcart(
-        user_id = shopcart_id,
-        item_id = int(item["item_id"]),
-        item_name = item["item_name"],
-        price = float(item["price"]),
-        quantity = int(item["quantity"])
+    if Shopcart.find_item(shopcart_id, item["item_id"]):
+        item_id = item["item_id"]
+        abort(
+            status.HTTP_409_CONFLICT, 
+            f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'."
         )
-
+    item["user_id"] = shopcart_id
     app.logger.info(
-        "Request to create item %s with user_id %s,  item_name %s, price %s, \
-            quantity %s...", item.item_id, item.user_id, item.item_name, item.price, item.quantity
+        "Creating item %s with user_id %s, item_name %s, price %s, quantity %s...",
+        item["item_id"], item["user_id"], item["item_name"], item["price"], item["quantity"]
     )    
-    item.create()
+    new_item = Shopcart()
+    new_item.deserialize(item)
+    new_item.create()
     return make_response(
-        jsonify(item.serialize()), status.HTTP_200_OK
+        jsonify(new_item.serialize()), status.HTTP_201_CREATED
         )
 
 ######################################################################
@@ -332,4 +308,4 @@ def check_content_type(media_type):
         "Content-Type must be {}".format(media_type),
     )
    
-    
+   
