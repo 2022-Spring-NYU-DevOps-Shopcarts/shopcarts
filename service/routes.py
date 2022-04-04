@@ -79,11 +79,11 @@ def create_shopcarts():
 @app.route("/shopcarts", methods=["GET"])
 def list_shopcarts():
     """Returns all of the Shopcarts"""
-    # app.logger.info("Request for shopcart list")
-    # shopcarts = Shopcart.all_shopcart()
-    # results = [shopcart.serialize() for shopcart in shopcarts]
-    # app.logger.info("Returning %d shopcarts", len(results))
-    # return make_response(jsonify(results), status.HTTP_200_OK)
+    app.logger.info("Request for shopcart list")
+    shopcarts = Shopcart.all_shopcart()
+    results = [dict(shopcart) for shopcart in shopcarts]
+    app.logger.info("Returning %d shopcarts", len(results))
+    return make_response(jsonify(results), status.HTTP_200_OK)
 
 ######################################################################
 # RETRIEVE A SHOPCART
@@ -286,6 +286,7 @@ def create_items(shopcart_id):
     return make_response(
         jsonify(new_item.serialize()), status.HTTP_201_CREATED
         )
+
 ######################################################################
 # READ AN ITEM
 ######################################################################
@@ -336,7 +337,7 @@ def update_items(shopcart_id, item_id):
             have either quantity or price, or both
 
     Returns:
-        status code: 201 if successful, 
+        status code: 200 if successful, 
         404 if the requested shopcart_id or item_id does not exist,
         400 if data type errors.
         message (JSON): new item if successful, otherwise error messages
@@ -346,6 +347,8 @@ def update_items(shopcart_id, item_id):
     req = request.get_json()
     if not "quantity" in req.keys() and not "price" in req.keys():
         abort(status.HTTP_400_BAD_REQUEST, "Must have either quantity or price.")
+    quantity = None
+    price = None
     if "quantity" in req.keys():
         if not isinstance(req["quantity"], int) or req["quantity"] <= 0:
             abort(status.HTTP_400_BAD_REQUEST, "Invalid quantity.")
@@ -374,7 +377,7 @@ def update_items(shopcart_id, item_id):
         item.price = price
         app.logger.info("item {item_id}'s price is changed to {price}")
     item.create()
-    return make_response(jsonify(item.serialize(), status.HTTP_201_CREATED))
+    return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
     
                   
     

@@ -71,23 +71,23 @@ class TestYourResourceServer(TestCase):
     def _create_items(self, count):
         """Factory method to create items in shopcart in bulk"""
         shopcart = ItemFactory()
-        shopcarts = [shopcart]
-        shopcarts_serialize = [shopcart.serialize()]
+        items = [shopcart]
+        items_serialize = [shopcart.serialize()]
         for i in range(count-1):
             new_item = ItemFactory(user_id = shopcart.user_id, item_id = shopcart.item_id+i+1)
-            shopcarts.append(new_item)
-            shopcarts_serialize.append(new_item.serialize())
+            items.append(new_item)
+            items_serialize.append(new_item.serialize())
         
         resp = self.app.post(
                 BASE_URL,
                 json={"user_id": shopcart.user_id,
-                    "items": shopcarts_serialize},
+                    "items": items_serialize},
                 content_type=CONTENT_TYPE_JSON
         )
         self.assertEqual(
                 resp.status_code, status.HTTP_201_CREATED, "Could not create test items in shopcart"
         )
-        return shopcarts
+        return items
 
 
 
@@ -102,12 +102,14 @@ class TestYourResourceServer(TestCase):
 
     def test_get_shopcart_list(self):
         """Get a list of Shopcart"""
-        # self._create_items(2)
-        # self._create_items(3)
-        # resp = self.app.get(BASE_URL)
-        # self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        # data = resp.get_json()
-        # self.assertEqual(len(data), 2)
+        shopcart1 = self._create_items(2)
+        shopcart2 = self._create_items(3)
+        resp = self.app.get(BASE_URL)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[0]["user_id"], shopcart1[0].user_id)
+        self.assertEqual(data[1]["user_id"], shopcart2[0].user_id)
 
     def test_get_shopcart(self):
         """Get a shopcart"""
@@ -537,8 +539,9 @@ class TestYourResourceServer(TestCase):
         )
         self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
 
-    
-    
+    ######################################################################
+    # TEST READ ITEM
+    ######################################################################
     def test_read_an_item(self):
         """Read an item in a certain shopcart"""
         test_shopcart = self._create_items(1)
@@ -614,195 +617,195 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-        def test_update_item_bad_quantity_float(self):
-            """ Attempts updating an item with a quantity not in integer. """
-            # create an item first
-            test_item = ItemFactory()
-            req = test_item.serialize()
-            user_id = req.pop("user_id")
-            url = f"{BASE_URL}/{user_id}/items"
-            logging.debug(url)
-            resp = self.app.post(
-                url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+    def test_update_item_bad_quantity_float(self):
+        """ Attempts updating an item with a quantity not in integer. """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-            # test updating with a negative quantity
-            req["quantity"] = 3.5
-            req.pop("item_name")
-            item_id = req.pop("item_id")
-            new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-            resp = self.app.put(
-                new_url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-        
+        # test updating with a negative quantity
+        req["quantity"] = 3.5
+        req.pop("item_name")
+        item_id = req.pop("item_id")
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+        resp = self.app.put(
+            new_url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+    
 
-        def test_update_item_bad_price(self):
-            """ Attempts updating an item with a negative price. """
-            # create an item first
-            test_item = ItemFactory()
-            req = test_item.serialize()
-            user_id = req.pop("user_id")
-            url = f"{BASE_URL}/{user_id}/items"
-            logging.debug(url)
-            resp = self.app.post(
-                url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+    def test_update_item_bad_price(self):
+        """ Attempts updating an item with a negative price. """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-            # test updating with a negative quantity
-            req["price"] = -1
-            req.pop("item_name")
-            item_id = req.pop("item_id")
-            new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+        # test updating with a negative quantity
+        req["price"] = -1
+        req.pop("item_name")
+        item_id = req.pop("item_id")
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
-            resp = self.app.put(
-                new_url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
-
-        def test_update_item_only_price(self):
-            """ Attempts updating an item with a valid price. """
-            # create an item first
-            test_item = ItemFactory()
-            req = test_item.serialize()
-            user_id = req.pop("user_id")
-            url = f"{BASE_URL}/{user_id}/items"
-            logging.debug(url)
-            resp = self.app.post(
-                url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-
-            # test updating with a valid price
-            req["price"] = 23
-            req.pop("quantity")
-            req.pop("item_name")
-            item_id = req.pop("item_id")
-            new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-
-            resp = self.app.put(
-                new_url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        
-
-        def test_update_item_only_quantity(self):
-            """ Attempts updating an item with a valid quantity. """
-            # create an item first
-            test_item = ItemFactory()
-            req = test_item.serialize()
-            user_id = req.pop("user_id")
-            url = f"{BASE_URL}/{user_id}/items"
-            logging.debug(url)
-            resp = self.app.post(
-                url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-
-            # test updating with a valid quantity
-            req["quantity"] = 12
-            req.pop("price")
-            req.pop("item_name")
-            item_id = req.pop("item_id")
-            new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-
-            resp = self.app.put(
-                new_url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-
-        
-        def test_update_item_quantity_price(self):
-            """ Attempts updating an item with a valid quantity and a valid quantity. """
-            # create an item first
-            test_item = ItemFactory()
-            req = test_item.serialize()
-            user_id = req.pop("user_id")
-            url = f"{BASE_URL}/{user_id}/items"
-            logging.debug(url)
-            resp = self.app.post(
-                url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-
-            # test updating with a valid price and a valid quantity
-            req["quantity"] = 12
-            req["price"] = 24
-            req.pop("item_name")
-            item_id = req.pop("item_id")
-            new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-
-            resp = self.app.put(
-                new_url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        resp = self.app.put(
+            new_url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-        def test_update_item_no_shopcart_found(self):
-            """ Attempts updating an item but the associated shopcart id does not exist. """
-            # create an item first
-            test_item = ItemFactory()
-            req = test_item.serialize()
-            user_id = req.pop("user_id")
-            url = f"{BASE_URL}/{user_id}/items"
-            logging.debug(url)
-            resp = self.app.post(
-                url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+    def test_update_item_only_price(self):
+        """ Attempts updating an item with a valid price. """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-            # test updating with a valid price and a valid quantity
-            req["quantity"] = 12
-            req["price"] = 24
-            req.pop("item_name")
-            user_id = 100000000000
-            item_id = req.pop("item_id")
-            new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+        # test updating with a valid price
+        req["price"] = 23
+        req.pop("quantity")
+        req.pop("item_name")
+        item_id = req.pop("item_id")
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
-            resp = self.app.put(
-                new_url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        resp = self.app.put(
+            new_url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+    
 
-        
-        def test_update_item_no_item_found(self):
-            """ Attempts updating an item but the associated item id does not exist. """
-            # create an item first
-            test_item = ItemFactory()
-            req = test_item.serialize()
-            user_id = req.pop("user_id")
-            url = f"{BASE_URL}/{user_id}/items"
-            logging.debug(url)
-            resp = self.app.post(
-                url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+    def test_update_item_only_quantity(self):
+        """ Attempts updating an item with a valid quantity. """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-            # test updating with a valid price and a valid quantity
-            req["quantity"] = 12
-            req["price"] = 24
-            req.pop("item_name")
-            item_id = 100000001
-            new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+        # test updating with a valid quantity
+        req["quantity"] = 12
+        req.pop("price")
+        req.pop("item_name")
+        item_id = req.pop("item_id")
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
-            resp = self.app.put(
-                new_url, json=req, content_type=CONTENT_TYPE_JSON
-            )
-            logging.debug(resp)
-            self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        resp = self.app.put(
+            new_url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    
+    def test_update_item_quantity_price(self):
+        """ Attempts updating an item with a valid quantity and a valid quantity. """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # test updating with a valid price and a valid quantity
+        req["quantity"] = 12
+        req["price"] = 24
+        req.pop("item_name")
+        item_id = req.pop("item_id")
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+
+        resp = self.app.put(
+            new_url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+
+    def test_update_item_no_shopcart_found(self):
+        """ Attempts updating an item but the associated shopcart id does not exist. """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # test updating with a valid price and a valid quantity
+        req["quantity"] = 12
+        req["price"] = 24
+        req.pop("item_name")
+        user_id = 100000000000
+        item_id = req.pop("item_id")
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+
+        resp = self.app.put(
+            new_url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    
+    def test_update_item_no_item_found(self):
+        """ Attempts updating an item but the associated item id does not exist. """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # test updating with a valid price and a valid quantity
+        req["quantity"] = 12
+        req["price"] = 24
+        req.pop("item_name")
+        item_id = 100000001
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+
+        resp = self.app.put(
+            new_url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
