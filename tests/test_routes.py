@@ -590,7 +590,6 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-
     def test_update_item_bad_quantity_negative(self):
         """ Attempts updating an item with a negative quantity. """
         # create an item first
@@ -616,7 +615,6 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-
     def test_update_item_bad_quantity_float(self):
         """ Attempts updating an item with a quantity not in integer. """
         # create an item first
@@ -641,7 +639,6 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-    
 
     def test_update_item_bad_price(self):
         """ Attempts updating an item with a negative price. """
@@ -669,7 +666,6 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-
     def test_update_item_only_price(self):
         """ Attempts updating an item with a valid price. """
         # create an item first
@@ -696,7 +692,6 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-    
 
     def test_update_item_only_quantity(self):
         """ Attempts updating an item with a valid quantity. """
@@ -725,7 +720,6 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-    
     def test_update_item_quantity_price(self):
         """ Attempts updating an item with a valid quantity and a valid quantity. """
         # create an item first
@@ -752,7 +746,6 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-
 
     def test_update_item_no_shopcart_found(self):
         """ Attempts updating an item but the associated shopcart id does not exist. """
@@ -782,7 +775,6 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
-    
     def test_update_item_no_item_found(self):
         """ Attempts updating an item but the associated item id does not exist. """
         # create an item first
