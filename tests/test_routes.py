@@ -152,15 +152,6 @@ class TestYourResourceServer(TestCase):
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart, [], "Expect to return an empty list")
 
-        # Check that the location header was correct
-        # test_item = ItemFactory(user_id = test_shopcart.user_id, item_id = test_shopcart.item_id+1)
-        # resp = self.app.put(location, json=test_item.serialize(), content_type=CONTENT_TYPE_JSON)
-        # self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        # resp = self.app.get(location, content_type=CONTENT_TYPE_JSON)
-        # self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        # new_shopcart = resp.get_json()
-        # self.assertEqual(new_shopcart[0]["user_id"], test_shopcart.user_id, "User IDs do not match")
-
 
     def test_create_shopcart_with_item(self):
         """Create a new Shopcart with a item"""
@@ -176,6 +167,11 @@ class TestYourResourceServer(TestCase):
         location = resp.headers.get("Location", None)
         self.assertIsNotNone(location)
         # Check the data is correct
+        new_shopcart = resp.get_json()
+        self.assertEqual(new_shopcart[0]["user_id"], shopcart.user_id, "User IDs do not match")
+        # Check that the location header was correct
+        resp = self.app.get(location, content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart[0]["user_id"], shopcart.user_id, "User IDs do not match")
 
