@@ -536,7 +536,26 @@ class TestYourResourceServer(TestCase):
             url, json=req2, content_type=CONTENT_TYPE_JSON
         )
         self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
+
     
+    
+    def test_read_an_item(self):
+        """Read an item in a certain shopcart"""
+        test_shopcart = self._create_items(1)
+        resp = self.app.get(
+            "{0}/{1}/items/{2}".format(BASE_URL, test_shopcart[0].user_id,test_shopcart[0].item_id), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data['item_id'], test_shopcart[0].item_id)
+        self.assertEqual(data['item_name'], test_shopcart[0].item_name)
+        self.assertEqual(data['quantity'], test_shopcart[0].quantity)
+        self.assertEqual(data['price'], test_shopcart[0].price)
+
+    def test_read_an_item_not_found(self):
+        """Read an item thats not found"""
+        resp = self.app.get("/shopcarts/0/items/0")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
 
     ######################################################################
     # TEST UPDATE ITEM
