@@ -98,9 +98,7 @@ def get_shopcarts(shopcart_id):
     #This is the list of shopcarts which user_id == shopcart_id
     shopcart = Shopcart.find_shopcart(shopcart_id) 
     if not shopcart:
-        raise NotFound(
-            "Shopcart with id '{}' was not found.".format(shopcart_id)
-            )
+        return make_response(jsonify([]), status.HTTP_200_OK) 
     app.logger.info("Returning shopcart: %s", shopcart_id)
     #As 1 user is attached to 1 user_id
     return make_response(jsonify(

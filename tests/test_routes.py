@@ -53,20 +53,6 @@ class TestYourResourceServer(TestCase):
         """ This runs after each test """
         db.session.remove()
         db.drop_all()
-    
-    # def _create_shopcarts(self, count):
-    #     """Factory method to create shopcarts in bulk"""
-    #     shopcarts = []
-    #     for i in range(count):
-    #         test_shopcart = ShopcartFactory()
-    #         resp = self.app.post(
-    #             BASE_URL, json=test_shopcart.serialize(), content_type=CONTENT_TYPE_JSON
-    #         )
-    #         self.assertEqual(
-    #             resp.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
-    #         )
-    #         shopcarts.append(test_shopcart)
-    #     return shopcarts
 
     def _create_items(self, count):
         """Factory method to create items in shopcart in bulk"""
@@ -90,7 +76,6 @@ class TestYourResourceServer(TestCase):
         return items
 
 
-
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
@@ -99,6 +84,7 @@ class TestYourResourceServer(TestCase):
         """ Test index call """
         resp = self.app.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
 
     def test_get_shopcart_list(self):
         """Get a list of Shopcart"""
@@ -110,6 +96,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0]["user_id"], shopcart1[0].user_id)
         self.assertEqual(data[1]["user_id"], shopcart2[0].user_id)
+
 
     def test_get_shopcart(self):
         """Get a shopcart"""
@@ -127,16 +114,29 @@ class TestYourResourceServer(TestCase):
             self.assertEqual(data[i]['quantity'], test_shopcart[i].quantity)
             self.assertEqual(data[i]['price'], test_shopcart[i].price)
 
-    def test_get_shopcart_not_found(self):
-        """Get a Shopcart thats not found"""
+
+    def test_get_shopcart_empty(self):
+        """Get an empty Shopcart"""
         resp = self.app.get("/shopcarts/0")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.get_json(), [], "Expect to return an empty list")
+
+
+    def test_get_shopcart_invalid(self):
+        """Get a Shopcart with invalid user id"""
+        resp = self.app.get("/shopcarts/s")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
-    
+
+
     def test_method_not_supported(self):
         """Test Method Not Supported"""
         resp = self.app.put(BASE_URL, json={}, content_type=CONTENT_TYPE_JSON)
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
+
+    ######################################################################
+    # TEST CREATE SHOPCART 
+    ######################################################################
     def test_create_shopcart(self):
         """Create a new Shopcart"""
         resp = self.app.post(
@@ -151,7 +151,7 @@ class TestYourResourceServer(TestCase):
         # Check the data is correct
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart, [], "Expect to return an empty list")
-        #self.assertEqual(new_shopcart["item_id"], test_shopcart.item_id, "item IDs do not match")
+
         # Check that the location header was correct
         # test_item = ItemFactory(user_id = test_shopcart.user_id, item_id = test_shopcart.item_id+1)
         # resp = self.app.put(location, json=test_item.serialize(), content_type=CONTENT_TYPE_JSON)
@@ -161,9 +161,6 @@ class TestYourResourceServer(TestCase):
         # new_shopcart = resp.get_json()
         # self.assertEqual(new_shopcart[0]["user_id"], test_shopcart.user_id, "User IDs do not match")
 
-    ######################################################################
-    # TEST CREATE SHOPCART 
-    ######################################################################
 
     def test_create_shopcart_with_item(self):
         """Create a new Shopcart with a item"""
@@ -181,6 +178,7 @@ class TestYourResourceServer(TestCase):
         # Check the data is correct
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart[0]["user_id"], shopcart.user_id, "User IDs do not match")
+
 
     def test_create_shopcart_with_item_list(self):
         """Create a new Shopcart with a list of items"""
@@ -204,15 +202,18 @@ class TestYourResourceServer(TestCase):
         new_shopcart = resp.get_json()
         self.assertEqual(new_shopcart[0]["user_id"], shopcart.user_id, "User IDs do not match")
 
+
     def test_create_shopcart_no_data(self):
         """Create a Shopcart with missing data"""
         resp = self.app.post(BASE_URL, json={}, content_type=CONTENT_TYPE_JSON)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+
     def test_create_shopcart_no_content_type(self):
         """Create a Shopcart with no content type"""
         resp = self.app.post(BASE_URL)
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
 
     def test_create_shopcart_bad_id(self):
         """Create a Shopcart with bad user ID or bad item ID"""
@@ -232,7 +233,8 @@ class TestYourResourceServer(TestCase):
                 content_type=CONTENT_TYPE_JSON
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-    
+
+
     def test_create_shopcart_already_exist(self):
         """Create a Shopcart that already has items in it"""
         # create a shopcart with an item
@@ -411,6 +413,7 @@ class TestYourResourceServer(TestCase):
     #     )
     #     self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
+
     def test_delete_empty_shopcart(self):
         """Test delete an existing shopcart with no other items added"""
         user_id = 10023
@@ -419,6 +422,7 @@ class TestYourResourceServer(TestCase):
             content_type = "shopcarts/json"
         )
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
 
     def test_delete_shopcart_with_items(self):
         """Test deleting a shopcart with items added"""
@@ -429,10 +433,12 @@ class TestYourResourceServer(TestCase):
         )
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
+
     def test_delete_shopcart_not_found(self):
         """Delete a Shopcart that's not found"""
         resp = self.app.delete("/shopcarts/0")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
 
     ######################################################################
     # TEST CREATE ITEM
@@ -454,7 +460,8 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(new_item["item_id"], req["item_id"], "Item IDs do not match")
         self.assertEqual(new_item["quantity"], req["quantity"], "Quantities do not match")
         self.assertAlmostEqual(new_item["price"], req["price"], "Prices do not match")
-    
+
+
     def test_create_item_bad_name(self):
         """Attempts to create an item with non-string name"""
         req = ItemFactory().serialize()
@@ -467,7 +474,8 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-    
+
+
     def test_create_item_bad_id(self):
         """Attempts to create an item with a negative int id"""
         req = ItemFactory().serialize()
@@ -480,6 +488,7 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_create_item_bad_quantity(self):
         """Attempts to create an item with a non-positive int quantity"""
@@ -494,6 +503,7 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+
     def test_create_item_negative_price(self):
         """Attempts to create an item with a negative float price """
         req = ItemFactory().serialize()
@@ -506,7 +516,8 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-        
+
+
     def test_create_item_bad_price(self):
         """Attempts to create an item with a string as price """
         req = ItemFactory().serialize()
@@ -519,6 +530,7 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_create_item_duplicate_id(self):       
         """ Attempts creating an item with a duplicate ID. """
@@ -539,6 +551,7 @@ class TestYourResourceServer(TestCase):
         )
         self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
 
+
     ######################################################################
     # TEST READ ITEM
     ######################################################################
@@ -555,10 +568,12 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data['quantity'], test_shopcart[0].quantity)
         self.assertEqual(data['price'], test_shopcart[0].price)
 
+
     def test_read_an_item_not_found(self):
         """Read an item thats not found"""
         resp = self.app.get("/shopcarts/0/items/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
+
 
     ######################################################################
     # TEST UPDATE ITEM
@@ -590,6 +605,7 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+
     def test_update_item_bad_quantity_negative(self):
         """ Attempts updating an item with a negative quantity. """
         # create an item first
@@ -614,6 +630,7 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_update_item_bad_quantity_float(self):
         """ Attempts updating an item with a quantity not in integer. """
@@ -640,6 +657,7 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+
     def test_update_item_bad_price(self):
         """ Attempts updating an item with a negative price. """
         # create an item first
@@ -665,6 +683,7 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_update_item_only_price(self):
         """ Attempts updating an item with a valid price. """
@@ -693,6 +712,7 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+
     def test_update_item_only_quantity(self):
         """ Attempts updating an item with a valid quantity. """
         # create an item first
@@ -719,6 +739,7 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
 
     def test_update_item_quantity_price(self):
         """ Attempts updating an item with a valid quantity and a valid quantity. """
@@ -747,6 +768,7 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+
     def test_update_item_no_shopcart_found(self):
         """ Attempts updating an item but the associated shopcart id does not exist. """
         # create an item first
@@ -774,6 +796,7 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
 
     def test_update_item_no_item_found(self):
         """ Attempts updating an item but the associated item id does not exist. """
