@@ -1,3 +1,4 @@
+######################################################################
 # Copyright 2016, 2021 John J. Rofrano. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,16 +12,39 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+######################################################################
+
 """
-Module: error_handlers
+Error handlers
+
+Handles all of the HTTP Error Codes returning JSON messages
 """
-from flask import jsonify
-from service.models import DataValidationError
-from . import app, status
+
+from flask import jsonify, make_response
+from service import app
+from service.models import DataValidationError, DatabaseConnectionError
+from . import status
 
 ######################################################################
 # Error Handlers
 ######################################################################
+
+## Unused
+# @app.errorhandler(DatabaseConnectionError)
+# def database_connection_error(error):
+#     """Handles Errors from no database connection"""
+#     message = str(error)
+#     app.logger.error(message)
+#     return make_response(
+#         jsonify(
+#             status=status.HTTP_503_SERVICE_UNAVAILABLE,
+#             error="Service Unavailable",
+#             message=message,
+#         ),
+#         status.HTTP_503_SERVICE_UNAVAILABLE,
+#     )
+
+
 @app.errorhandler(DataValidationError)
 def request_validation_error(error):
     """Handles Value Errors from bad data"""
@@ -29,13 +53,11 @@ def request_validation_error(error):
 
 @app.errorhandler(status.HTTP_400_BAD_REQUEST)
 def bad_request(error):
-    """Handles bad requests with 400_BAD_REQUEST"""
+    """Handles bad reuests with 400_BAD_REQUEST"""
     message = str(error)
-    app.logger.warning(message)
-    return (
-        jsonify(
-            status=status.HTTP_400_BAD_REQUEST, error="Bad Request", message=message
-        ),
+    app.logger.error(message)
+    return make_response(
+        jsonify(status=status.HTTP_400_BAD_REQUEST, error="Bad Request", message=message),
         status.HTTP_400_BAD_REQUEST,
     )
 
@@ -44,8 +66,8 @@ def bad_request(error):
 def not_found(error):
     """Handles resources not found with 404_NOT_FOUND"""
     message = str(error)
-    app.logger.warning(message)
-    return (
+    app.logger.error(message)
+    return make_response(
         jsonify(status=status.HTTP_404_NOT_FOUND, error="Not Found", message=message),
         status.HTTP_404_NOT_FOUND,
     )
@@ -53,10 +75,10 @@ def not_found(error):
 
 @app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)
 def method_not_supported(error):
-    """Handles unsupported HTTP methods with 405_METHOD_NOT_SUPPORTED"""
+    """Handles unsuppoted HTTP methods with 405_METHOD_NOT_SUPPORTED"""
     message = str(error)
-    app.logger.warning(message)
-    return (
+    app.logger.error(message)
+    return make_response(
         jsonify(
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
             error="Method not Allowed",
@@ -68,10 +90,10 @@ def method_not_supported(error):
 
 @app.errorhandler(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 def mediatype_not_supported(error):
-    """Handles unsupported media requests with 415_UNSUPPORTED_MEDIA_TYPE"""
+    """Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE"""
     message = str(error)
-    app.logger.warning(message)
-    return (
+    app.logger.error(message)
+    return make_response(
         jsonify(
             status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             error="Unsupported media type",
@@ -80,17 +102,31 @@ def mediatype_not_supported(error):
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
     )
 
+## Unused
+# @app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
+# def internal_server_error(error):
+#     """Handles unexpected server error with 500_SERVER_ERROR"""
+#     message = str(error)
+#     app.logger.critical(message)
+#     return make_response(
+#         jsonify(
+#             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             error="Internal Server Error",
+#             message=message,
+#         ),
+#         status.HTTP_500_INTERNAL_SERVER_ERROR,
+#     )
 
-@app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
+@app.errorhandler(status.HTTP_409_CONFLICT)
 def internal_server_error(error):
-    """Handles unexpected server error with 500_SERVER_ERROR"""
+    """Handles unexpected server error with HTTP_409_CONFLICT"""
     message = str(error)
-    app.logger.error(message)
-    return (
+    app.logger.critical(message)
+    return make_response(
         jsonify(
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status=status.HTTP_409_CONFLICT,
             error="Internal Server Error",
             message=message,
         ),
-        status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status.HTTP_409_CONFLICT,
     )

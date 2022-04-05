@@ -10,7 +10,7 @@ import logging
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from flask import jsonify
-from service import status  # HTTP Status Codes
+from service.utils import status  # HTTP Status Codes
 from service.models import db
 from service.routes import app, init_db
 from .factories import ItemFactory
@@ -585,6 +585,14 @@ class TestYourResourceServer(TestCase):
     def test_read_an_item_not_found(self):
         """Read an item thats not found"""
         resp = self.app.get("/shopcarts/0/items/0")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
+
+    def test_read_an_item_not_found_Item(self):
+        """Read an item thats not found"""
+        test_shopcart = self._create_items(1)
+        resp = self.app.get(
+            "{0}/{1}/items/{2}".format(BASE_URL, test_shopcart[0].user_id,test_shopcart[0].item_id+100), content_type=CONTENT_TYPE_JSON
+        )
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
 
 

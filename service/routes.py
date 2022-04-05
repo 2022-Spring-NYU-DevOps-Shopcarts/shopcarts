@@ -16,7 +16,7 @@ Usage:
 from werkzeug.exceptions import NotFound
 from flask import jsonify, request, url_for, make_response, abort
 from service.models import Shopcart
-from . import status  # HTTP Status Codes
+from .utils import status  # HTTP Status Codes
 
 # Import Flask application
 from . import app
@@ -27,11 +27,8 @@ from . import app
 @app.route("/")
 def index():
     """ Root URL response """
-    info = {"name": "Shopcarts Service", "version": "1.0", "resource URL": "/shopcarts"} 
     app.logger.info("Root URL response")
-    return (
-        make_response(jsonify(info),status.HTTP_200_OK)
-    )
+    return app.send_static_file("index.html")
 
 ######################################################################
 # ADD A NEW SHOPCART
@@ -76,6 +73,10 @@ def create_shopcarts():
 ######################################################################
 # LIST ALL SHOPCARTS
 ######################################################################
+
+
+# Zhengrui Xia: Changed to Shopcart.all from Shopcart.all_shopcart since if a 
+# shopcart is empty, it won't exist in our database
 @app.route("/shopcarts", methods=["GET"])
 def list_shopcarts():
     """Returns all of the Shopcarts"""
@@ -97,8 +98,10 @@ def get_shopcarts(shopcart_id):
     app.logger.info("Request for shopcart with id: %s", shopcart_id)
     #This is the list of shopcarts which user_id == shopcart_id
     shopcart = Shopcart.find_shopcart(shopcart_id) 
+    
     if not shopcart:
         return make_response(jsonify([]), status.HTTP_200_OK) 
+
     app.logger.info("Returning shopcart: %s", shopcart_id)
     #As 1 user is attached to 1 user_id
     return make_response(jsonify(
@@ -271,7 +274,7 @@ def create_items(shopcart_id):
         item_id = item["item_id"]
         abort(
             status.HTTP_409_CONFLICT, 
-            f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'."
+            f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'. Do you mean Update?"
         )
     item["user_id"] = shopcart_id
     app.logger.info(

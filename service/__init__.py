@@ -8,6 +8,7 @@ import os
 import sys
 import logging
 from flask import Flask
+from .utils import log_handlers
 
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
 sys.path.insert(0,parentdir) 
@@ -17,21 +18,12 @@ app = Flask(__name__)
 app.config.from_object("config")
 
 # Import the routes After the Flask app is created
-from service import routes, models, error_handlers
+from service import routes, models
+from .utils import error_handlers
 
 # Set up logging for production
 if __name__ != "__main__":
-    gunicorn_logger = logging.getLogger("gunicorn.error")
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
-    app.logger.propagate = False
-    # Make all log formats consistent
-    formatter = logging.Formatter(
-        "[%(asctime)s] [%(levelname)s] [%(module)s] %(message)s", "%Y-%m-%d %H:%M:%S %z"
-    )
-    for handler in app.logger.handlers:
-        handler.setFormatter(formatter)
-    app.logger.info("Logging handler established")
+    log_handlers.init_logging(app, "gunicorn.error")
 
 app.logger.info(70 * "*")
 app.logger.info("  M Y   S E R V I C E   R U N N I N G  ".center(70, "*"))
@@ -43,7 +35,5 @@ except Exception as error:
     app.logger.critical("%s: Cannot continue", error)
     # gunicorn requires exit code 4 to stop spawning workers when they die
     sys.exit(4)
-
-# app.run(host='0.0.0.0', port=5000, debug=True)
 
 app.logger.info("Service initialized!")
