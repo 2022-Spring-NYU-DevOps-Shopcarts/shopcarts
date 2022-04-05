@@ -102,7 +102,7 @@ def get_shopcarts(shopcart_id):
     
     #### ZhengruiXia: We only need to check if the shopcart_id is valid
     try:
-        assert isinstance(shopcart_id, int)
+        assert isinstance(shopcart_id, int)    
         assert shopcart_id >= 0      
     except (TypeError, AssertionError, KeyError):
         app.logger.error("Requested shopcart id: %s is invalid", shopcart_id)
