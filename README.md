@@ -4,7 +4,7 @@ Version: 1.1
 Resource URLs: ```/shopcarts```, ```/shopcarts/<user-id>```, ```/shopcarts/<user-id>/items```, ```/shopcarts/<user-id>/items/<item-id>```
 
 Allows different users to store items in their shopcarts.
-Run via ```honcho run```.
+Run via ```honcho start```.
 Test via ```nosetests``` and ```behave```.
 
 ### Usage: 
