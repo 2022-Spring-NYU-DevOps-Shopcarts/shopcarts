@@ -29,6 +29,7 @@ Test via ```nosetests```.
         Expects JSON body data:
             quantity: int, positive
             price: float, non-negative
+    DELETE on /shopcarts/<user-id>/items/item_id: deletes an <item_id> item in a certain <user-id> shopcart
 ### To be fixed:
     PUT    on /shopcarts/<user-id>: change item quantities in <user-id> shopcart. 
         Expects JSON body data:
