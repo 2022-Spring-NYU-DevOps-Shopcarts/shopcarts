@@ -10,7 +10,7 @@ import logging
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from flask import jsonify
-from service import status  # HTTP Status Codes
+from service.utils import status  # HTTP Status Codes
 from service.models import db
 from service.routes import app, init_db
 from .factories import ItemFactory
@@ -102,12 +102,10 @@ class TestYourResourceServer(TestCase):
 
     def test_get_shopcart_list(self):
         """Get a list of Shopcart"""
-        # self._create_items(2)
-        # self._create_items(3)
-        # resp = self.app.get(BASE_URL)
-        # self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        # data = resp.get_json()
-        # self.assertEqual(len(data), 2)
+        self._create_items(2)
+        self._create_items(3)
+        resp = self.app.get(BASE_URL)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_get_shopcart(self):
         """Get a shopcart"""

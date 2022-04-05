@@ -16,7 +16,7 @@ Usage:
 from werkzeug.exceptions import NotFound
 from flask import jsonify, request, url_for, make_response, abort
 from service.models import Shopcart
-from . import status  # HTTP Status Codes
+from .utils import status  # HTTP Status Codes
 
 # Import Flask application
 from . import app
@@ -27,11 +27,8 @@ from . import app
 @app.route("/")
 def index():
     """ Root URL response """
-    info = {"name": "Shopcarts Service", "version": "1.0", "resource URL": "/shopcarts"} 
     app.logger.info("Root URL response")
-    return (
-        make_response(jsonify(info),status.HTTP_200_OK)
-    )
+    return app.send_static_file("index.html")
 
 ######################################################################
 # ADD A NEW SHOPCART
@@ -76,14 +73,18 @@ def create_shopcarts():
 ######################################################################
 # LIST ALL SHOPCARTS
 ######################################################################
+
+
+# Zhengrui Xia: Changed to Shopcart.all from Shopcart.all_shopcart since if a 
+# shopcart is empty, it won't exist in our database
 @app.route("/shopcarts", methods=["GET"])
 def list_shopcarts():
     """Returns all of the Shopcarts"""
-    # app.logger.info("Request for shopcart list")
-    # shopcarts = Shopcart.all_shopcart()
-    # results = [shopcart.serialize() for shopcart in shopcarts]
-    # app.logger.info("Returning %d shopcarts", len(results))
-    # return make_response(jsonify(results), status.HTTP_200_OK)
+    app.logger.info("Request for shopcart list")
+    shopcarts = Shopcart.all()
+    results = [shopcart.serialize() for shopcart in shopcarts]
+    app.logger.info("Returning %d shopcarts", len(results))
+    return make_response(jsonify(results), status.HTTP_200_OK)
 
 ######################################################################
 # RETRIEVE A SHOPCART
@@ -97,10 +98,19 @@ def get_shopcarts(shopcart_id):
     app.logger.info("Request for shopcart with id: %s", shopcart_id)
     #This is the list of shopcarts which user_id == shopcart_id
     shopcart = Shopcart.find_shopcart(shopcart_id) 
-    if not shopcart:
-        raise NotFound(
-            "Shopcart with id '{}' was not found.".format(shopcart_id)
-            )
+
+    # if not shopcart:
+    #     raise NotFound(
+    #         "Shopcart with id '{}' was not found.".format(shopcart_id)
+    #         )
+    ##########ZhengruiXia: We only need to check if the shopcart_id is valid
+    try:
+        assert isinstance(shopcart_id, int)
+        assert shopcart_id > 0      
+    except (TypeError, AssertionError, KeyError):
+        app.logger.error("Requested shopcart id: %s is invalid", shopcart_id)
+        abort(status.HTTP_400_BAD_REQUEST, f"Invalid shopcart id: '{shopcart_id}'")
+
     app.logger.info("Returning shopcart: %s", shopcart_id)
     #As 1 user is attached to 1 user_id
     return make_response(jsonify(
@@ -273,7 +283,7 @@ def create_items(shopcart_id):
         item_id = item["item_id"]
         abort(
             status.HTTP_409_CONFLICT, 
-            f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'."
+            f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'. Do you mean Update?"
         )
     item["user_id"] = shopcart_id
     app.logger.info(
