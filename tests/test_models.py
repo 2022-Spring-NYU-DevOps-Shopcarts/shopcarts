@@ -161,6 +161,30 @@ class TestShopcart(unittest.TestCase):
         self.assertRaises(DataValidationError, shopcart.deserialize, data)
 
 
+    def test_deserialize_bad_userid(self):
+        """Test deserialization of a Shopcart with non-int user_id"""
+        data = {"user_id" : 1.5, "item_id" : 2, "item_name" : "bottle", "quantity" : 2, "price" : 20.5}
+        shopcart = Shopcart()
+        logging.debug(shopcart)
+        self.assertRaises(DataValidationError, shopcart.deserialize, data)
+
+
+    def test_deserialize_bad_quantity(self):
+        """Test deserialization of a Shopcart with non-int quantity"""
+        data = {"user_id" : 1, "item_id" : 2, "item_name" : "bottle", "quantity" : 2.5, "price" : 20.5}
+        shopcart = Shopcart()
+        logging.debug(shopcart)
+        self.assertRaises(DataValidationError, shopcart.deserialize, data)
+
+
+    def test_deserialize_bad_price(self):
+        """Test deserialization of a Shopcart with non-number price"""
+        data = {"user_id" : 1, "item_id" : 2, "item_name" : "bottle", "quantity" : 2, "price" : "true"}
+        shopcart = Shopcart()
+        logging.debug(shopcart)
+        self.assertRaises(DataValidationError, shopcart.deserialize, data)
+
+
     def test_deserialize_bad_data(self):
         """Test deserialization of a Shopcart with bad data"""
         data = "This is not a dictionary"
