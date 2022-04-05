@@ -81,8 +81,8 @@ def create_shopcarts():
 def list_shopcarts():
     """Returns all of the Shopcarts"""
     app.logger.info("Request for shopcart list")
-    shopcarts = Shopcart.all()
-    results = [shopcart.serialize() for shopcart in shopcarts]
+    shopcarts = Shopcart.all_shopcart()
+    results = [dict(shopcart) for shopcart in shopcarts]
     app.logger.info("Returning %d shopcarts", len(results))
     return make_response(jsonify(results), status.HTTP_200_OK)
 
@@ -98,15 +98,9 @@ def get_shopcarts(shopcart_id):
     app.logger.info("Request for shopcart with id: %s", shopcart_id)
     #This is the list of shopcarts which user_id == shopcart_id
     shopcart = Shopcart.find_shopcart(shopcart_id) 
-
     
-    #### ZhengruiXia: We only need to check if the shopcart_id is valid
-    try:
-        assert isinstance(shopcart_id, int)    
-        assert shopcart_id >= 0      
-    except (TypeError, AssertionError, KeyError):
-        app.logger.error("Requested shopcart id: %s is invalid", shopcart_id)
-        abort(status.HTTP_400_BAD_REQUEST, f"Invalid shopcart id: '{shopcart_id}'")
+    if not shopcart:
+        return make_response(jsonify([]), status.HTTP_200_OK) 
 
     app.logger.info("Returning shopcart: %s", shopcart_id)
     #As 1 user is attached to 1 user_id
