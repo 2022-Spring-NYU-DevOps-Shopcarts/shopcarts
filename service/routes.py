@@ -81,8 +81,8 @@ def create_shopcarts():
 def list_shopcarts():
     """Returns all of the Shopcarts"""
     app.logger.info("Request for shopcart list")
-    shopcarts = Shopcart.all()
-    results = [shopcart.serialize() for shopcart in shopcarts]
+    shopcarts = Shopcart.all_shopcart()
+    results = [dict(shopcart) for shopcart in shopcarts]
     app.logger.info("Returning %d shopcarts", len(results))
     return make_response(jsonify(results), status.HTTP_200_OK)
 
