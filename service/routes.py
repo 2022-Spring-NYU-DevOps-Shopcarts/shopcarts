@@ -264,8 +264,8 @@ def create_items(shopcart_id):
         assert isinstance(item["price"], int) or isinstance(item["price"], float)
         assert item["price"] >= 0
     except (TypeError, AssertionError, KeyError):
-        app.logger.error("Price must be a non-negative integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Price must be a non-negative integer.")
+        app.logger.error("Price must be a non-negative int or float.")
+        abort(status.HTTP_400_BAD_REQUEST, "Price must be a non-negative int or float.")
 
     if Shopcart.find_item(shopcart_id, item["item_id"]):
         item_id = item["item_id"]
