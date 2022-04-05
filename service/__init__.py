@@ -22,7 +22,7 @@ from service import routes, models
 from .utils import error_handlers
 
 # Set up logging for production
-if __name__ == "__main__":
+if __name__ != "__main__":
     log_handlers.init_logging(app, "gunicorn.error")
 
 app.logger.info(70 * "*")

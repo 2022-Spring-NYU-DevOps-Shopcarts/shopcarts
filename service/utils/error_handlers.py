@@ -28,19 +28,21 @@ from . import status
 ######################################################################
 # Error Handlers
 ######################################################################
-@app.errorhandler(DatabaseConnectionError)
-def database_connection_error(error):
-    """Handles Errors from no database connection"""
-    message = str(error)
-    app.logger.error(message)
-    return make_response(
-        jsonify(
-            status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            error="Service Unavailable",
-            message=message,
-        ),
-        status.HTTP_503_SERVICE_UNAVAILABLE,
-    )
+
+## Unused
+# @app.errorhandler(DatabaseConnectionError)
+# def database_connection_error(error):
+#     """Handles Errors from no database connection"""
+#     message = str(error)
+#     app.logger.error(message)
+#     return make_response(
+#         jsonify(
+#             status=status.HTTP_503_SERVICE_UNAVAILABLE,
+#             error="Service Unavailable",
+#             message=message,
+#         ),
+#         status.HTTP_503_SERVICE_UNAVAILABLE,
+#     )
 
 
 @app.errorhandler(DataValidationError)
@@ -100,20 +102,20 @@ def mediatype_not_supported(error):
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
     )
 
-
-@app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
-def internal_server_error(error):
-    """Handles unexpected server error with 500_SERVER_ERROR"""
-    message = str(error)
-    app.logger.critical(message)
-    return make_response(
-        jsonify(
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            error="Internal Server Error",
-            message=message,
-        ),
-        status.HTTP_500_INTERNAL_SERVER_ERROR,
-    )
+## Unused
+# @app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
+# def internal_server_error(error):
+#     """Handles unexpected server error with 500_SERVER_ERROR"""
+#     message = str(error)
+#     app.logger.critical(message)
+#     return make_response(
+#         jsonify(
+#             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             error="Internal Server Error",
+#             message=message,
+#         ),
+#         status.HTTP_500_INTERNAL_SERVER_ERROR,
+#     )
 
 @app.errorhandler(status.HTTP_409_CONFLICT)
 def internal_server_error(error):
