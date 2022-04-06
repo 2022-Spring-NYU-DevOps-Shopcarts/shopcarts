@@ -18,7 +18,7 @@ def before_all(context):
     options.add_argument("--no-sandbox") # Bypass OS security model
     options.add_argument("--headless")
     context.WAIT_SECONDS = WAIT_SECONDS
-    context.driver = webdriver.Chrome(options=options)
+    context.driver = webdriver.Chrome(options=options, executable_path="/usr/bin/chromedriver")
     context.driver.implicitly_wait(context.WAIT_SECONDS) # seconds
     # context.driver.set_window_size(1200, 600)
 
