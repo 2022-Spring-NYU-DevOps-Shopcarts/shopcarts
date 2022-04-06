@@ -222,7 +222,7 @@ $(function () {
             table += '</tbody></table>';
             $("#shopcarts_results").append(table);
 
-            flash_message("Successfully list all the shopcarts")
+            flash_message("Successfully listed all the shopcarts")
         });
 
         ajax.fail(function(res){

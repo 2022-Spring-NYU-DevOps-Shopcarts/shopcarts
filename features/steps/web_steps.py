@@ -37,14 +37,14 @@ def step_impl(context):
     # Uncomment next line to take a screenshot of the web page
     #context.driver.save_screenshot('home_page.png')
 
-@then('I should see "{message}" in the title')
+@then('We should see "{message}" in the title')
 def step_impl(context, message):
     """ Check the document title for a message """
     expect(context.driver.title).to_contain(message)
 
-@then('I should not see "{message}"')
+@then('We should not see "{message}"')
 def step_impl(context, message):
-    error_msg = "I should not see '%s' in '%s'" % (message, context.resp.text)
+    error_msg = "We should not see '%s' in '%s'" % (message, context.resp.text)
     ensure(message in context.resp.text, False, error_msg)
 
 @when('We enter "{text_string}" to the text box "{element_name}"')
@@ -54,13 +54,13 @@ def step_impl(context, element_name, text_string):
     element.clear()
     element.send_keys(text_string)
 
-@when('I select "{text}" in the "{element_name}" dropdown')
+@when('We select "{text}" in the "{element_name}" dropdown')
 def step_impl(context, text, element_name):
     element_id = element_name.lower()
     element = Select(context.driver.find_element_by_id(element_id))
     element.select_by_visible_text(text)
 
-@then('I should see "{text}" in the "{element_name}" dropdown')
+@then('We should see "{text}" in the "{element_name}" dropdown')
 def step_impl(context, text, element_name):
     element_id = element_name.lower()
     element = Select(context.driver.find_element_by_id(element_id))
@@ -75,7 +75,7 @@ def step_impl(context, element_name):
 ##################################################################
 # These two function simulate copy and paste
 ##################################################################
-@when('I copy the "{element_name}" field')
+@when('We copy the "{element_name}" field')
 def step_impl(context, element_name):
     element_id = element_name.lower()
     element = WebDriverWait(context.driver, context.WAIT_SECONDS).until(
@@ -84,7 +84,7 @@ def step_impl(context, element_name):
     context.clipboard = element.get_attribute('value')
     logging.info('Clipboard contains: %s', context.clipboard)
 
-@when('I paste the "{element_name}" field')
+@when('We paste the "{element_name}" field')
 def step_impl(context, element_name):
     element_id = element_name.lower()
     element = WebDriverWait(context.driver, context.WAIT_SECONDS).until(
@@ -118,7 +118,7 @@ def step_impl(context, name):
 @then('We should not see "{name}" in the results')
 def step_impl(context, name):
     element = context.driver.find_element_by_id('search_results')
-    error_msg = "I should not see '%s' in '%s'" % (name, element.text)
+    error_msg = "We should not see '%s' in '%s'" % (name, element.text)
     ensure(name in element.text, False, error_msg)
 
 # for list all the shopcarts
@@ -135,7 +135,7 @@ def step_impl(context, shopcart_id):
 @then('We should not see "{shopcart_id}" in the shopcart table')
 def step_impl(context, shopcart_id):
     element = context.driver.find_element_by_id('shopcarts_results')
-    error_msg = "I should not see '%s' in '%s'" % (shopcart_id, element.text)
+    error_msg = "We should not see '%s' in '%s'" % (shopcart_id, element.text)
     ensure(shopcart_id in element.text, False, error_msg)
 
 
@@ -177,7 +177,7 @@ def step_impl(context, text_string, element_name):
     )
     expect(found).to_be(True)
 
-@when('I change "{element_name}" to "{text_string}"')
+@when('We change "{element_name}" to "{text_string}"')
 def step_impl(context, element_name, text_string):
     element_id = element_name.lower()
     element = WebDriverWait(context.driver, context.WAIT_SECONDS).until(

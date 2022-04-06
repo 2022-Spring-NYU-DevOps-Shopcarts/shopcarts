@@ -1,7 +1,7 @@
 Feature: The shopcart store service back-end
     As a Shopcart Store Owner
-    I need a RESTful catalog service
-    So that I can keep track of all my shopcarts
+    We need a RESTful catalog service
+    So that We can keep track of all my shopcarts
 
 Background:
     Given a set of items in shopcarts
@@ -11,29 +11,29 @@ Background:
         | 1002    | 1       |  ring1    |  3       |  3     |
 
 Scenario: Create an empty Shopcart which is already non-empty
-    When I visit the "home page"
-    And I enter "1001" to the text box "User_ID"
-    And I press the button "Create-Shopcart"
-    Then I should see status code 400
-    And I should see message "User with id '1001' already has a non-empty shopcart."
-    When I enter "1001" to the text box "User_ID"
-    And I press the button "Retrieve"
-    Then I should see "ring1" in the results
-    And I should see "ring2" in the results
+    When We visit the "home page"
+    And We enter "1001" to the text box "User_ID"
+    And We press the button "Create-Shopcart"
+    Then We should see status code 400
+    And We should see message "User with id '1001' already has a non-empty shopcart."
+    When We enter "1001" to the text box "User_ID"
+    And We press the button "Retrieve"
+    Then We should see "ring1" in the results
+    And We should see "ring2" in the results
 
 Scenario: Create an empty Shopcart
-    When I visit the "home page"
-    And I enter "1003" to the text box "User_ID"
-    And I press the button "Create-Shopcart"
-    Then I should see message "Successfully Added an empty Shopcart"
-    When I enter "1003" to the text box "User_ID"
-    And I press the button "Retrieve"
-    Then I should not see "ring1" in the results
-    And I should not see "ring2" in the results
+    When We visit the "home page"
+    And We enter "1003" to the text box "User_ID"
+    And We press the button "Create-Shopcart"
+    Then We should see message "Successfully Added an empty Shopcart"
+    When We enter "1003" to the text box "User_ID"
+    And We press the button "Retrieve"
+    Then We should not see "ring1" in the results
+    And We should not see "ring2" in the results
 
 Scenario: List all shopcarts
-    When I visit the "home page"
-    And  I press the button "List All Shopcarts"
-    Then I should see message "Successfully list all the shopcarts"
-    And I should see "1001" in the shopcart table
-    And I should see "1002" in the shopcart table
+    When We visit the "home page"
+    And  We press the button "List All Shopcarts"
+    Then We should see message "Successfully list all the shopcarts"
+    And We should see "1001" in the shopcart table
+    And We should see "1002" in the shopcart table
