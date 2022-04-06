@@ -115,12 +115,29 @@ def step_impl(context, name):
         )
     )
     expect(found).to_be(True)
-
 @then('We should not see "{name}" in the results')
 def step_impl(context, name):
     element = context.driver.find_element_by_id('search_results')
     error_msg = "I should not see '%s' in '%s'" % (name, element.text)
     ensure(name in element.text, False, error_msg)
+
+# for list all the shopcarts
+@then('We should see "{shopcart_id}" in the shopcart table')
+def step_impl(context, shopcart_id):
+    found = WebDriverWait(context.driver, context.WAIT_SECONDS).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID, 'shopcarts_results'),
+            shopcart_id
+        )
+    )
+    expect(found).to_be(True)
+    
+@then('We should not see "{shopcart_id}" in the shopcart table')
+def step_impl(context, shopcart_id):
+    element = context.driver.find_element_by_id('shopcarts_results')
+    error_msg = "I should not see '%s' in '%s'" % (shopcart_id, element.text)
+    ensure(shopcart_id in element.text, False, error_msg)
+
 
 @then('We should see message "{message}"')
 def step_impl(context, message):

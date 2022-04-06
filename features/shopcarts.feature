@@ -11,27 +11,29 @@ Background:
         | 1002    | 1       |  ring1    |  3       |  3     |
 
 Scenario: Create an empty Shopcart which is already non-empty
-    When we visit the "home page"
-    And we enter "1001" to the text box "User_ID"
-    And we press the button "Create-Shopcart"
-    Then we should see status code 400
-    And we should see message "User with id '1001' already has a non-empty shopcart."
-    When we enter "1001" to the text box "User_ID"
-    And we press the button "Retrieve"
-    Then we should see "ring1" in the results
-    And we should see "ring2" in the results
+    When I visit the "home page"
+    And I enter "1001" to the text box "User_ID"
+    And I press the button "Create-Shopcart"
+    Then I should see status code 400
+    And I should see message "User with id '1001' already has a non-empty shopcart."
+    When I enter "1001" to the text box "User_ID"
+    And I press the button "Retrieve"
+    Then I should see "ring1" in the results
+    And I should see "ring2" in the results
 
 Scenario: Create an empty Shopcart
-    When we visit the "home page"
-    And we enter "1003" to the text box "User_ID"
-    And we press the button "Create-Shopcart"
-    Then we should see message "Successfully Added an empty Shopcart"
-    When we enter "1003" to the text box "User_ID"
-    And we press the button "Retrieve"
-    Then we should not see "ring1" in the results
-    And we should not see "ring2" in the results
+    When I visit the "home page"
+    And I enter "1003" to the text box "User_ID"
+    And I press the button "Create-Shopcart"
+    Then I should see message "Successfully Added an empty Shopcart"
+    When I enter "1003" to the text box "User_ID"
+    And I press the button "Retrieve"
+    Then I should not see "ring1" in the results
+    And I should not see "ring2" in the results
 
 Scenario: List all shopcarts
-    When we visit the "home page"
-    And  we press the button "List All Shopcarts"
-    Then we should see status message "[1001, 1002]"
+    When I visit the "home page"
+    And  I press the button "List All Shopcarts"
+    Then I should see message "Successfully list all the shopcarts"
+    And I should see "1001" in the shopcart table
+    And I should see "1002" in the shopcart table
