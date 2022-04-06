@@ -74,3 +74,13 @@ Scenario: Retrieve an empty Shopcart
     Then we should see message "Successfully retrieved the shopcart"
     And we should not see " ring1" in the results
     And we should not see "ring2" in the results
+
+############################################################
+# LIST SHOPCARTS
+############################################################ 
+Scenario: List all shopcarts
+    When we visit the "home page"
+    And  we press the button "List All Shopcarts"
+    Then we should see message "Successfully listed all the shopcarts"
+    And we should see "1001" in the shopcart table
+    And we should see "1002" in the shopcart table
