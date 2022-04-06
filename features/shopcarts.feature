@@ -30,3 +30,11 @@ Scenario: Create an empty Shopcart
     And we press the button "Retrieve"
     Then we should not see "ring1" in the results
     And we should not see "ring2" in the results
+
+# Scenario: Delete a non-empty Shopcart
+#     When we visit the "home page"
+#     And we enter "1001" to the text box "User_ID"
+#     And we press the button "Clear-Shopcart"
+#     And we press the button "Retrieve"
+#     Then we should not see "[1, ring1, 2, 1998]" in the results
+#     And we should not see "[2, ring2, 1, 1.5]" in the results
