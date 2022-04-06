@@ -189,7 +189,46 @@ $(function () {
         });
 
     });
+    // ****************************************
+    // List All Shopping Carts
+    // ****************************************
+    $("#list-btn").click(function () {
 
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "GET",
+            url: `/shopcarts`,
+            contentType: "application/json",
+            data: ''
+        })
+        ajax.done(function(res){
+            //alert(res.toSource())
+            $("#shopcarts_results").empty();
+            let table = '<table class="table table-striped" cellpadding="10">'
+            table += '<thead><tr>'
+            table += '<th class="col-md-5">Shopcart ID</th>'
+            table += '</tr></thead><tbody class="scrollTbody">'
+
+            for(let i = 0; i < res.length; i++) {
+                let item = res[i];
+                table +=  `<tr id="row_${i}"><td>${item.user_id}</td></tr>`;
+            }
+            if(res.length == 0){
+                table +=  `<tr><td>No shopcarts in database</td></tr>`;
+            }
+            table += '</tbody></table>';
+            $("#shopcarts_results").append(table);
+
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            clear_form_data()
+            flash_message(res.responseJSON.message)
+        });
+
+    });
     // ****************************************
     // Delete an Item
     // ****************************************

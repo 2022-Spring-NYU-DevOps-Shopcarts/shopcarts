@@ -79,12 +79,24 @@
                 <button type="submit" class="btn btn-primary" id="search-btn">Search Item by ID</button>
                 <button type="submit" class="btn btn-primary" id="create-btn">Add to Shopcart</button>
                 <button type="submit" class="btn btn-primary" id="update-btn">Update Item</button>
+                <button type="submit" class="btn btn-primary" id="list-btn">List All Shopping Carts</button>
                 <button type="submit" class="btn btn-warning" id="clear-btn">Remove</button>
               </div>
             </div>
           </div> <!-- form horizontal -->
         </div> <!-- end well -->
       </div> <!-- end Form -->
+
+      <!-- List shopcarts Results -->
+      <div class="table-responsive col-md-12" id="shopcarts_results">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th class="col-md-1">Shopcart ID</th>
+          </tr>
+          </thead>
+        </table>
+      </div>
 
       <!-- Search Results -->
       <div class="table-responsive col-md-12" id="search_results">
@@ -99,6 +111,7 @@
           </thead>
         </table>
       </div>
+
 
       <footer>
         <br><br>
