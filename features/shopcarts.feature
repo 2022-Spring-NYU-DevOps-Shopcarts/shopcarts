@@ -30,3 +30,21 @@ Scenario: Create an empty Shopcart
     And we press the button "Retrieve"
     Then we should not see "ring1" in the results
     And we should not see "ring2" in the results
+
+Scenario: Clear a non-empty Shopcart
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we press the button "Clear-Shopcart"
+    Then we should see message "Successfully cleared the shopcart"
+    When we press the button "Retrieve"
+    Then we should not see "ring1" in the results
+    And we should not see "ring2" in the results
+
+Scenario: Clear a non-empty Shopcart
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we press the button "Clear-Shopcart"
+    Then we should see message "Successfully cleared the shopcart"
+    When we enter "1002" to the text box "User_ID"
+    And we press the button "Retrieve"
+    Then we should see "ring1" in the results

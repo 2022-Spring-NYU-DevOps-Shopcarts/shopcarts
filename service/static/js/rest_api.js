@@ -218,6 +218,30 @@ $(function () {
     });
 
     // ****************************************
+    // Delete an entire Shopcart
+    // ****************************************
+    $("#clear-shopcart-btn").click(function() {
+
+        let user_id = Number($("#user_id").val());
+
+        $("#flash_message").empty();
+        
+        let ajax = $.ajax({
+            type: "DELETE",
+            url: `/shopcarts/${user_id}`,
+            contentType: "application/json",
+        });
+
+        ajax.done(function(res){
+            flash_message("Successfully cleared the shopcart" )
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+    });
+
+    // ****************************************
     // Clear the form
     // ****************************************
 
