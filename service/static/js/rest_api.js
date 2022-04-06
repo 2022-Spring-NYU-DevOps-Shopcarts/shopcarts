@@ -220,7 +220,7 @@ $(function () {
     // ****************************************
     // Delete an entire Shopcart
     // ****************************************
-    $("#delete-shopcart-btn").click(function() {
+    $("#clear-shopcart-btn").click(function() {
 
         let user_id = Number($("#user_id").val());
 
@@ -233,7 +233,7 @@ $(function () {
         });
 
         ajax.done(function(res){
-            flash_message(`Successfully Deleted the Shopcart ${user_id}` )
+            flash_message("Successfully cleared the shopcart" )
         });
 
         ajax.fail(function(res){
