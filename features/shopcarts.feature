@@ -48,3 +48,10 @@ Scenario: Clear a non-empty Shopcart
     When we enter "1002" to the text box "User_ID"
     And we press the button "Retrieve"
     Then we should see "ring1" in the results
+    
+Scenario: List all shopcarts
+    When we visit the "home page"
+    And  we press the button "List All Shopcarts"
+    Then we should see message "Successfully list all the shopcarts"
+    And we should see "1001" in the shopcart table
+    And we should see "1002" in the shopcart table
