@@ -13,13 +13,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     # use a known build environment
-    container: rofrano/pipeline-selenium:latest
+    container: python:3.9-slim
 
     # Required services
     services:
       # Label used to access the service container
       postgres:
-        image: postgres:alpine
+        image: postgres
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: testdb
@@ -50,6 +50,7 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
       - name: Run unit tests with behave
         run: behave
         env:
