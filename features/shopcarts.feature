@@ -22,15 +22,33 @@ Scenario: Create an empty Shopcart which is already non-empty
     And We should see "ring2" in the results
 
 Scenario: Create an empty Shopcart
-    When We visit the "home page"
-    And We enter "1003" to the text box "User_ID"
-    And We press the button "Create-Shopcart"
-    Then We should see message "Successfully Added an empty Shopcart"
-    When We enter "1003" to the text box "User_ID"
-    And We press the button "Retrieve"
-    Then We should not see "ring1" in the results
-    And We should not see "ring2" in the results
+    When we visit the "home page"
+    And we enter "1003" to the text box "User_ID"
+    And we press the button "Create-Shopcart"
+    Then we should see message "Successfully Added an empty Shopcart"
+    When we enter "1003" to the text box "User_ID"
+    And we press the button "Retrieve"
+    Then we should not see "ring1" in the results
+    And we should not see "ring2" in the results
 
+Scenario: Clear a non-empty Shopcart
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we press the button "Clear-Shopcart"
+    Then we should see message "Successfully cleared the shopcart"
+    When we press the button "Retrieve"
+    Then we should not see "ring1" in the results
+    And we should not see "ring2" in the results
+
+Scenario: Clear a non-empty Shopcart
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we press the button "Clear-Shopcart"
+    Then we should see message "Successfully cleared the shopcart"
+    When we enter "1002" to the text box "User_ID"
+    And we press the button "Retrieve"
+    Then we should see "ring1" in the results
+    
 Scenario: List all shopcarts
     When We visit the "home page"
     And  We press the button "List All Shopcarts"
