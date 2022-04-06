@@ -82,8 +82,8 @@ Scenario: List all shopcarts
     When we visit the "home page"
     And we press the button "List-All-Shopcarts"
     Then we should see message "Successfully listed all the shopcarts"
-    And we should see "1001" in the shopcart table
-    And we should see "1002" in the shopcart table
+    And we should see "1001" in the shopcarts table
+    And we should see "1002" in the shopcarts table
 
 Scenario: List shopcarts when there are none
     When we visit the "home page"
@@ -93,6 +93,6 @@ Scenario: List shopcarts when there are none
     And we press the button "Clear-Shopcart"
     And we press the button "List-All-Shopcarts"
     Then we should see message "Successfully listed all the shopcarts"
-    And we should not see "1001" in the shopcart table
-    And we should not see "1002" in the shopcart table
+    And we should not see "1001" in the shopcarts table
+    And we should not see "1002" in the shopcarts table
 
