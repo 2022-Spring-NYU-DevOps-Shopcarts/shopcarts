@@ -73,10 +73,6 @@ def create_shopcarts():
 ######################################################################
 # LIST ALL SHOPCARTS
 ######################################################################
-
-
-# Zhengrui Xia: Changed to Shopcart.all from Shopcart.all_shopcart since if a 
-# shopcart is empty, it won't exist in our database
 @app.route("/shopcarts", methods=["GET"])
 def list_shopcarts():
     """Returns all of the Shopcarts"""
@@ -383,7 +379,6 @@ def update_items(shopcart_id, item_id):
 ######################################################################
 # DELETE AN ITEM
 ######################################################################
-            
 @app.route("/shopcarts/<shopcart_id>/items/<item_id>", methods = ["DELETE"])
 def delete_items(shopcart_id, item_id):
     """

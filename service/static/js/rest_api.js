@@ -28,6 +28,38 @@ $(function () {
         $("#flash_message").append(message);
     }
 
+
+    // ****************************************
+    // Create an empty Shopcart
+    // ****************************************
+
+    $("#create-shopcart-btn").click(function () {
+
+        let user_id = parseInt($("#user_id").val());
+
+        let data = {
+            "user_id": user_id
+        };
+
+        $("#flash_message").empty();
+        
+        let ajax = $.ajax({
+            type: "POST",
+            url: `/shopcarts`,
+            contentType: "application/json",
+            data: JSON.stringify(data),
+        });
+
+        ajax.done(function(res){
+            flash_message("Successfully Added an empty Shopcart")
+        });
+
+        ajax.fail(function(res){
+            flash_message(res.responseJSON.message)
+        });
+    });
+
+
     // ****************************************
     // Create an Item
     // ****************************************
