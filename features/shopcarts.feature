@@ -30,3 +30,8 @@ Scenario: Create an empty Shopcart
     And we press the button "Retrieve"
     Then we should not see "ring1" in the results
     And we should not see "ring2" in the results
+
+Scenario: List all shopcarts
+    When we visit the "home page"
+    And  we press the button "List All Shopcarts"
+    Then we should see status message "[1001, 1002]"

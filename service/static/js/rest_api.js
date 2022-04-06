@@ -203,24 +203,13 @@ $(function () {
             data: ''
         })
         ajax.done(function(res){
-            //alert(res.toSource())
-            $("#shopcarts_results").empty();
-            let table = '<table class="table table-striped" cellpadding="10">'
-            table += '<thead><tr>'
-            table += '<th class="col-md-5">Shopcart ID</th>'
-            table += '</tr></thead><tbody class="scrollTbody">'
-
+            var shopcart_list = [];
             for(let i = 0; i < res.length; i++) {
-                let item = res[i];
-                table +=  `<tr id="row_${i}"><td>${item.user_id}</td></tr>`;
+                shopcart_list.push(res[i].user_id);   
             }
-            if(res.length == 0){
-                table +=  `<tr><td>No shopcarts in database</td></tr>`;
-            }
-            table += '</tbody></table>';
-            $("#shopcarts_results").append(table);
-
-            flash_message("Success")
+            shopcart_list = Array.from(new Set(shopcart_list));
+            var message_res = "[" + shopcart_list.toString() + "]";
+            flash_message(message_res)
         });
 
         ajax.fail(function(res){
