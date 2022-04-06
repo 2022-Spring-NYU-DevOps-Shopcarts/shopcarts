@@ -13,7 +13,7 @@ Background:
 ############################################################
 # CREATE SHOPCARTS
 ############################################################
-Scenario: Create an empty Shopcart which is already non-empty
+Scenario: Create an empty shopcart which is already non-empty
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Create-Shopcart"
@@ -24,11 +24,11 @@ Scenario: Create an empty Shopcart which is already non-empty
     Then we should see "ring1" in the results
     And we should see "ring2" in the results
 
-Scenario: Create an empty Shopcart
+Scenario: Create an empty shopcart
     When we visit the "home page"
     And we enter "1003" to the text box "User_ID"
     And we press the button "Create-Shopcart"
-    Then we should see message "Successfully Added an empty Shopcart"
+    Then we should see message "Successfully added an empty shopcart"
     When we enter "1003" to the text box "User_ID"
     And we press the button "Retrieve"
     Then we should not see "ring1" in the results
@@ -37,7 +37,7 @@ Scenario: Create an empty Shopcart
 ############################################################
 # CLEAR SHOPCARTS
 ############################################################
-Scenario: Clear a non-empty Shopcart
+Scenario: Clear a non-empty shopcart
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Clear-Shopcart"
@@ -46,7 +46,7 @@ Scenario: Clear a non-empty Shopcart
     Then we should not see "ring1" in the results
     And we should not see "ring2" in the results
 
-Scenario: Clear a non-empty Shopcart
+Scenario: Clear a non-empty shopcart
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Clear-Shopcart"
@@ -58,7 +58,7 @@ Scenario: Clear a non-empty Shopcart
 ############################################################
 # RETRIEVE SHOPCARTS
 ############################################################
-Scenario: Retrieve a non-empty Shopcart
+Scenario: Retrieve a non-empty shopcart
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
@@ -67,12 +67,12 @@ Scenario: Retrieve a non-empty Shopcart
     And we should see "ring2" in the results
     And we should not see "3" in the results
 
-Scenario: Retrieve an empty Shopcart
+Scenario: Retrieve an empty shopcart
     When we visit the "home page"
     And we enter "1003" to the text box "User_ID"
     And we press the button "Retrieve"
     Then we should see message "Successfully retrieved the shopcart"
-    And we should not see " ring1" in the results
+    And we should not see "ring1" in the results
     And we should not see "ring2" in the results
 
 ############################################################
@@ -80,7 +80,19 @@ Scenario: Retrieve an empty Shopcart
 ############################################################ 
 Scenario: List all shopcarts
     When we visit the "home page"
-    And  we press the button "List All Shopcarts"
+    And we press the button "List-All-Shopcarts"
     Then we should see message "Successfully listed all the shopcarts"
     And we should see "1001" in the shopcart table
     And we should see "1002" in the shopcart table
+
+Scenario: List shopcarts when there are none
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we press the button "Clear-Shopcart"
+    And we enter "1002" to the text box "User_ID"
+    And we press the button "Clear-Shopcart"
+    And we press the button "List-All-Shopcarts"
+    Then we should see message "Successfully listed all the shopcarts"
+    And we should not see "1001" in the shopcart table
+    And we should not see "1002" in the shopcart table
+

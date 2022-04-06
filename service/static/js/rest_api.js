@@ -30,7 +30,7 @@ $(function () {
 
 
     // ****************************************
-    // Create an empty Shopcart
+    // Create Empty Shopcart
     // ****************************************
 
     $("#create-shopcart-btn").click(function () {
@@ -51,7 +51,7 @@ $(function () {
         });
 
         ajax.done(function(res){
-            flash_message("Successfully Added an empty Shopcart")
+            flash_message("Successfully added an empty shopcart")
         });
 
         ajax.fail(function(res){
@@ -61,7 +61,7 @@ $(function () {
 
 
     // ****************************************
-    // Create an Item
+    // Create Item
     // ****************************************
 
     $("#create-btn").click(function () {
@@ -90,7 +90,7 @@ $(function () {
         });
 
         ajax.done(function(res){
-            flash_message("Successfully Added an Item")
+            flash_message("Successfully added an Item")
         });
 
         ajax.fail(function(res){
@@ -100,7 +100,7 @@ $(function () {
 
 
     // ****************************************
-    // Update an Item
+    // Update Item
     // ****************************************
 
     $("#update-btn").click(function () {
@@ -141,7 +141,7 @@ $(function () {
     });
 
     // ****************************************
-    // Retrieve an Item
+    // Retrieve Shopcart
     // ****************************************
 
     $("#retrieve-btn").click(function () {
@@ -184,7 +184,7 @@ $(function () {
 
     });
     // ****************************************
-    // List All Shopping Carts
+    // List All Shopcarts
     // ****************************************
     $("#list-all-shopcarts-btn").click(function () {
 
@@ -253,7 +253,7 @@ $(function () {
     });
 
     // ****************************************
-    // Delete an entire Shopcart
+    // Clear Shopcart
     // ****************************************
     $("#clear-shopcart-btn").click(function() {
 
@@ -277,7 +277,7 @@ $(function () {
     });
 
     // ****************************************
-    // Clear the form
+    // Clear the Form
     // ****************************************
 
     $("#clear-btn").click(function () {
@@ -287,7 +287,7 @@ $(function () {
     });
 
     // ****************************************
-    // Search for a Pet
+    // Search Item
     // ****************************************
 
     $("#search-btn").click(function () {
