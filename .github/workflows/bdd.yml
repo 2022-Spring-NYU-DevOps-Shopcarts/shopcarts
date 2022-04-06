@@ -52,3 +52,5 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Run unit tests with behave
         run: behave
+        env:
+          DATABASE_URI: "postgresql://postgres:postgres@postgres:5432/testdb"
