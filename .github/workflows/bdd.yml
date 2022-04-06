@@ -20,7 +20,7 @@ jobs:
       # Label used to access the service container
       postgres:
         image: postgres:alpine
-        environment:
+        env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: testdb
         ports:
