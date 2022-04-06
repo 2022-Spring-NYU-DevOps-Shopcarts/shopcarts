@@ -10,6 +10,9 @@ Background:
         | 1001    | 2       |  ring2    |  1       |  1.5   |
         | 1002    | 1       |  ring1    |  3       |  3     |
 
+############################################################
+# CREATE SHOPCARTS
+############################################################
 Scenario: Create an empty Shopcart which is already non-empty
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
@@ -31,6 +34,9 @@ Scenario: Create an empty Shopcart
     Then we should not see "ring1" in the results
     And we should not see "ring2" in the results
 
+############################################################
+# CLEAR SHOPCARTS
+############################################################
 Scenario: Clear a non-empty Shopcart
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
@@ -48,3 +54,23 @@ Scenario: Clear a non-empty Shopcart
     When we enter "1002" to the text box "User_ID"
     And we press the button "Retrieve"
     Then we should see "ring1" in the results
+
+############################################################
+# RETRIEVE SHOPCARTS
+############################################################
+Scenario: Retrieve a non-empty Shopcart
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
+    And we should see "ring1" in the results
+    And we should see "ring2" in the results
+    And we should not see "3" in the results
+
+Scenario: Retrieve an empty Shopcart
+    When we visit the "home page"
+    And we enter "1003" to the text box "User_ID"
+    And we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
+    And we should not see " ring1" in the results
+    And we should not see "ring2" in the results

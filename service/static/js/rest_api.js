@@ -146,13 +146,7 @@ $(function () {
 
     $("#retrieve-btn").click(function () {
 
-        let user_id = $("#user_id").val();
-
-        if (isNaN(user_id))
-        {
-            flash_message("Please enter a valid user id");
-            return;
-        }
+        let user_id = Number($("#user_id").val());
 
         $("#flash_message").empty();
 
@@ -180,7 +174,7 @@ $(function () {
             table += '</tbody></table>';
             $("#search_results").append(table);
 
-            flash_message("Success")
+            flash_message("Successfully retrieved the shopcart")
         });
 
         ajax.fail(function(res){
