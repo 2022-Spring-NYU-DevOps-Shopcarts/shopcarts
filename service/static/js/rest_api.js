@@ -35,7 +35,7 @@ $(function () {
 
     $("#create-shopcart-btn").click(function () {
 
-        let user_id = parseFloat($("#user_id").val());
+        let user_id = Number($("#user_id").val());
 
         let data = {
             "user_id": user_id
