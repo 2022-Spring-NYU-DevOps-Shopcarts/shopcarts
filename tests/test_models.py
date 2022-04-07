@@ -10,7 +10,7 @@ from werkzeug.exceptions import NotFound
 from sqlalchemy import null, true
 from service.models import Shopcart, DataValidationError, db
 from service import app
-from .factories import ItemFactory
+from tests.factories import ItemFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/shopcarts"

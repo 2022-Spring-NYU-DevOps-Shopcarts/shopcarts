@@ -13,7 +13,7 @@ from flask import jsonify
 from service.utils import status  # HTTP Status Codes
 from service.models import db
 from service.routes import app, init_db
-from .factories import ItemFactory
+from tests.factories import ItemFactory
 
 
 DATABASE_URI = os.getenv(
