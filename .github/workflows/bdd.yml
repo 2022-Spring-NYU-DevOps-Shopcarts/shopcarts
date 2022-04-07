@@ -52,8 +52,19 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: Run unit tests with behave
-        run: behave
+      - name: Run the server locally
+        run: |
+          echo "\n*** CREATING TEST DB ***\n"
+          curl -X PUT postgresql://postgres:postgres@postgres:5432/testdb
+          echo "\n*** STARTING APPLICATION ***\n"
+          gunicorn --log-level=critical --bind=0.0.0.0:8080 service:app &
+          sleep 5
+          curl -I http://localhost:8080/
+          echo "\n*** SERVER IS RUNNING ***"
         env:
           DATABASE_URI: "postgresql://postgres:postgres@postgres:5432/testdb"
+
+      - name: Run unit tests with behave
+        run: behave
+
           
