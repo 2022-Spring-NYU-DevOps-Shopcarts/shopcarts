@@ -2,8 +2,8 @@
 .DS_Store
 Thumbs.db
 
-# VS Code
-.vscode/
+# VS Code (Commented out to enable the testing integration per April 6th lecture)
+# .vscode/
 
 # Vagrant
 .vagrant
