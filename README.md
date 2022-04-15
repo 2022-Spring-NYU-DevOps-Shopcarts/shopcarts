@@ -5,7 +5,7 @@ Resource URLs: ```/shopcarts```, ```/shopcarts/<user-id>```, ```/shopcarts/<user
 
 Allows different users to store items in their shopcarts.
 Run via ```honcho start```.
-Test via ```nosetests``` and (after starting server) ```behave```.
+Test via ```nosetests``` and (after starting local server) ```behave```.
 
 ### Usage: 
     POST   on /shopcarts: creates a new empty shopcart with given <user-id>.
