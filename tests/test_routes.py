@@ -134,7 +134,7 @@ class TestYourResourceServer(TestCase):
     def test_get_shopcart_invalid(self):
         """Get a Shopcart with invalid user id"""
         resp = self.app.get("/shopcarts/s")
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 

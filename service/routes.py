@@ -15,7 +15,8 @@ Usage:
 """
 from werkzeug.exceptions import NotFound
 from flask import jsonify, request, url_for, make_response, abort
-from service.models import Shopcart
+from flask_restx import Api, Resource, fields, reqparse, inputs
+from service.models import Shopcart, DataValidationError, DatabaseConnectionError
 from .utils import status  # HTTP Status Codes
 
 # Import Flask application
@@ -31,101 +32,201 @@ def index():
     return app.send_static_file("index.html")
 
 ######################################################################
-# ADD A NEW SHOPCART
+# Configure Swagger before initializing it
 ######################################################################
-@app.route("/shopcarts", methods=["POST"])
-def create_shopcarts():
-    """
-    Creates a Shopcart
-    This endpoint will create a Shopcart based the data in the body that is posted
-    """
-    app.logger.info("Request to create a shopcart")
-    check_content_type("application/json")
-    req = request.get_json()
-    if not "user_id" in req.keys() or not isinstance(req["user_id"], int):
-        abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id.")
-    if Shopcart.find_shopcart(req["user_id"]):
-        user_id = req["user_id"]
-        abort(
-            status.HTTP_400_BAD_REQUEST, 
-            f"User with id '{user_id}' already has a non-empty shopcart.",
-        )
-    
-    shopcarts = []
-    shopcarts_deserialize = []
-    if "item_id" in req.keys():
-        shopcarts.append(req)
-    elif "items" in req.keys():
-        shopcarts = req["items"]
-    for s in shopcarts:
-        s["user_id"] = req["user_id"]
-        shopcart = Shopcart()
-        shopcart.deserialize(s)
-        shopcart.create()
-        shopcarts_deserialize.append(shopcart)
-    location_url = url_for("get_shopcarts", shopcart_id=req["user_id"], _external=True)
-    app.logger.info("Shopcart with ID [%s] created.", req["user_id"])
-    results = [shopcart.serialize() for shopcart in shopcarts_deserialize]
-    return make_response(
-        jsonify(results), status.HTTP_201_CREATED, {"Location": location_url}
-    )
+api = Api(app,
+          version='1.0.0',
+          title='Shopcart REST API Service',
+          description='This is a Shopcart server.',
+          default='shopcarts',
+          default_label='Shopcart operations',
+          doc='/apidocs', # default also could use doc='/apidocs/'
+          prefix='/'
+         )
+
+# Define the model so that the docs reflect what can be sent
+create_item_model = api.model('Shopcart', {
+    'item_id': fields.Integer(required=True,
+                              description='The ID of the Item'),
+    'item_name': fields.String(required=True,
+                               description='The name of the Item'),
+    'quantity': fields.Integer(required=True,
+                               description='The quantity of the Item'),
+    'price': fields.Float(required=True,
+                          description='The price of the Item')
+})
+
+create_shopcart_model = api.model('Shopcart', {
+    'user_id': fields.Integer(required=True,
+                              description='The ID of the user'),
+    'item_id': fields.Integer(description='The ID of the item'),
+    'item_name': fields.String(description='The name of the item'),
+    'quantity': fields.Integer(description='The quantity of the Item'),
+    'price': fields.Float(description='The price of the Item'),
+    'items': fields.List(fields.Nested(create_item_model),
+                         description='The list of Items (use for multiple items)')
+})
+
+item_model = api.model('Shopcart', {
+    'user_id': fields.Integer(readOnly=True,
+                              description='The ID of the User'),
+    'item_id': fields.Integer(readOnly=True,
+                              description='The ID of the Item'),
+    'item_name': fields.String(readOnly=True,
+                               description='The name of the Item'),
+    'quantity': fields.Integer(description='The quantity of the Item'),
+    'price': fields.Float(description='The price of the Item')
+})
+
+list_shopcart_model = api.model('Shopcart', {
+    'user_id': fields.Integer(readOnly=True,
+                              description='The ID of the User')
+})
 
 ######################################################################
-# LIST ALL SHOPCARTS
+# Special Error Handlers
 ######################################################################
-@app.route("/shopcarts", methods=["GET"])
-def list_shopcarts():
-    """Returns all of the Shopcarts"""
-    app.logger.info("Request for shopcart list")
-    shopcarts = Shopcart.all_shopcart()
-    results = [dict(shopcart) for shopcart in shopcarts]
-    app.logger.info("Returning %d shopcarts", len(results))
-    return make_response(jsonify(results), status.HTTP_200_OK)
+@api.errorhandler(DataValidationError)
+def request_validation_error(error):
+    """ Handles Value Errors from bad data """
+    message = str(error)
+    app.logger.error(message)
+    return {
+        'status_code': status.HTTP_400_BAD_REQUEST,
+        'error': 'Bad Request',
+        'message': message
+    }, status.HTTP_400_BAD_REQUEST
+
+@api.errorhandler(DatabaseConnectionError)
+def database_connection_error(error):
+    """ Handles Database Errors from connection attempts """
+    message = str(error)
+    app.logger.critical(message)
+    return {
+        'status_code': status.HTTP_503_SERVICE_UNAVAILABLE,
+        'error': 'Service Unavailable',
+        'message': message
+    }, status.HTTP_503_SERVICE_UNAVAILABLE
 
 ######################################################################
-# RETRIEVE A SHOPCART
+#  PATH: /shopcarts
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>", methods=["GET"])
-def get_shopcarts(shopcart_id):
-    """
-    Retrieve a single Shopcart
-    This endpoint will return a Shopcart based on its id
-    """
-    app.logger.info("Request for shopcart with id: %s", shopcart_id)
-    #This is the list of shopcarts which user_id == shopcart_id
-    shopcart = Shopcart.find_shopcart(shopcart_id) 
-    
-    if not shopcart:
-        return make_response(jsonify([]), status.HTTP_200_OK) 
+@api.route('/shopcarts', strict_slashes=False)
+class ShopcartCollection(Resource):
 
-    app.logger.info("Returning shopcart: %s", shopcart_id)
-    #As 1 user is attached to 1 user_id
-    return make_response(jsonify(
-        [sc.serialize() for sc in shopcart]),
-        status.HTTP_200_OK
-        ) 
+    ######################################################################
+    # ADD A NEW SHOPCART
+    ######################################################################
+    @api.doc('create_shopcarts')
+    @api.response(400, 'Invalid user id')
+    @api.expect(create_shopcart_model)
+    @api.marshal_list_with(item_model, code=201)
+    def post(self):
+        """
+        Creates a Shopcart
+        This endpoint will create a Shopcart based the data in the body that is posted
+        """
+        app.logger.info("Request to create a shopcart")
+        check_content_type("application/json")
+        req = request.get_json()
+        if not "user_id" in req.keys() or not isinstance(req["user_id"], int):
+            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id.")
+        if Shopcart.find_shopcart(req["user_id"]):
+            user_id = req["user_id"]
+            abort(
+                status.HTTP_400_BAD_REQUEST, 
+                f"User with id '{user_id}' already has a non-empty shopcart.",
+            )
+        
+        shopcarts = []
+        shopcarts_deserialize = []
+        if "item_id" in req.keys():
+            shopcarts.append(req)
+        elif "items" in req.keys():
+            shopcarts = req["items"]
+        for s in shopcarts:
+            s["user_id"] = req["user_id"]
+            shopcart = Shopcart()
+            shopcart.deserialize(s)
+            shopcart.create()
+            shopcarts_deserialize.append(shopcart)
+        location_url = api.url_for(ShopcartResource, user_id=req["user_id"], _external=True)
+        app.logger.info("Shopcart with ID [%s] created.", req["user_id"])
+        results = [shopcart.serialize() for shopcart in shopcarts_deserialize]
+        return results, status.HTTP_201_CREATED, {"Location": location_url}
+
+    ######################################################################
+    # LIST ALL SHOPCARTS
+    ######################################################################
+    @api.doc('list_shopcarts')
+    @api.response(400, 'Invalid user id')
+    @api.marshal_list_with(list_shopcart_model)
+    def get(self):
+        """Returns all of the Shopcarts"""
+        app.logger.info("Request for shopcart list")
+        shopcarts = Shopcart.all_shopcart()
+        results = [dict(shopcart) for shopcart in shopcarts]
+        app.logger.info("Returning %d shopcarts", len(results))
+        return results, status.HTTP_200_OK
+
 
 ######################################################################
-# DELETE A SHOPCART
+#  PATH: /shopcarts/{id}
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>", methods=["DELETE"])
-def delete_shopcarts(shopcart_id):
-    """
-    Delete a single Shopcart
-    This endpoint will return a Shopcart based on its id
-    """
-    app.logger.info("Request to delete shopcart with id: %s", shopcart_id)
-    shopcart = Shopcart.find_shopcart(shopcart_id) 
-    if shopcart:
-        for item in shopcart:
-            item.delete()
-    return make_response("", status.HTTP_204_NO_CONTENT)
+@api.route('/shopcarts/<user_id>', strict_slashes=False)
+@api.route('user_id', 'The User identifier')
+class ShopcartResource(Resource):
+
+    ######################################################################
+    # RETRIEVE A SHOPCART
+    ######################################################################
+    @api.doc('get_shopcarts')
+    @api.response(400, 'Invalid user id')
+    @api.marshal_list_with(item_model)
+    def get(self, user_id):
+        """
+        Retrieve a single Shopcart
+        This endpoint will return a Shopcart based on its id
+        """
+        app.logger.info("Request for shopcart with id: %s", user_id)
+        if not user_id.isdigit():
+            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id")
+        
+        #This is the list of shopcarts which user_id == shopcart_id
+        shopcart = Shopcart.find_shopcart(user_id)         
+        if not shopcart:
+            return [], status.HTTP_200_OK 
+
+        app.logger.info("Returning shopcart: %s", user_id)
+        #As 1 user is attached to 1 user_id
+        return [sc.serialize() for sc in shopcart], status.HTTP_200_OK
+
+
+    ######################################################################
+    # DELETE A SHOPCART
+    ######################################################################
+    @api.doc('delete_shopcarts')
+    @api.response(400, 'Invalid user id')
+    def delete(self, user_id):
+        """
+        Delete a single Shopcart
+        This endpoint will return a Shopcart based on its id
+        """
+        app.logger.info("Request to delete shopcart with id: %s", user_id)
+        if not user_id.isdigit():
+            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id")
+        
+        shopcart = Shopcart.find_shopcart(user_id) 
+        if shopcart:
+            for item in shopcart:
+                item.delete()
+        return "", status.HTTP_204_NO_CONTENT
 
 ######################################################################
 # UPDATE A SHOPCART (#TODO: TO BE FIXED)
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>", methods = ["PUT"])
-def update_shopcarts(shopcart_id):
+# @app.route("/shopcarts/<int:shopcart_id>", methods = ["PUT"])
+# def update_shopcarts(shopcart_id):
     """
     Updates shopcart with the relevant shopcart_id to quantity
 
