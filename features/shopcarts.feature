@@ -17,8 +17,7 @@ Scenario: Create an empty shopcart which is already non-empty
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Create-Shopcart"
-    Then we should see status code 400
-    And we should see message "User with id '1001' already has a non-empty shopcart."
+    Then we should see message "User with id '1001' already has a non-empty shopcart"
     When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
     Then we should see "ring1" in the results

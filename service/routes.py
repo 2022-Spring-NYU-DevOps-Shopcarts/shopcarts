@@ -190,7 +190,7 @@ class ShopcartResource(Resource):
         """
         app.logger.info("Request for shopcart with id: %s", user_id)
         if not user_id.isdigit():
-            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id")
+            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id.")
         
         #This is the list of shopcarts which user_id == shopcart_id
         shopcart = Shopcart.find_shopcart(user_id)         
@@ -214,7 +214,7 @@ class ShopcartResource(Resource):
         """
         app.logger.info("Request to delete shopcart with id: %s", user_id)
         if not user_id.isdigit():
-            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id")
+            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id.")
         
         shopcart = Shopcart.find_shopcart(user_id) 
         if shopcart:
@@ -519,7 +519,6 @@ def delete_items(shopcart_id, item_id):
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
-
 
 def init_db():
     """ Initializes the SQLAlchemy app """
