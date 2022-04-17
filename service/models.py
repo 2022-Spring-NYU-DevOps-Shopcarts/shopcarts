@@ -121,7 +121,7 @@ class Shopcart(db.Model):
                         "Invalid type for float [price]: "
                         + str(type(data["price"]))
                 )
-            if 'hold' in data.items():
+            if 'hold' in data:
                 if isinstance(data["hold"], bool):
                     self.hold = data["hold"]
                 else:

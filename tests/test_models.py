@@ -153,6 +153,26 @@ class TestShopcart(unittest.TestCase):
         self.assertEqual(shopcart.price, 20.5)
 
 
+    def test_deserialize_with_hold(self):
+        """Test deserialization of a Shopcart with hold info"""
+        data = {"user_id" : 1, "item_id" : 2, "item_name" : "bottle", "quantity" : 2, "price" : 20.5, "hold" : True}
+        shopcart = Shopcart()
+        shopcart.deserialize(data)
+        logging.debug(shopcart)
+        self.assertEqual(shopcart.item_name, "bottle")
+        self.assertEqual(shopcart.quantity, 2)
+        self.assertEqual(shopcart.price, 20.5)
+        self.assertEqual(shopcart.hold, True)
+        
+
+    def test_deserialize_with_bad_hold(self):
+        """Test deserialization of a Shopcart with hold info"""
+        data = {"user_id" : 1, "item_id" : 2, "item_name" : "bottle", "quantity" : 2, "price" : 20.5, "hold" : 1}
+        shopcart = Shopcart()
+        logging.debug(shopcart)
+        self.assertRaises(DataValidationError, shopcart.deserialize, data)
+
+
     def test_deserialize_missing_data(self):
         """Test deserialization of a Shopcart with missing data"""
         data = {"user_id" : 1, "item_id" : 2, "item_name" : "bottle", "quantity" : 2}
