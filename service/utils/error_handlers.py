@@ -118,14 +118,14 @@ def mediatype_not_supported(error):
 #     )
 
 @app.errorhandler(status.HTTP_409_CONFLICT)
-def internal_server_error(error):
+def conflict(error):
     """Handles unexpected server error with HTTP_409_CONFLICT"""
     message = str(error)
-    app.logger.critical(message)
+    app.logger.error(message)
     return make_response(
         jsonify(
             status=status.HTTP_409_CONFLICT,
-            error="Internal Server Error",
+            error="conflict",
             message=message,
         ),
         status.HTTP_409_CONFLICT,
