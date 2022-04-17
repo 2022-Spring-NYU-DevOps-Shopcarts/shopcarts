@@ -45,40 +45,55 @@ api = Api(app,
          )
 
 # Define the model so that the docs reflect what can be sent
-create_item_model = api.model('Shopcart', {
+create_item_model = api.model('Item', {
     'item_id': fields.Integer(required=True,
-                              description='The ID of the Item'),
+                              description='The ID of the Item',
+                              min = 0,
+                              example = 1),
     'item_name': fields.String(required=True,
                                description='The name of the Item'),
     'quantity': fields.Integer(required=True,
-                               description='The quantity of the Item'),
+                               description='The quantity of the Item',
+                               min = 1),
     'price': fields.Float(required=True,
-                          description='The price of the Item')
+                          description='The price of the Item',
+                          min = 0,
+                          exclusiveMin = True)
 })
 
 create_shopcart_model = api.model('Shopcart', {
     'user_id': fields.Integer(required=True,
-                              description='The ID of the user'),
-    'item_id': fields.Integer(description='The ID of the item'),
+                              description='The ID of the user',
+                              min = 0),
+    'item_id': fields.Integer(description='The ID of the item',
+                              min = 0),
     'item_name': fields.String(description='The name of the item'),
-    'quantity': fields.Integer(description='The quantity of the Item'),
-    'price': fields.Float(description='The price of the Item'),
+    'quantity': fields.Integer(description='The quantity of the Item',
+                               min = 1),
+    'price': fields.Float(description='The price of the Item',
+                          min = 0,
+                          exclusiveMin = True),
     'items': fields.List(fields.Nested(create_item_model),
                          description='The list of Items (use for multiple items)')
 })
 
-item_model = api.model('Shopcart', {
+item_model = api.model('ItemModel', {
     'user_id': fields.Integer(readOnly=True,
-                              description='The ID of the User'),
+                              description='The ID of the User',
+                              min = 0),
     'item_id': fields.Integer(readOnly=True,
-                              description='The ID of the Item'),
+                              description='The ID of the Item',
+                              min = 0),
     'item_name': fields.String(readOnly=True,
                                description='The name of the Item'),
-    'quantity': fields.Integer(description='The quantity of the Item'),
-    'price': fields.Float(description='The price of the Item')
+    'quantity': fields.Integer(description='The quantity of the Item',
+                               min = 1),
+    'price': fields.Float(description='The price of the Item',
+                          min = 0,
+                          exclusiveMin = True)
 })
 
-list_shopcart_model = api.model('Shopcart', {
+list_shopcart_model = api.model('ShopcartModel', {
     'user_id': fields.Integer(readOnly=True,
                               description='The ID of the User')
 })
@@ -97,16 +112,16 @@ def request_validation_error(error):
         'message': message
     }, status.HTTP_400_BAD_REQUEST
 
-@api.errorhandler(DatabaseConnectionError)
-def database_connection_error(error):
-    """ Handles Database Errors from connection attempts """
-    message = str(error)
-    app.logger.critical(message)
-    return {
-        'status_code': status.HTTP_503_SERVICE_UNAVAILABLE,
-        'error': 'Service Unavailable',
-        'message': message
-    }, status.HTTP_503_SERVICE_UNAVAILABLE
+# @api.errorhandler(DatabaseConnectionError)
+# def database_connection_error(error):
+#     """ Handles Database Errors from connection attempts """
+#     message = str(error)
+#     app.logger.critical(message)
+#     return {
+#         'status_code': status.HTTP_503_SERVICE_UNAVAILABLE,
+#         'error': 'Service Unavailable',
+#         'message': message
+#     }, status.HTTP_503_SERVICE_UNAVAILABLE
 
 ######################################################################
 #  PATH: /shopcarts
@@ -118,7 +133,7 @@ class ShopcartCollection(Resource):
     # ADD A NEW SHOPCART
     ######################################################################
     @api.doc('create_shopcarts')
-    @api.response(400, 'Invalid user id')
+    @api.response(400, 'Invalid posted data')
     @api.expect(create_shopcart_model)
     @api.marshal_list_with(item_model, code=201)
     def post(self):
@@ -140,16 +155,26 @@ class ShopcartCollection(Resource):
         
         shopcarts = []
         shopcarts_deserialize = []
+        if "items" in req.keys():
+            shopcarts = req["items"]
         if "item_id" in req.keys():
             shopcarts.append(req)
-        elif "items" in req.keys():
-            shopcarts = req["items"]
         for s in shopcarts:
             s["user_id"] = req["user_id"]
             shopcart = Shopcart()
             shopcart.deserialize(s)
-            shopcart.create()
             shopcarts_deserialize.append(shopcart)
+        for s in shopcarts_deserialize:
+            if Shopcart.find_item(req["user_id"], s.item_id):
+                shopcart = Shopcart.find_shopcart(req["user_id"]) 
+                if shopcart:
+                    for item in shopcart:
+                        item.delete()
+                abort(
+                status.HTTP_400_BAD_REQUEST, 
+                f"Item with id '{s.item_id}' appears more than once in the data.",
+            )
+            s.create()
         location_url = api.url_for(ShopcartResource, user_id=req["user_id"], _external=True)
         app.logger.info("Shopcart with ID [%s] created.", req["user_id"])
         results = [shopcart.serialize() for shopcart in shopcarts_deserialize]
@@ -159,7 +184,6 @@ class ShopcartCollection(Resource):
     # LIST ALL SHOPCARTS
     ######################################################################
     @api.doc('list_shopcarts')
-    @api.response(400, 'Invalid user id')
     @api.marshal_list_with(list_shopcart_model)
     def get(self):
         """Returns all of the Shopcarts"""
@@ -174,7 +198,7 @@ class ShopcartCollection(Resource):
 #  PATH: /shopcarts/{id}
 ######################################################################
 @api.route('/shopcarts/<user_id>', strict_slashes=False)
-@api.route('user_id', 'The User identifier')
+@api.param('user_id', 'The User identifier')
 class ShopcartResource(Resource):
 
     ######################################################################
