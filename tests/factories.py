@@ -16,5 +16,5 @@ class ItemFactory(factory.Factory):
     user_id = factory.Sequence(lambda n: n)
     item_id = FuzzyInteger(0)
     item_name = "ring" + str(item_id)
-    quantity = FuzzyInteger(0, 999)
+    quantity = FuzzyInteger(1, 999)
     price = FuzzyFloat(0.1)
