@@ -103,8 +103,9 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 2)
-        self.assertEqual(data[0]["user_id"], shopcart1[0].user_id)
-        self.assertEqual(data[1]["user_id"], shopcart2[0].user_id)
+        dict1 = {'user_id': shopcart1[0].user_id}
+        dict2 = {'user_id': shopcart2[0].user_id}
+        self.assertCountEqual(data, [dict1,dict2])
 
 
     def test_get_shopcart(self):
@@ -134,7 +135,7 @@ class TestYourResourceServer(TestCase):
     def test_get_shopcart_invalid(self):
         """Get a Shopcart with invalid user id"""
         resp = self.app.get("/shopcarts/s")
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -262,6 +263,19 @@ class TestYourResourceServer(TestCase):
         resp = self.app.post(
             BASE_URL,
                 json=test_shopcart.serialize(),
+                content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_shopcart_duplicate_item_id(self):
+        """Create a Shopcart with duplicate item id"""
+        item = ItemFactory()
+        shopcart = [item.serialize(), item.serialize()]       
+        logging.debug(shopcart)
+        resp = self.app.post(
+                BASE_URL,
+                json={"user_id": item.user_id,
+                    "items": shopcart},
                 content_type=CONTENT_TYPE_JSON
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
@@ -451,6 +465,11 @@ class TestYourResourceServer(TestCase):
         """Delete a Shopcart that's not found"""
         resp = self.app.delete("/shopcarts/0")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_shopcart_invalid(self):
+        """Delete a Shopcart with invalid user id"""
+        resp = self.app.delete("/shopcarts/s")
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
     ######################################################################
