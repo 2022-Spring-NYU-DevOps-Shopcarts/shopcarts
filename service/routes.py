@@ -401,7 +401,7 @@ class ItemResource(Resource):
     ######################################################################
     # UPDATE AN ITEM
     ######################################################################
-    @api.doc('get_items')
+    @api.doc('update_items')
     @api.response(400, 'invalid id')
     @api.response(404, 'not found')
     @api.expect(update_item_model)
@@ -460,44 +460,40 @@ class ItemResource(Resource):
         item.create()
         return item.serialize(), status.HTTP_200_OK
 
-######################################################################
-# DELETE AN ITEM
-######################################################################
-@app.route("/shopcarts/<shopcart_id>/items/<item_id>", methods = ["DELETE"])
-def delete_items(shopcart_id, item_id):
-    """
-    Delete item in shopcart {shopcart_id} with item_id {item_id},
-        regardless of the item's current existence.
+    ######################################################################
+    # DELETE AN ITEM
+    ######################################################################
+    @api.doc('delete_items')
+    @api.response(400, 'invalid id')
+    @api.response(404, 'not found')
+    @api.response(204, 'deleted')
 
-    Args:
-        shopcart_id (int): The shopcart containing the relevant item
-        item_id (int): The item to be deleted
+    def delete(self, shopcart_id, item_id):
+        """
+        Delete an item{item_id} in a certain shopcart{shopcart_id}.
+        This endpoint will delete an item based on the shopcart_id and item_id argument in the url
+        """
 
-    Returns:
-        status code: 204 if both args valid (int and >= 0); 400 if not
-        message (JSON): empty
-    """   
-
-    try:
-        shopcart_id = int(shopcart_id)
-        assert shopcart_id >= 0
-    except (AssertionError, ValueError):
-        app.logger.error("Shopcart_id must be a non-negative integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Shopcart_id must be a non-negative integer.")
-    try:
-        item_id = int(item_id)
-        assert item_id >= 0
-    except (AssertionError, ValueError):
-        app.logger.error("Item_id must be a non-negative integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
-    app.logger.info("Attempting to delete item %s from shopcart %s...", item_id, shopcart_id)
-    try:
-        item = Shopcart.find_item_or_404(shopcart_id, item_id)
-        item.delete()
-    except NotFound:
-        pass
-    app.logger.info("Making 204 response...")
-    return make_response("", status.HTTP_204_NO_CONTENT)
+        try:
+            shopcart_id = int(shopcart_id)
+            assert shopcart_id >= 0
+        except (AssertionError, ValueError):
+            app.logger.error("Shopcart_id must be a non-negative integer.")
+            abort(status.HTTP_400_BAD_REQUEST, "Shopcart_id must be a non-negative integer.")
+        try:
+            item_id = int(item_id)
+            assert item_id >= 0
+        except (AssertionError, ValueError):
+            app.logger.error("Item_id must be a non-negative integer.")
+            abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
+        app.logger.info("Attempting to delete item %s from shopcart %s...", item_id, shopcart_id)
+        try:
+            item = Shopcart.find_item_or_404(shopcart_id, item_id)
+            item.delete()
+        except NotFound:
+            pass
+        app.logger.info("Making 204 response...")
+        return "", status.HTTP_204_NO_CONTENT
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
