@@ -231,6 +231,7 @@ class ShopcartResource(Resource):
     ######################################################################
     @api.doc('delete_shopcarts')
     @api.response(400, 'Invalid user id')
+    @api.response(204, 'No content')
     def delete(self, user_id):
         """
         Delete a single Shopcart
