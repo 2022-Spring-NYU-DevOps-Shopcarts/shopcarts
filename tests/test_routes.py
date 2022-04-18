@@ -563,6 +563,18 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_crete_item_invalid_shopcartID(self):
+        """Attempts to create an item with a negative float shopcart_id in url """
+        req = ItemFactory().serialize()
+        user_id = -1.5
+        url = BASE_URL + "/" + str(user_id) + "/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_create_item_duplicate_id(self):       
         """ Attempts creating an item with a duplicate ID. """
@@ -614,6 +626,21 @@ class TestYourResourceServer(TestCase):
         )
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
 
+    def test_read_an_item_with_invalid_shopcartID(self):
+        """Read an item with a negative float shopcart id in url"""
+        test_shopcart = self._create_items(1)
+        resp = self.app.get(
+            "{0}/{1}/items/{2}".format(BASE_URL, -1.5,test_shopcart[0].item_id+100), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)  
+
+    def test_read_an_item_with_invalid_itemID(self):
+        """Read an item with a negative float item id in url"""
+        test_shopcart = self._create_items(1)
+        resp = self.app.get(
+            "{0}/{1}/items/{2}".format(BASE_URL, test_shopcart[0].user_id,-1.5), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)  
 
     ######################################################################
     # TEST UPDATE ITEM
@@ -864,6 +891,61 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_item_with_negative_shopcartID(self):
+        """ Attempts updating an item with a negative float shopcart id in url """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # test updating with a negative float shopcart id in url
+        req["price"] = 23
+        req.pop("quantity")
+        req.pop("item_name")
+        item_id = req.pop("item_id")
+        new_url = f"{BASE_URL}/-1.5/items/{item_id}"
+
+        resp = self.app.put(
+            new_url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_item_with_negative_itemID(self):
+        """ Attempts updating an item with a negative float item id in url """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # test updating with a negative float shopcart id in url
+        req["price"] = 23
+        req.pop("quantity")
+        req.pop("item_name")
+        item_id = req.pop("item_id")
+        new_url = f"{BASE_URL}/{user_id}/items/-1.5"
+
+        resp = self.app.put(
+            new_url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 
     ######################################################################
