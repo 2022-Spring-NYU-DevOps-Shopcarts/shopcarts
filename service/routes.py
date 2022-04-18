@@ -304,12 +304,17 @@ class ItemCollectionResource(Resource):
         check_content_type("application/json")
         item = request.get_json()
         app.logger.info("Received item %s...", item)
+        if not shopcart_id.isdigit():
+            app.logger.error("Shopcart id must be a non-negative integer.")
+            abort(status.HTTP_400_BAD_REQUEST, "Shopcart id must be a non-negative integer.")
+
         try:
             assert isinstance(item["quantity"], int)
-            assert item["quantity"] > 0      
-        except (TypeError, AssertionError, KeyError):
+            assert item["quantity"] > 0
+        except:
             app.logger.error("Quantity must be a positive integer.")
             abort(status.HTTP_400_BAD_REQUEST, "Quantity must be a positive integer.")
+
         try:
             assert isinstance(item["item_id"], int)
             assert item["item_id"] >= 0
@@ -374,16 +379,12 @@ class ItemResource(Resource):
         """
 
         app.logger.info("Request for an item with id: %s in shopcart with id: %s", item_id, shopcart_id)
-        try:
-            shopcart_id = int(shopcart_id)
-        except(TypeError, ValueError):
+        if not shopcart_id.isdigit():
             app.logger.error("The shopcart id passed in the url must be an integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be an integer")
-        try:
-            item_id = int(item_id)
-        except(TypeError, ValueError):
+            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be a non-negative integer")
+        if not item_id.isdigit():
             app.logger.error("The item id passed in the url must be an integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The item id passed in the url must be an integer")
+            abort(status.HTTP_400_BAD_REQUEST, "The item id passed in the url must be a non-negative integer")
 
         shopcart = Shopcart.find_shopcart(shopcart_id) 
         if not shopcart:
@@ -414,16 +415,12 @@ class ItemResource(Resource):
         """
         app.logger.info("Request to update an item")
         check_content_type("application/json")
-        try:
-            shopcart_id = int(shopcart_id)
-        except(TypeError, ValueError):
-            app.logger.error("The shopcart id passed in the url must be an integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be an integer")
-        try:
-            item_id = int(item_id)
-        except(TypeError, ValueError):
-            app.logger.error("The item id passed in the url must be an integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The item id passed in the url must be an integer")
+        if not shopcart_id.isdigit():
+            app.logger.error("The shopcart id passed in the url must be a non-negative integer")
+            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be a non-negative integer")
+        if not item_id.isdigit():
+            app.logger.error("The item id passed in the url must be a non-negative integer")
+            abort(status.HTTP_400_BAD_REQUEST, "The item id passed in the url must be a non-negative integer")
 
         req = request.get_json()
         if not "quantity" in req.keys() and not "price" in req.keys():
@@ -474,18 +471,13 @@ class ItemResource(Resource):
         This endpoint will delete an item based on the shopcart_id and item_id argument in the url
         """
 
-        try:
-            shopcart_id = int(shopcart_id)
-            assert shopcart_id >= 0
-        except (AssertionError, ValueError):
-            app.logger.error("Shopcart_id must be a non-negative integer.")
-            abort(status.HTTP_400_BAD_REQUEST, "Shopcart_id must be a non-negative integer.")
-        try:
-            item_id = int(item_id)
-            assert item_id >= 0
-        except (AssertionError, ValueError):
-            app.logger.error("Item_id must be a non-negative integer.")
-            abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
+        if not shopcart_id.isdigit():
+            app.logger.error("The shopcart id passed in the url must be an integer")
+            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be a non-negative integer")
+        if not item_id.isdigit():
+            app.logger.error("The item id passed in the url must be an integer")
+            abort(status.HTTP_400_BAD_REQUEST, "The item id passed in the url must be a non-negative integer")
+            
         app.logger.info("Attempting to delete item %s from shopcart %s...", item_id, shopcart_id)
         try:
             item = Shopcart.find_item_or_404(shopcart_id, item_id)

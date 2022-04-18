@@ -827,7 +827,7 @@ class TestYourResourceServer(TestCase):
         req["quantity"] = 12
         req["price"] = 24
         req.pop("item_name")
-        user_id = 100000000000
+        user_id = 10000
         item_id = req.pop("item_id")
         new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
