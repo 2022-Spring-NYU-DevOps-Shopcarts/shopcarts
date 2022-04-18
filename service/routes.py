@@ -281,10 +281,11 @@ class ItemResource(Resource):
     # CREATE AN ITEM
     ######################################################################
     @api.doc('create_items')
+    @api.response(201, 'created')
     @api.response(400, 'invalid id')
     @api.response(409, 'item already in cart')
     @api.expect(create_item_model)
-    # @api.marshal_list_with(item_model, code=201)
+   
     def post(self, shopcart_id):
         """
         Create new item in shopcart {shopcart_id}.
@@ -318,7 +319,7 @@ class ItemResource(Resource):
             abort(status.HTTP_400_BAD_REQUEST, "Price must be a positive int or float.")
         try:
             shopcart_id = int(shopcart_id)
-        except(TypeError):
+        except(TypeError, ValueError):
             app.logger.error("The shopcart id passed in the url must be an integer")
             abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be an integer")
 
