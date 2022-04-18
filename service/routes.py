@@ -275,32 +275,20 @@ class ShopcartResource(Resource):
 ######################################################################
 @api.route('/shopcarts/<shopcart_id>/items')
 @api.param('shopcart_id', 'The Shopcart identifier')
-class ShopcartResource(Resource):
+class ItemResource(Resource):
 
     ######################################################################
     # CREATE AN ITEM
     ######################################################################
     @api.doc('create_items')
     @api.response(400, 'invalid id')
-    @api.response(409, 'conflict with existing item')
+    @api.response(409, 'item already in cart')
     @api.expect(create_item_model)
     # @api.marshal_list_with(item_model, code=201)
     def post(self, shopcart_id):
         """
         Create new item in shopcart {shopcart_id}.
-
-        Args:
-            shopcart_id (int): The shopcart to be updated
-            body of API call (JSON): 
-                item_id (int)
-                quantity (int) 
-                item_name (string)
-                price (float/int)
-
-        Returns:
-            status code: 201 if successful, 409 if already exists,
-                400 if data type errors.
-            message (JSON): new item if successful, empty if not.
+        This endpoint will create an item based the data in the body that is posted
         """
         check_content_type("application/json")
         item = request.get_json()
@@ -328,6 +316,11 @@ class ShopcartResource(Resource):
         except (TypeError, AssertionError, KeyError):
             app.logger.error("Price must be a positive int or float.")
             abort(status.HTTP_400_BAD_REQUEST, "Price must be a positive int or float.")
+        try:
+            shopcart_id = int(shopcart_id)
+        except(TypeError):
+            app.logger.error("The shopcart id passed in the url must be an integer")
+            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be an integer")
 
         if Shopcart.find_item(shopcart_id, item["item_id"]):
             item_id = item["item_id"]
