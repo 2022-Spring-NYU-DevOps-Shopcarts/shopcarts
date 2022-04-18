@@ -268,147 +268,83 @@ class ShopcartResource(Resource):
             406 if data type errors.
         message (JSON): new state of shopcart or empty if cart not found
     """
-    # check_content_type("application/json")
-    # item_quantity = request.get_json()
-    # item_id = item_quantity["item_id"]
-    # try:
-    #     assert isinstance(item_quantity["quantity"], int)
-    #     assert item_quantity["quantity"] >= 0
-    # except (TypeError, AssertionError):
-    #     app.logger.error(
-    #         "Quantity %s must be a non-negative integer.",
-    #         item_quantity["quantity"]
-    #         )
-    #     return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
-    # quantity = int(item_quantity["quantity"])
-    # app.logger.info(
-    #     "Request to modify shopcart id %s: change quantity of \
-    #     item id %s to %s...", shopcart_id, item_id, quantity
-    # )    
-    # # Make sure this shopcart exists
-    # Shopcart.find_shopcart_or_404(shopcart_id)
-    # user_id = shopcart_id
-    # try:
-    #     item = Shopcart.find_item_or_404(user_id, item_id)
-    #     if quantity == 0:
-    #         app.logger.info(
-    #         "Deleting item %s from cart %s...",
-    #         item_id, user_id
-    #         )
-    #         item.delete()
-    #         return make_response(
-    #             jsonify(""), status.HTTP_200_OK
-    #         )
-    #     else:
-    #         app.logger.info(
-    #             "Updating item %s to quantity %s in cart %s...",
-    #             item_id, quantity, shopcart_id
-    #             )
-    #         item.quantity = quantity
-    #         item.create()
-    #         return make_response(
-    #             jsonify(item.serialize()), status.HTTP_200_OK
-    #             )
-    # except NotFound:
-    #     if quantity == 0:
-    #         app.logger.info("No changes to cart %s", user_id)
-    #         return make_response(
-    #             jsonify(""), status.HTTP_200_OK
-    #             )
-    #     else:
-    #         app.logger.info(
-    #             "Item %s not found in cart %s, creating...",
-    #             item_id, user_id
-    #             )
-    #         item_name = item_quantity["item_name"]
-    #         try:
-    #             assert isinstance(item_quantity["price"], float)
-    #             assert item_quantity["price"] >= 0
-    #         except (TypeError, AssertionError):
-    #             app.logger.error(
-    #                 "Price %s must be a non-negative number.", item_quantity["price"]
-    #                 )
-    #             return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
-    #         price = float(item_quantity["price"])
-    #         item =  Shopcart(
-    #             user_id = user_id,
-    #             item_id = item_id,
-    #             item_name = item_name,
-    #             price = price,
-    #             quantity = quantity
-    #             )
-    #         item.create()
-    #         return make_response(
-    #             jsonify(item.serialize()), 
-    #             status.HTTP_200_OK
-    #         )
 
 
 ######################################################################
-# CREATE AN ITEM
+#  PATH: /shopcarts/{id}/items
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items", methods = ["POST"])
-def create_items(shopcart_id):
-    """
-    Create new item in shopcart {shopcart_id}.
+@api.route('/shopcarts/<shopcart_id>/items')
+@api.param('shopcart_id', 'The Shopcart identifier')
+class ShopcartResource(Resource):
 
-    Args:
-        shopcart_id (int): The shopcart to be updated
-        body of API call (JSON): 
-            item_id (int)
-            quantity (int) 
-            item_name (string)
-            price (float/int)
+    ######################################################################
+    # CREATE AN ITEM
+    ######################################################################
+    @api.doc('create_items')
+    @api.response(400, 'invalid id')
+    @api.response(409, 'conflict with existing item')
+    @api.expect(create_item_model)
+    # @api.marshal_list_with(item_model, code=201)
+    def post(self, shopcart_id):
+        """
+        Create new item in shopcart {shopcart_id}.
 
-    Returns:
-        status code: 201 if successful, 409 if already exists,
-            400 if data type errors.
-        message (JSON): new item if successful, empty if not.
-    """
-    check_content_type("application/json")
-    item = request.get_json()
-    app.logger.info("Received item %s...", item)
-    try:
-        assert isinstance(item["quantity"], int)
-        assert item["quantity"] > 0      
-    except (TypeError, AssertionError, KeyError):
-        app.logger.error("Quantity must be a positive integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Quantity must be a positive integer.")
-    try:
-        assert isinstance(item["item_id"], int)
-        assert item["item_id"] >= 0
-    except (TypeError, AssertionError, KeyError):
-        app.logger.error("Item_id must be a non-negative integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
-    try:
-        assert isinstance(item["item_name"], str)
-    except (AssertionError, KeyError):
-        app.logger.error("Item_name must be a string.")
-        abort(status.HTTP_400_BAD_REQUEST, "Item_name must be a string.")
-    try:
-        assert isinstance(item["price"], int) or isinstance(item["price"], float)
-        assert item["price"] > 0
-    except (TypeError, AssertionError, KeyError):
-        app.logger.error("Price must be a positive int or float.")
-        abort(status.HTTP_400_BAD_REQUEST, "Price must be a positive int or float.")
+        Args:
+            shopcart_id (int): The shopcart to be updated
+            body of API call (JSON): 
+                item_id (int)
+                quantity (int) 
+                item_name (string)
+                price (float/int)
 
-    if Shopcart.find_item(shopcart_id, item["item_id"]):
-        item_id = item["item_id"]
-        abort(
-            status.HTTP_409_CONFLICT, 
-            f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'. Do you mean Update?"
-        )
-    item["user_id"] = shopcart_id
-    app.logger.info(
-        "Creating item %s with user_id %s, item_name %s, price %s, quantity %s...",
-        item["item_id"], item["user_id"], item["item_name"], item["price"], item["quantity"]
-    )    
-    new_item = Shopcart()
-    new_item.deserialize(item)
-    new_item.create()
-    return make_response(
-        jsonify(new_item.serialize()), status.HTTP_201_CREATED
-        )
+        Returns:
+            status code: 201 if successful, 409 if already exists,
+                400 if data type errors.
+            message (JSON): new item if successful, empty if not.
+        """
+        check_content_type("application/json")
+        item = request.get_json()
+        app.logger.info("Received item %s...", item)
+        try:
+            assert isinstance(item["quantity"], int)
+            assert item["quantity"] > 0      
+        except (TypeError, AssertionError, KeyError):
+            app.logger.error("Quantity must be a positive integer.")
+            abort(status.HTTP_400_BAD_REQUEST, "Quantity must be a positive integer.")
+        try:
+            assert isinstance(item["item_id"], int)
+            assert item["item_id"] >= 0
+        except (TypeError, AssertionError, KeyError):
+            app.logger.error("Item_id must be a non-negative integer.")
+            abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
+        try:
+            assert isinstance(item["item_name"], str)
+        except (AssertionError, KeyError):
+            app.logger.error("Item_name must be a string.")
+            abort(status.HTTP_400_BAD_REQUEST, "Item_name must be a string.")
+        try:
+            assert isinstance(item["price"], int) or isinstance(item["price"], float)
+            assert item["price"] > 0
+        except (TypeError, AssertionError, KeyError):
+            app.logger.error("Price must be a positive int or float.")
+            abort(status.HTTP_400_BAD_REQUEST, "Price must be a positive int or float.")
+
+        if Shopcart.find_item(shopcart_id, item["item_id"]):
+            item_id = item["item_id"]
+            abort(
+                status.HTTP_409_CONFLICT, 
+                f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'. Do you mean Update?"
+            )
+        item["user_id"] = shopcart_id
+        app.logger.info(
+            "Creating item %s with user_id %s, item_name %s, price %s, quantity %s...",
+            item["item_id"], item["user_id"], item["item_name"], item["price"], item["quantity"]
+        )    
+        new_item = Shopcart()
+        new_item.deserialize(item)
+        new_item.create()
+        return new_item.serialize(), status.HTTP_201_CREATED
+            
 
 ######################################################################
 # READ AN ITEM
