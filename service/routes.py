@@ -275,7 +275,7 @@ class ShopcartResource(Resource):
 ######################################################################
 @api.route('/shopcarts/<shopcart_id>/items')
 @api.param('shopcart_id', 'The Shopcart identifier')
-class ItemResource(Resource):
+class ItemCollectionResource(Resource):
 
     ######################################################################
     # CREATE AN ITEM
@@ -341,36 +341,53 @@ class ItemResource(Resource):
             
 
 ######################################################################
-# READ AN ITEM
+#  PATH: /shopcarts/{id}/items/{id}
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items/<int:item_id>", methods = ["GET"])
-def read_an_item(shopcart_id, item_id):
-    """
-    Read an item{item_id} in a certain shopcart{shopcart_id}.
+@api.route('/shopcarts/<shopcart_id>/items/<item_id>')
+@api.param('shopcart_id', 'The Shopcart identifier')
+@api.param('item_id', 'The item identifier')
 
-    Args:
-        shopcart_id (int): the shopcart which contains the item
-        item_id (int): the item need to be read
+class ItemResource(Resource):
 
-    Returns:
-        status code: 200 OK if successful
-        message (JSON): {int: item_id, string: name, float: price, int: quantity} if successful, 
-                        empty if not.
-    """
-    app.logger.info("Request for an item with id: %s in shopcart with id: %s", item_id, shopcart_id)
-    shopcart = Shopcart.find_shopcart(shopcart_id) 
-    if not shopcart:
-        raise NotFound(
-            "Shopcart with id '{}' was not found.".format(shopcart_id)
+    ######################################################################
+    # READ AN ITEM
+    ######################################################################
+    @api.doc('get_items')
+    @api.response(400, 'invalid id')
+    @api.response(404, 'not found')
+    @api.expect(item_model)
+    @api.marshal_with(item_model)
+
+    def get(self, shopcart_id, item_id):
+        """
+        Read an item{item_id} in a certain shopcart{shopcart_id}.
+        This endpoint will read an item based on the shopcart_id and item_id argument in the url
+        """
+
+        app.logger.info("Request for an item with id: %s in shopcart with id: %s", item_id, shopcart_id)
+        try:
+            shopcart_id = int(shopcart_id)
+        except(TypeError, ValueError):
+            app.logger.error("The shopcart id passed in the url must be an integer")
+            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be an integer")
+        try:
+            item_id = int(item_id)
+        except(TypeError, ValueError):
+            app.logger.error("The item id passed in the url must be an integer")
+            abort(status.HTTP_400_BAD_REQUEST, "The item id passed in the url must be an integer")
+
+        shopcart = Shopcart.find_shopcart(shopcart_id) 
+        if not shopcart:
+            abort(status.HTTP_404_NOT_FOUND,
+                "Shopcart with id '{}' was not found.".format(shopcart_id)
+                )
+        item = Shopcart.find_item(shopcart_id, item_id)
+        if not item:
+            abort(status.HTTP_404_NOT_FOUND,
+                "Item with the id '{}' in shopcart'{}' was not found".format(item_id,shopcart_id) 
             )
-    item = Shopcart.find_item(shopcart_id, item_id)
-    if not item:
-        raise NotFound(
-            "Item with the id '{}' in shopcart'{}' was not found".format(item_id,shopcart_id) 
-        )
-    return make_response(jsonify(item.serialize()),
-        status.HTTP_200_OK
-        ) 
+        return item.serialize(), status.HTTP_200_OK
+
 
 ######################################################################
 # UPDATE AN ITEM
