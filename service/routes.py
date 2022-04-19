@@ -277,7 +277,7 @@ class ShopcartResource(Resource):
 ######################################################################
 #  PATH: /shopcarts/{id}/items
 ######################################################################
-@api.route('/shopcarts/<shopcart_id>/items')
+@api.route('/shopcarts/<int:shopcart_id>/items')
 @api.param('shopcart_id', 'The Shopcart identifier')
 class ItemCollectionResource(Resource):
 
@@ -286,7 +286,6 @@ class ItemCollectionResource(Resource):
     ######################################################################
     @api.doc('create_items')
     @api.response(201, 'created')
-    @api.response(400, 'invalid id')
     @api.response(409, 'item already in cart')
     @api.expect(create_item_model)
    
@@ -298,12 +297,6 @@ class ItemCollectionResource(Resource):
         check_content_type("application/json")
         item = request.get_json()
         app.logger.info("Received item %s...", item)
-        try:
-            shopcart_id = int(shopcart_id)
-            assert shopcart_id > 0
-        except (ValueError, AssertionError):
-            app.logger.error("Shopcart id must be a non-negative integer.")
-            abort(status.HTTP_400_BAD_REQUEST, "Shopcart id must be a non-negative integer.")
 
         try:
             assert isinstance(item["quantity"], int)
@@ -311,7 +304,6 @@ class ItemCollectionResource(Resource):
         except:
             app.logger.error("Quantity must be a positive integer.")
             abort(status.HTTP_400_BAD_REQUEST, "Quantity must be a positive integer.")
-
         try:
             assert isinstance(item["item_id"], int)
             assert item["item_id"] >= 0
@@ -350,7 +342,7 @@ class ItemCollectionResource(Resource):
 ######################################################################
 #  PATH: /shopcarts/{id}/items/{id}
 ######################################################################
-@api.route('/shopcarts/<shopcart_id>/items/<item_id>')
+@api.route('/shopcarts/<int:shopcart_id>/items/<int:item_id>')
 @api.param('shopcart_id', 'The Shopcart identifier')
 @api.param('item_id', 'The item identifier')
 
@@ -360,7 +352,6 @@ class ItemResource(Resource):
     # READ AN ITEM
     ######################################################################
     @api.doc('get_items')
-    @api.response(400, 'invalid id')
     @api.response(404, 'not found')
     @api.marshal_with(item_model)
 
@@ -371,12 +362,6 @@ class ItemResource(Resource):
         """
 
         app.logger.info("Request for an item with id: %s in shopcart with id: %s", item_id, shopcart_id)
-        if not shopcart_id.isdigit():
-            app.logger.error("The shopcart id passed in the url must be an integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be a non-negative integer")
-        if not item_id.isdigit():
-            app.logger.error("The item id passed in the url must be an integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The item id passed in the url must be a non-negative integer")
 
         shopcart = Shopcart.find_shopcart(shopcart_id) 
         if not shopcart:
@@ -395,7 +380,6 @@ class ItemResource(Resource):
     # UPDATE AN ITEM
     ######################################################################
     @api.doc('update_items')
-    @api.response(400, 'invalid id')
     @api.response(404, 'not found')
     @api.expect(update_item_model)
     @api.marshal_with(item_model)
@@ -407,12 +391,6 @@ class ItemResource(Resource):
         """
         app.logger.info("Request to update an item")
         check_content_type("application/json")
-        if not shopcart_id.isdigit():
-            app.logger.error("The shopcart id passed in the url must be a non-negative integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be a non-negative integer")
-        if not item_id.isdigit():
-            app.logger.error("The item id passed in the url must be a non-negative integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The item id passed in the url must be a non-negative integer")
 
         req = request.get_json()
         if not "quantity" in req.keys() and not "price" in req.keys():
@@ -453,7 +431,6 @@ class ItemResource(Resource):
     # DELETE AN ITEM
     ######################################################################
     @api.doc('delete_items')
-    @api.response(400, 'invalid id')
     @api.response(404, 'not found')
     @api.response(204, 'deleted')
 
@@ -462,13 +439,6 @@ class ItemResource(Resource):
         Delete an item{item_id} in a certain shopcart{shopcart_id}.
         This endpoint will delete an item based on the shopcart_id and item_id argument in the url
         """
-
-        if not shopcart_id.isdigit():
-            app.logger.error("The shopcart id passed in the url must be an integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The shopcart id passed in the url must be a non-negative integer")
-        if not item_id.isdigit():
-            app.logger.error("The item id passed in the url must be an integer")
-            abort(status.HTTP_400_BAD_REQUEST, "The item id passed in the url must be a non-negative integer")
 
         app.logger.info("Attempting to delete item %s from shopcart %s...", item_id, shopcart_id)
         try:

@@ -132,6 +132,11 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.get_json(), [], "Expect to return an empty list")
 
 
+    # def test_get_shopcart_invalid(self):
+    #     """Get a Shopcart with invalid user id"""
+    #     resp = self.app.get("/shopcarts/s")
+    #     self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
 
 
     ######################################################################
@@ -553,17 +558,17 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_crete_item_invalid_shopcartID(self):
-        """Attempts to create an item with a negative float shopcart_id in url """
-        req = ItemFactory().serialize()
-        user_id = -1.5
-        url = BASE_URL + "/" + str(user_id) + "/items"
-        logging.debug(url)
-        resp = self.app.post(
-            url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+    # def test_crete_item_invalid_shopcartID(self):
+    #     """Attempts to create an item with a negative float shopcart_id in url """
+    #     req = ItemFactory().serialize()
+    #     user_id = -1.5
+    #     url = BASE_URL + "/" + str(user_id) + "/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
     def test_create_item_duplicate_id(self):       
@@ -602,7 +607,6 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data['quantity'], test_shopcart[0].quantity)
         self.assertEqual(data['price'], test_shopcart[0].price)
 
-
     def test_read_an_item_not_found(self):
         """Read an item thats not found"""
         resp = self.app.get("/shopcarts/0/items/0")
@@ -616,21 +620,6 @@ class TestYourResourceServer(TestCase):
         )
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
 
-    def test_read_an_item_with_invalid_shopcartID(self):
-        """Read an item with a negative float shopcart id in url"""
-        test_shopcart = self._create_items(1)
-        resp = self.app.get(
-            "{0}/{1}/items/{2}".format(BASE_URL, -1.5,test_shopcart[0].item_id+100), content_type=CONTENT_TYPE_JSON
-        )
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)  
-
-    def test_read_an_item_with_invalid_itemID(self):
-        """Read an item with a negative float item id in url"""
-        test_shopcart = self._create_items(1)
-        resp = self.app.get(
-            "{0}/{1}/items/{2}".format(BASE_URL, test_shopcart[0].user_id,-1.5), content_type=CONTENT_TYPE_JSON
-        )
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)  
 
     ######################################################################
     # TEST UPDATE ITEM
@@ -882,60 +871,6 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_update_item_with_negative_shopcartID(self):
-        """ Attempts updating an item with a negative float shopcart id in url """
-        # create an item first
-        test_item = ItemFactory()
-        req = test_item.serialize()
-        user_id = req.pop("user_id")
-        url = f"{BASE_URL}/{user_id}/items"
-        logging.debug(url)
-        resp = self.app.post(
-            url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-
-        # test updating with a negative float shopcart id in url
-        req["price"] = 23
-        req.pop("quantity")
-        req.pop("item_name")
-        item_id = req.pop("item_id")
-        new_url = f"{BASE_URL}/-1.5/items/{item_id}"
-
-        resp = self.app.put(
-            new_url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_update_item_with_negative_itemID(self):
-        """ Attempts updating an item with a negative float item id in url """
-        # create an item first
-        test_item = ItemFactory()
-        req = test_item.serialize()
-        user_id = req.pop("user_id")
-        url = f"{BASE_URL}/{user_id}/items"
-        logging.debug(url)
-        resp = self.app.post(
-            url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-
-        # test updating with a negative float shopcart id in url
-        req["price"] = 23
-        req.pop("quantity")
-        req.pop("item_name")
-        item_id = req.pop("item_id")
-        new_url = f"{BASE_URL}/{user_id}/items/-1.5"
-
-        resp = self.app.put(
-            new_url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
 
 
     ######################################################################
@@ -1043,125 +978,125 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.get_data(), b"")
 
 
-    def test_delete_item_negative_userid(self):
-        """ Attempts deleting item on an invalid negative user_id"""
-        # create an item first
-        test_item = ItemFactory()
-        req = test_item.serialize()
-        user_id = req.pop("user_id")
-        url = f"{BASE_URL}/{user_id}/items"
-        logging.debug(url)
-        resp = self.app.post(
-            url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+    # def test_delete_item_negative_userid(self):
+    #     """ Attempts deleting item on an invalid negative user_id"""
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-        # test deletion
-        user_id = -1
-        item_id = req["item_id"]
-        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-        resp = self.app.delete(
-            new_url, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+    #     # test deletion
+    #     user_id = -1
+    #     item_id = req["item_id"]
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+    #     resp = self.app.delete(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-    def test_delete_item_nonint_userid(self):
-        """ Attempts deleting item on an invalid non-int user_id"""
-        # create an item first
-        test_item = ItemFactory()
-        req = test_item.serialize()
-        user_id = req.pop("user_id")
-        url = f"{BASE_URL}/{user_id}/items"
-        logging.debug(url)
-        resp = self.app.post(
-            url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+    # def test_delete_item_nonint_userid(self):
+    #     """ Attempts deleting item on an invalid non-int user_id"""
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-        # test deletion
-        user_id = 1.5
-        item_id = req["item_id"] + 1 # wrong item_id too but shouldn't matter
-        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-        resp = self.app.delete(
-            new_url, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+    #     # test deletion
+    #     user_id = 1.5
+    #     item_id = req["item_id"] + 1 # wrong item_id too but shouldn't matter
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+    #     resp = self.app.delete(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
     
 
-    def test_delete_item_nonint_item_id(self):
-        """ Attempts deleting item on an invalid non-int user_id"""
-        # create an item first
-        test_item = ItemFactory()
-        req = test_item.serialize()
-        user_id = req.pop("user_id")
-        url = f"{BASE_URL}/{user_id}/items"
-        logging.debug(url)
-        resp = self.app.post(
-            url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+    # def test_delete_item_nonint_item_id(self):
+    #     """ Attempts deleting item on an invalid non-int user_id"""
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-        # test deletion
-        user_id += 1 # wrong user_id (still valid) too but shouldn't matter
-        item_id = 1.5 
-        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-        resp = self.app.delete(
-            new_url, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
-
-    def test_delete_item_negative_itemid(self):
-        """ Attempts deleting item on an invalid negative item_id"""
-        # create an item first
-        test_item = ItemFactory()
-        req = test_item.serialize()
-        user_id = req.pop("user_id")
-        url = f"{BASE_URL}/{user_id}/items"
-        logging.debug(url)
-        resp = self.app.post(
-            url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-
-        # test deletion
-        item_id = -1
-        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-        resp = self.app.delete(
-            new_url, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+    #     # test deletion
+    #     user_id += 1 # wrong user_id (still valid) too but shouldn't matter
+    #     item_id = 1.5 
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+    #     resp = self.app.delete(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-    def test_delete_item_nonint_userid_negative_itemid(self):
-        """ Attempts deleting item on an invalid user_id and invalid item_id"""
-        # create an item first
-        test_item = ItemFactory()
-        req = test_item.serialize()
-        user_id = req.pop("user_id")
-        url = f"{BASE_URL}/{user_id}/items"
-        logging.debug(url)
-        resp = self.app.post(
-            url, json=req, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+    # def test_delete_item_negative_itemid(self):
+    #     """ Attempts deleting item on an invalid negative item_id"""
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-        # test deletion
-        user_id = 1.5
-        item_id = -1
-        new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
-        resp = self.app.delete(
-            new_url, content_type=CONTENT_TYPE_JSON
-        )
-        logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+    #     # test deletion
+    #     item_id = -1
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+    #     resp = self.app.delete(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    # def test_delete_item_nonint_userid_negative_itemid(self):
+    #     """ Attempts deleting item on an invalid user_id and invalid item_id"""
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+    #     # test deletion
+    #     user_id = 1.5
+    #     item_id = -1
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
+    #     resp = self.app.delete(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
