@@ -132,11 +132,6 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.get_json(), [], "Expect to return an empty list")
 
 
-    def test_get_shopcart_invalid(self):
-        """Get a Shopcart with invalid user id"""
-        resp = self.app.get("/shopcarts/s")
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
 
 
     ######################################################################
@@ -465,11 +460,6 @@ class TestYourResourceServer(TestCase):
         """Delete a Shopcart that's not found"""
         resp = self.app.delete("/shopcarts/0")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
-
-    def test_delete_shopcart_invalid(self):
-        """Delete a Shopcart with invalid user id"""
-        resp = self.app.delete("/shopcarts/s")
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
     ######################################################################

@@ -207,7 +207,7 @@ class ShopcartCollection(Resource):
 ######################################################################
 #  PATH: /shopcarts/{id}
 ######################################################################
-@api.route('/shopcarts/<user_id>', strict_slashes=False)
+@api.route('/shopcarts/<int:user_id>', strict_slashes=False)
 @api.param('user_id', 'The User identifier')
 class ShopcartResource(Resource):
 
@@ -215,7 +215,6 @@ class ShopcartResource(Resource):
     # RETRIEVE A SHOPCART
     ######################################################################
     @api.doc('get_shopcarts')
-    @api.response(400, 'Invalid user id')
     @api.marshal_list_with(item_model)
     def get(self, user_id):
         """
@@ -223,8 +222,6 @@ class ShopcartResource(Resource):
         This endpoint will return a Shopcart based on its id
         """
         app.logger.info("Request for shopcart with id: %s", user_id)
-        if not user_id.isdigit():
-            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id.")
         
         #This is the list of shopcarts which user_id == shopcart_id
         shopcart = Shopcart.find_shopcart(user_id)         
@@ -240,7 +237,6 @@ class ShopcartResource(Resource):
     # DELETE A SHOPCART
     ######################################################################
     @api.doc('delete_shopcarts')
-    @api.response(400, 'Invalid user id')
     @api.response(204, 'No content')
     def delete(self, user_id):
         """
@@ -248,8 +244,6 @@ class ShopcartResource(Resource):
         This endpoint will return a Shopcart based on its id
         """
         app.logger.info("Request to delete shopcart with id: %s", user_id)
-        if not user_id.isdigit():
-            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id.")
         
         shopcart = Shopcart.find_shopcart(user_id) 
         if shopcart:
