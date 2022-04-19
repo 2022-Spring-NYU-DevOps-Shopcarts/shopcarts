@@ -73,34 +73,34 @@ from . import status
 #     )
 
 
-@app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)
-def method_not_supported(error):
-    """Handles unsuppoted HTTP methods with 405_METHOD_NOT_SUPPORTED"""
-    message = str(error)
-    app.logger.error(message)
-    return make_response(
-        jsonify(
-            status=status.HTTP_405_METHOD_NOT_ALLOWED,
-            error="Method not Allowed",
-            message=message,
-        ),
-        status.HTTP_405_METHOD_NOT_ALLOWED,
-    )
+# @app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)
+# def method_not_supported(error):
+#     """Handles unsuppoted HTTP methods with 405_METHOD_NOT_SUPPORTED"""
+#     message = str(error)
+#     app.logger.error(message)
+#     return make_response(
+#         jsonify(
+#             status=status.HTTP_405_METHOD_NOT_ALLOWED,
+#             error="Method not Allowed",
+#             message=message,
+#         ),
+#         status.HTTP_405_METHOD_NOT_ALLOWED,
+#     )
 
 
-@app.errorhandler(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
-def mediatype_not_supported(error):
-    """Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE"""
-    message = str(error)
-    app.logger.error(message)
-    return make_response(
-        jsonify(
-            status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            error="Unsupported media type",
-            message=message,
-        ),
-        status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-    )
+# @app.errorhandler(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+# def mediatype_not_supported(error):
+#     """Handles unsuppoted media requests with 415_UNSUPPORTED_MEDIA_TYPE"""
+#     message = str(error)
+#     app.logger.error(message)
+#     return make_response(
+#         jsonify(
+#             status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+#             error="Unsupported media type",
+#             message=message,
+#         ),
+#         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+#     )
 
 ## Unused
 # @app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)
