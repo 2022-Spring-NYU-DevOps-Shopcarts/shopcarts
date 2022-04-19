@@ -135,7 +135,7 @@ class TestYourResourceServer(TestCase):
     def test_get_shopcart_invalid(self):
         """Get a Shopcart with invalid user id"""
         resp = self.app.get("/shopcarts/s")
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
 
@@ -466,11 +466,6 @@ class TestYourResourceServer(TestCase):
         resp = self.app.delete("/shopcarts/0")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_delete_shopcart_invalid(self):
-        """Delete a Shopcart with invalid user id"""
-        resp = self.app.delete("/shopcarts/s")
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
 
     ######################################################################
     # TEST CREATE ITEM
@@ -563,6 +558,18 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_crete_item_invalid_shopcartID(self):
+        """Attempts to create an item with a negative float shopcart_id in url """
+        req = ItemFactory().serialize()
+        user_id = -1.5
+        url = BASE_URL + "/" + str(user_id) + "/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
 
     def test_create_item_duplicate_id(self):       
         """ Attempts creating an item with a duplicate ID. """
@@ -599,7 +606,6 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data['item_name'], test_shopcart[0].item_name)
         self.assertEqual(data['quantity'], test_shopcart[0].quantity)
         self.assertEqual(data['price'], test_shopcart[0].price)
-
 
     def test_read_an_item_not_found(self):
         """Read an item thats not found"""
@@ -827,7 +833,7 @@ class TestYourResourceServer(TestCase):
         req["quantity"] = 12
         req["price"] = 24
         req.pop("item_name")
-        user_id = 100000000000
+        user_id = 10000
         item_id = req.pop("item_id")
         new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
@@ -864,6 +870,7 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
 
 
     ######################################################################
@@ -993,7 +1000,7 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
     def test_delete_item_nonint_userid(self):
@@ -1018,7 +1025,7 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
     
 
     def test_delete_item_nonint_item_id(self):
@@ -1043,7 +1050,7 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
     def test_delete_item_negative_itemid(self):
@@ -1067,7 +1074,7 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
     def test_delete_item_nonint_userid_negative_itemid(self):
@@ -1092,4 +1099,4 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
