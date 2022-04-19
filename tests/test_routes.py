@@ -1099,8 +1099,7 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     ######################################################################
     # TEST RESUME ITEM
