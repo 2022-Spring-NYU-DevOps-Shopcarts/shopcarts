@@ -46,8 +46,9 @@ class Shopcart(db.Model):
     item_name = db.Column(db.String(63))
     quantity = db.Column(db.Integer)
     price = db.Column(db.Float)
+    hold = db.Column(db.Boolean)
 
-
+    
     def __repr__(self):
         return "<Product %s in Shopcart for user %s>" % (self.item_id, self.user_id)
 
@@ -78,7 +79,8 @@ class Shopcart(db.Model):
             "item_id": self.item_id,
             "item_name": self.item_name,
             "quantity": self.quantity,
-            "price": self.price}
+            "price": self.price,
+            "hold": self.hold}
         
 
     def deserialize(self, data):
@@ -119,7 +121,16 @@ class Shopcart(db.Model):
                         "Invalid type for float [price]: "
                         + str(type(data["price"])) + " with value " + str(data["price"])
                 )
-                
+            if 'hold' in data:
+                if isinstance(data["hold"], bool):
+                    self.hold = data["hold"]
+                else:
+                    raise DataValidationError(
+                            "Invalid type for bool [hold]: "
+                            + str(type(data["hold"]))
+                    )
+            else:
+                self.hold = False  
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Shopcart item: missing " + error.args[0]
