@@ -91,35 +91,35 @@ class Shopcart(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            if isinstance(data["user_id"], int):
+            if isinstance(data["user_id"], int) and data["user_id"] >= 0:
                 self.user_id = data["user_id"]
             else:
                 raise DataValidationError(
-                    "Invalid type for int [user_id]: "
-                    + str(type(data["user_id"]))
+                    "Invalid type or value for positive int [user_id]: "
+                    + str(type(data["user_id"])) + " with value " + str(data["user_id"])
                 )
-            if isinstance(data["item_id"], int):
+            if isinstance(data["item_id"], int) and data["user_id"] >= 0:
                 self.item_id = data["item_id"]
             else:
                 raise DataValidationError(
                     "Invalid type for int [item_id]: "
-                    + str(type(data["item_id"]))
+                    + str(type(data["item_id"])) + " with value " + str(data["item_id"])
                 )
 
             self.item_name = data["item_name"] + ""
-            if isinstance(data["quantity"], int):
+            if isinstance(data["quantity"], int) and data["quantity"] > 0:
                 self.quantity = data["quantity"]
             else:
                 raise DataValidationError(
                         "Invalid type for int [quantity]: "
-                        + str(type(data["quantity"]))
+                        + str(type(data["quantity"])) + " with value " + str(data["quantity"])
                 )
-            if isinstance(data["price"], float) or isinstance(data["price"], int):
+            if (isinstance(data["price"], float) or isinstance(data["price"], int)) and data["price"] > 0:
                 self.price = data["price"]
             else:
                 raise DataValidationError(
                         "Invalid type for float [price]: "
-                        + str(type(data["price"]))
+                        + str(type(data["price"])) + " with value " + str(data["price"])
                 )
             if 'hold' in data:
                 if isinstance(data["hold"], bool):

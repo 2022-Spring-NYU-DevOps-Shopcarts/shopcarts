@@ -103,8 +103,9 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(len(data), 2)
-        self.assertEqual(data[0]["user_id"], shopcart1[0].user_id)
-        self.assertEqual(data[1]["user_id"], shopcart2[0].user_id)
+        dict1 = {'user_id': shopcart1[0].user_id}
+        dict2 = {'user_id': shopcart2[0].user_id}
+        self.assertCountEqual(data, [dict1,dict2])
 
 
     def test_get_shopcart(self):
@@ -262,6 +263,19 @@ class TestYourResourceServer(TestCase):
         resp = self.app.post(
             BASE_URL,
                 json=test_shopcart.serialize(),
+                content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_shopcart_duplicate_item_id(self):
+        """Create a Shopcart with duplicate item id"""
+        item = ItemFactory()
+        shopcart = [item.serialize(), item.serialize()]       
+        logging.debug(shopcart)
+        resp = self.app.post(
+                BASE_URL,
+                json={"user_id": item.user_id,
+                    "items": shopcart},
                 content_type=CONTENT_TYPE_JSON
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
@@ -544,6 +558,18 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_crete_item_invalid_shopcartID(self):
+        """Attempts to create an item with a negative float shopcart_id in url """
+        req = ItemFactory().serialize()
+        user_id = -1.5
+        url = BASE_URL + "/" + str(user_id) + "/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
 
     def test_create_item_duplicate_id(self):       
         """ Attempts creating an item with a duplicate ID. """
@@ -580,7 +606,6 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data['item_name'], test_shopcart[0].item_name)
         self.assertEqual(data['quantity'], test_shopcart[0].quantity)
         self.assertEqual(data['price'], test_shopcart[0].price)
-
 
     def test_read_an_item_not_found(self):
         """Read an item thats not found"""
@@ -808,7 +833,7 @@ class TestYourResourceServer(TestCase):
         req["quantity"] = 12
         req["price"] = 24
         req.pop("item_name")
-        user_id = 100000000000
+        user_id = 10000
         item_id = req.pop("item_id")
         new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
 
@@ -845,6 +870,7 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
 
 
     ######################################################################
@@ -974,7 +1000,7 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
     def test_delete_item_nonint_userid(self):
@@ -999,7 +1025,7 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
     
 
     def test_delete_item_nonint_item_id(self):
@@ -1024,7 +1050,7 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
     def test_delete_item_negative_itemid(self):
@@ -1048,7 +1074,7 @@ class TestYourResourceServer(TestCase):
             new_url, content_type=CONTENT_TYPE_JSON
         )
         logging.debug(resp)
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
     def test_delete_item_nonint_userid_negative_itemid(self):
@@ -1299,3 +1325,4 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
