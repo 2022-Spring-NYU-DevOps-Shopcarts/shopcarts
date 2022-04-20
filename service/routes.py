@@ -44,7 +44,6 @@ api = Api(app,
           prefix='/'
          )
 
-# Define the model so that the docs reflect what can be sent
 create_item_model = api.model('Item', {
     'item_id': fields.Integer(required=True,
                               description='The ID of the Item',
@@ -63,6 +62,7 @@ create_item_model = api.model('Item', {
                             description='The holding status of the Item')
 })
 
+# Define the model so that the docs reflect what can be sent
 create_shopcart_model = api.model('Shopcart', {
     'user_id': fields.Integer(required=True,
                               description='The ID of the user',
@@ -97,10 +97,20 @@ item_model = api.model('ItemModel', {
     'hold': fields.Boolean(description='The holding status of the Item')
 })
 
+update_item_model = api.model('ItemModel', {
+    'quantity': fields.Integer(description='The quantity of the Item',
+                               min = 1),
+    'price': fields.Float(description='The price of the Item',
+                          min = 0,
+                          exclusiveMin = True)       
+})
+
 list_shopcart_model = api.model('ShopcartModel', {
     'user_id': fields.Integer(readOnly=True,
                               description='The ID of the User')
 })
+
+
 
 ######################################################################
 # Special Error Handlers
@@ -201,7 +211,7 @@ class ShopcartCollection(Resource):
 ######################################################################
 #  PATH: /shopcarts/{id}
 ######################################################################
-@api.route('/shopcarts/<user_id>', strict_slashes=False)
+@api.route('/shopcarts/<int:user_id>', strict_slashes=False)
 @api.param('user_id', 'The User identifier')
 class ShopcartResource(Resource):
 
@@ -209,7 +219,6 @@ class ShopcartResource(Resource):
     # RETRIEVE A SHOPCART
     ######################################################################
     @api.doc('get_shopcarts')
-    @api.response(400, 'Invalid user id')
     @api.marshal_list_with(item_model)
     def get(self, user_id):
         """
@@ -217,8 +226,6 @@ class ShopcartResource(Resource):
         This endpoint will return a Shopcart based on its id
         """
         app.logger.info("Request for shopcart with id: %s", user_id)
-        if not user_id.isdigit():
-            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id.")
         
         #This is the list of shopcarts which user_id == shopcart_id
         shopcart = Shopcart.find_shopcart(user_id)         
@@ -234,15 +241,13 @@ class ShopcartResource(Resource):
     # DELETE A SHOPCART
     ######################################################################
     @api.doc('delete_shopcarts')
-    @api.response(400, 'Invalid user id')
+    @api.response(204, 'No content')
     def delete(self, user_id):
         """
         Delete a single Shopcart
         This endpoint will return a Shopcart based on its id
         """
         app.logger.info("Request to delete shopcart with id: %s", user_id)
-        if not user_id.isdigit():
-            abort(status.HTTP_400_BAD_REQUEST, f"Invalid user id.")
         
         shopcart = Shopcart.find_shopcart(user_id) 
         if shopcart:
@@ -271,278 +276,182 @@ class ShopcartResource(Resource):
             406 if data type errors.
         message (JSON): new state of shopcart or empty if cart not found
     """
-    # check_content_type("application/json")
-    # item_quantity = request.get_json()
-    # item_id = item_quantity["item_id"]
-    # try:
-    #     assert isinstance(item_quantity["quantity"], int)
-    #     assert item_quantity["quantity"] >= 0
-    # except (TypeError, AssertionError):
-    #     app.logger.error(
-    #         "Quantity %s must be a non-negative integer.",
-    #         item_quantity["quantity"]
-    #         )
-    #     return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
-    # quantity = int(item_quantity["quantity"])
-    # app.logger.info(
-    #     "Request to modify shopcart id %s: change quantity of \
-    #     item id %s to %s...", shopcart_id, item_id, quantity
-    # )    
-    # # Make sure this shopcart exists
-    # Shopcart.find_shopcart_or_404(shopcart_id)
-    # user_id = shopcart_id
-    # try:
-    #     item = Shopcart.find_item_or_404(user_id, item_id)
-    #     if quantity == 0:
-    #         app.logger.info(
-    #         "Deleting item %s from cart %s...",
-    #         item_id, user_id
-    #         )
-    #         item.delete()
-    #         return make_response(
-    #             jsonify(""), status.HTTP_200_OK
-    #         )
-    #     else:
-    #         app.logger.info(
-    #             "Updating item %s to quantity %s in cart %s...",
-    #             item_id, quantity, shopcart_id
-    #             )
-    #         item.quantity = quantity
-    #         item.create()
-    #         return make_response(
-    #             jsonify(item.serialize()), status.HTTP_200_OK
-    #             )
-    # except NotFound:
-    #     if quantity == 0:
-    #         app.logger.info("No changes to cart %s", user_id)
-    #         return make_response(
-    #             jsonify(""), status.HTTP_200_OK
-    #             )
-    #     else:
-    #         app.logger.info(
-    #             "Item %s not found in cart %s, creating...",
-    #             item_id, user_id
-    #             )
-    #         item_name = item_quantity["item_name"]
-    #         try:
-    #             assert isinstance(item_quantity["price"], float)
-    #             assert item_quantity["price"] >= 0
-    #         except (TypeError, AssertionError):
-    #             app.logger.error(
-    #                 "Price %s must be a non-negative number.", item_quantity["price"]
-    #                 )
-    #             return make_response(jsonify(""), status.HTTP_406_NOT_ACCEPTABLE)
-    #         price = float(item_quantity["price"])
-    #         item =  Shopcart(
-    #             user_id = user_id,
-    #             item_id = item_id,
-    #             item_name = item_name,
-    #             price = price,
-    #             quantity = quantity
-    #             )
-    #         item.create()
-    #         return make_response(
-    #             jsonify(item.serialize()), 
-    #             status.HTTP_200_OK
-    #         )
 
 
 ######################################################################
-# CREATE AN ITEM
+#  PATH: /shopcarts/{id}/items
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items", methods = ["POST"])
-def create_items(shopcart_id):
-    """
-    Create new item in shopcart {shopcart_id}.
+@api.route('/shopcarts/<int:shopcart_id>/items')
+@api.param('shopcart_id', 'The Shopcart identifier')
+class ItemCollectionResource(Resource):
 
-    Args:
-        shopcart_id (int): The shopcart to be updated
-        body of API call (JSON): 
-            item_id (int)
-            quantity (int) 
-            item_name (string)
-            price (float/int)
+    ######################################################################
+    # CREATE AN ITEM
+    ######################################################################
+    @api.doc('create_items')
+    @api.response(201, 'created')
+    @api.response(409, 'item already in cart')
+    @api.expect(create_item_model)
+   
+    def post(self, shopcart_id):
+        """
+        Create new item in shopcart {shopcart_id}.
+        This endpoint will create an item based the data in the body that is posted
+        """
+        check_content_type("application/json")
+        item = request.get_json()
+        app.logger.info("Received item %s...", item)
 
-    Returns:
-        status code: 201 if successful, 409 if already exists,
-            400 if data type errors.
-        message (JSON): new item if successful, empty if not.
-    """
-    check_content_type("application/json")
-    item = request.get_json()
-    app.logger.info("Received item %s...", item)
-    try:
-        assert isinstance(item["quantity"], int)
-        assert item["quantity"] > 0      
-    except (TypeError, AssertionError, KeyError):
-        app.logger.error("Quantity must be a positive integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Quantity must be a positive integer.")
-    try:
-        assert isinstance(item["item_id"], int)
-        assert item["item_id"] >= 0
-    except (TypeError, AssertionError, KeyError):
-        app.logger.error("Item_id must be a non-negative integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
-    try:
-        assert isinstance(item["item_name"], str)
-    except (AssertionError, KeyError):
-        app.logger.error("Item_name must be a string.")
-        abort(status.HTTP_400_BAD_REQUEST, "Item_name must be a string.")
-    try:
-        assert isinstance(item["price"], int) or isinstance(item["price"], float)
-        assert item["price"] > 0
-    except (TypeError, AssertionError, KeyError):
-        app.logger.error("Price must be a positive int or float.")
-        abort(status.HTTP_400_BAD_REQUEST, "Price must be a positive int or float.")
+        try:
+            assert isinstance(item["quantity"], int)
+            assert item["quantity"] > 0
+        except:
+            app.logger.error("Quantity must be a positive integer.")
+            abort(status.HTTP_400_BAD_REQUEST, "Quantity must be a positive integer.")
+        try:
+            assert isinstance(item["item_id"], int)
+            assert item["item_id"] >= 0
+        except (TypeError, AssertionError, KeyError):
+            app.logger.error("Item_id must be a non-negative integer.")
+            abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
+        try:
+            assert isinstance(item["item_name"], str)
+        except (AssertionError, KeyError):
+            app.logger.error("Item_name must be a string.")
+            abort(status.HTTP_400_BAD_REQUEST, "Item_name must be a string.")
+        try:
+            assert isinstance(item["price"], int) or isinstance(item["price"], float)
+            assert item["price"] > 0
+        except (TypeError, AssertionError, KeyError):
+            app.logger.error("Price must be a positive int or float.")
+            abort(status.HTTP_400_BAD_REQUEST, "Price must be a positive int or float.")
 
-    if Shopcart.find_item(shopcart_id, item["item_id"]):
-        item_id = item["item_id"]
-        abort(
-            status.HTTP_409_CONFLICT, 
-            f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'. Do you mean Update?"
-        )
-    item["user_id"] = shopcart_id
-    app.logger.info(
-        "Creating item %s with user_id %s, item_name %s, price %s, quantity %s...",
-        item["item_id"], item["user_id"], item["item_name"], item["price"], item["quantity"]
-    )    
-    new_item = Shopcart()
-    new_item.deserialize(item)
-    new_item.create()
-    return make_response(
-        jsonify(new_item.serialize()), status.HTTP_201_CREATED
-        )
-
-######################################################################
-# READ AN ITEM
-######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items/<int:item_id>", methods = ["GET"])
-def read_an_item(shopcart_id, item_id):
-    """
-    Read an item{item_id} in a certain shopcart{shopcart_id}.
-
-    Args:
-        shopcart_id (int): the shopcart which contains the item
-        item_id (int): the item need to be read
-
-    Returns:
-        status code: 200 OK if successful
-        message (JSON): {int: item_id, string: name, float: price, int: quantity} if successful, 
-                        empty if not.
-    """
-    app.logger.info("Request for an item with id: %s in shopcart with id: %s", item_id, shopcart_id)
-    shopcart = Shopcart.find_shopcart(shopcart_id) 
-    if not shopcart:
-        raise NotFound(
-            "Shopcart with id '{}' was not found.".format(shopcart_id)
+        if Shopcart.find_item(shopcart_id, item["item_id"]):
+            item_id = item["item_id"]
+            abort(
+                status.HTTP_409_CONFLICT, 
+                f"Shopcart with user_id '{shopcart_id}' already contains item with id '{item_id}'. Do you mean Update?"
             )
-    item = Shopcart.find_item(shopcart_id, item_id)
-    if not item:
-        raise NotFound(
-            "Item with the id '{}' in shopcart'{}' was not found".format(item_id,shopcart_id) 
-        )
-    return make_response(jsonify(item.serialize()),
-        status.HTTP_200_OK
-        ) 
+        item["user_id"] = shopcart_id
+        app.logger.info(
+            "Creating item %s with user_id %s, item_name %s, price %s, quantity %s...",
+            item["item_id"], item["user_id"], item["item_name"], item["price"], item["quantity"]
+        )    
+        new_item = Shopcart()
+        new_item.deserialize(item)
+        new_item.create()
+        return new_item.serialize(), status.HTTP_201_CREATED
+            
 
 ######################################################################
-# UPDATE AN ITEM
+#  PATH: /shopcarts/{id}/items/{id}
 ######################################################################
-@app.route("/shopcarts/<int:shopcart_id>/items/<int:item_id>", methods = ["PUT"])
-def update_items(shopcart_id, item_id):
-    """
-    Update an existing item in shopcart {shopcart_id}.
-    Update quantity and/or price
+@api.route('/shopcarts/<int:shopcart_id>/items/<int:item_id>')
+@api.param('shopcart_id', 'The Shopcart identifier')
+@api.param('item_id', 'The item identifier')
 
-    Args:
-        shopcart_id (int): The shopcart to be updated
-        body of API call (JSON): 
-            quantity (int) 
-            price (float/int)
+class ItemResource(Resource):
 
-            have either quantity or price, or both
+    ######################################################################
+    # READ AN ITEM
+    ######################################################################
+    @api.doc('get_items')
+    @api.response(404, 'not found')
+    @api.marshal_with(item_model)
 
-    Returns:
-        status code: 200 if successful, 
-        404 if the requested shopcart_id or item_id does not exist,
-        400 if data type errors.
-        message (JSON): new item if successful, otherwise error messages
-    """
-    app.logger.info("Request to update an item")
-    check_content_type("application/json")
-    req = request.get_json()
-    if not "quantity" in req.keys() and not "price" in req.keys():
-        abort(status.HTTP_400_BAD_REQUEST, "Must have either quantity or price.")
-    quantity = None
-    price = None
-    if "quantity" in req.keys():
-        if not isinstance(req["quantity"], int) or req["quantity"] <= 0:
-            abort(status.HTTP_400_BAD_REQUEST, "Invalid quantity.")
-        else:
-            quantity = req["quantity"]
-    if "price" in req.keys():
-        if (not isinstance(req["price"], int) and not isinstance(req["price"], float)) or req["price"] < 0:
-            abort(status.HTTP_400_BAD_REQUEST, "Invalid price.")
-        else:
-            price = req["price"]
-    
-    # Make sure the shopcart exists
-    shopcart = Shopcart.find_shopcart(shopcart_id)
-    if not shopcart:
-        abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {shopcart_id} was not found.")
-    # Make sure the item exists
-    item = Shopcart.find_item(shopcart_id, item_id)
-    if not item:
-        abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
-    
-    # Now proceed to update
-    if quantity:
-        item.quantity = quantity
-        app.logger.info("item {item_id}'s quantity is changed to {quantity}")
-    if price:
-        item.price = price
-        app.logger.info("item {item_id}'s price is changed to {price}")
-    item.create()
-    return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
+    def get(self, shopcart_id, item_id):
+        """
+        Read an item{item_id} in a certain shopcart{shopcart_id}.
+        This endpoint will read an item based on the shopcart_id and item_id argument in the url
+        """
 
-######################################################################
-# DELETE AN ITEM
-######################################################################
-@app.route("/shopcarts/<shopcart_id>/items/<item_id>", methods = ["DELETE"])
-def delete_items(shopcart_id, item_id):
-    """
-    Delete item in shopcart {shopcart_id} with item_id {item_id},
-        regardless of the item's current existence.
+        app.logger.info("Request for an item with id: %s in shopcart with id: %s", item_id, shopcart_id)
 
-    Args:
-        shopcart_id (int): The shopcart containing the relevant item
-        item_id (int): The item to be deleted
+        shopcart = Shopcart.find_shopcart(shopcart_id) 
+        if not shopcart:
+            abort(status.HTTP_404_NOT_FOUND,
+                "Shopcart with id '{}' was not found.".format(shopcart_id)
+                )
+        item = Shopcart.find_item(shopcart_id, item_id)
+        if not item:
+            abort(status.HTTP_404_NOT_FOUND,
+                "Item with the id '{}' in shopcart'{}' was not found".format(item_id,shopcart_id) 
+            )
+        return item.serialize(), status.HTTP_200_OK
 
-    Returns:
-        status code: 204 if both args valid (int and >= 0); 400 if not
-        message (JSON): empty
-    """   
 
-    try:
-        shopcart_id = int(shopcart_id)
-        assert shopcart_id >= 0
-    except (AssertionError, ValueError):
-        app.logger.error("Shopcart_id must be a non-negative integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Shopcart_id must be a non-negative integer.")
-    try:
-        item_id = int(item_id)
-        assert item_id >= 0
-    except (AssertionError, ValueError):
-        app.logger.error("Item_id must be a non-negative integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
-    app.logger.info("Attempting to delete item %s from shopcart %s...", item_id, shopcart_id)
-    try:
-        item = Shopcart.find_item_or_404(shopcart_id, item_id)
-        item.delete()
-    except NotFound:
-        pass
-    app.logger.info("Making 204 response...")
-    return make_response("", status.HTTP_204_NO_CONTENT)
+    ######################################################################
+    # UPDATE AN ITEM
+    ######################################################################
+    @api.doc('update_items')
+    @api.response(404, 'not found')
+    @api.expect(update_item_model)
+    @api.marshal_with(item_model)
+
+    def put(self, shopcart_id, item_id):
+        """
+        Update an item{item_id} in a certain shopcart{shopcart_id}.
+        This endpoint will update an item based on the shopcart_id and item_id argument in the url
+        """
+        app.logger.info("Request to update an item")
+        check_content_type("application/json")
+
+        req = request.get_json()
+        if not "quantity" in req.keys() and not "price" in req.keys():
+            abort(status.HTTP_400_BAD_REQUEST, "Must have either quantity or price.")
+        quantity = None
+        price = None
+        if "quantity" in req.keys():
+            if not isinstance(req["quantity"], int) or req["quantity"] <= 0:
+                abort(status.HTTP_400_BAD_REQUEST, "Invalid quantity.")
+            else:
+                quantity = req["quantity"]
+        if "price" in req.keys():
+            if (not isinstance(req["price"], int) and not isinstance(req["price"], float)) or req["price"] < 0:
+                abort(status.HTTP_400_BAD_REQUEST, "Invalid price.")
+            else:
+                price = req["price"]
+        
+        # Make sure the shopcart exists
+        shopcart = Shopcart.find_shopcart(shopcart_id)
+        if not shopcart:
+            abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {shopcart_id} was not found.")
+        # Make sure the item exists
+        item = Shopcart.find_item(shopcart_id, item_id)
+        if not item:
+            abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
+        
+        # Now proceed to update
+        if quantity:
+            item.quantity = quantity
+            app.logger.info("item {item_id}'s quantity is changed to {quantity}")
+        if price:
+            item.price = price
+            app.logger.info("item {item_id}'s price is changed to {price}")
+        item.create()
+        return item.serialize(), status.HTTP_200_OK
+
+    ######################################################################
+    # DELETE AN ITEM
+    ######################################################################
+    @api.doc('delete_items')
+    @api.response(404, 'not found')
+    @api.response(204, 'deleted')
+
+    def delete(self, shopcart_id, item_id):
+        """
+        Delete an item{item_id} in a certain shopcart{shopcart_id}.
+        This endpoint will delete an item based on the shopcart_id and item_id argument in the url
+        """
+
+        app.logger.info("Attempting to delete item %s from shopcart %s...", item_id, shopcart_id)
+        try:
+            item = Shopcart.find_item_or_404(shopcart_id, item_id)
+            item.delete()
+        except NotFound:
+            pass
+        app.logger.info("Making 204 response...")
+        return "", status.HTTP_204_NO_CONTENT
 
 ######################################################################
 #  PATH: /shopcarts/{id}/items/{item_id}/hold
