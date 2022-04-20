@@ -105,6 +105,14 @@ update_item_model = api.model('ItemModel', {
                           exclusiveMin = True)       
 })
 
+update_item_model = api.model('ItemModel', {
+    'quantity': fields.Integer(description='The quantity of the Item',
+                               min = 1),
+    'price': fields.Float(description='The price of the Item',
+                          min = 0,
+                          exclusiveMin = True)       
+})
+
 list_shopcart_model = api.model('ShopcartModel', {
     'user_id': fields.Integer(readOnly=True,
                               description='The ID of the User')
@@ -431,12 +439,14 @@ class ItemResource(Resource):
         item.create()
         return item.serialize(), status.HTTP_200_OK
 
+
     ######################################################################
     # DELETE AN ITEM
     ######################################################################
     @api.doc('delete_items')
     @api.response(404, 'not found')
     @api.response(204, 'deleted')
+
 
     def delete(self, shopcart_id, item_id):
         """
@@ -452,6 +462,7 @@ class ItemResource(Resource):
             pass
         app.logger.info("Making 204 response...")
         return "", status.HTTP_204_NO_CONTENT
+
 
 ######################################################################
 #  PATH: /shopcarts/{id}/items/{item_id}/hold
@@ -528,6 +539,7 @@ def resume_items(shopcart_id, item_id):
         abort(status.HTTP_404_NOT_FOUND, f"item with id {item_id} was not found.")
     app.logger.info("Making 200 response...")
     return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
