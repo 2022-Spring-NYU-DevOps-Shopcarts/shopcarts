@@ -29,7 +29,8 @@ def step_impl(context):
             "item_id": int(row['item_id']),
             "item_name": row['item_name'],
             "quantity": int(row['quantity']),
-            "price": float(row['price'])
+            "price": float(row['price']),
+            "hold": row['hold'],
         }
         payload = json.dumps(data)
         context.resp = requests.post(create_url+"/"+row['user_id']+"/items", data=payload, headers=headers)
