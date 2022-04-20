@@ -18,3 +18,4 @@ class ItemFactory(factory.Factory):
     item_name = "ring" + str(item_id)
     quantity = FuzzyInteger(1, 999)
     price = FuzzyFloat(0.1)
+    hold = False

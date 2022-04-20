@@ -11,6 +11,7 @@ $(function () {
         $("#item_name").val(res.item_name);
         $("#quantity").val(res.quantity);
         $("#price").val(res.price);
+        $("#hold").val(res.hold);
     }
 
     /// Clears all form fields
@@ -20,6 +21,7 @@ $(function () {
         $("#item_name").val("");
         $("#quantity").val("");
         $("#price").val("");
+        $("#hold").val("");
     }
 
     // Updates the flash message area
@@ -71,13 +73,15 @@ $(function () {
         let item_name = $("#item_name").val();
         let quantity = parseInt($("#quantity").val());
         let price = parseInt($("#price").val());
+        let hold = $("#hold").val();
 
         let data = {
             "item_id": item_id,
             "user_id": user_id,
             "item_name": item_name,
             "quantity": quantity,
-            "price": price
+            "price": price,
+            "hold": hold
         };
 
         $("#flash_message").empty();
@@ -166,10 +170,11 @@ $(function () {
             table += '<th class="col-md-2">Item Name</th>'
             table += '<th class="col-md-2">Quantity</th>'
             table += '<th class="col-md-2">Price</th>'
+            table += '<th class="col-md-2">Hold</th>'
             table += '</tr></thead><tbody>'
             for(let i = 0; i < res.length; i++) {
                 let item = res[i];
-                table +=  `<tr id="row_${i}"><td>${item.item_id}</td><td>${item.item_name}</td><td>${item.quantity}</td><td>${item.price}</td></tr>`;
+                table +=  `<tr id="row_${i}"><td>${item.item_id}</td><td>${item.item_name}</td><td>${item.quantity}</td><td>${item.price}</td><td>${item.hold}</td></tr>`;
             }
             table += '</tbody></table>';
             $("#search_results").append(table);

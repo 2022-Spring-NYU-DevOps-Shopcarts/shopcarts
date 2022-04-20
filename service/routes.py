@@ -57,7 +57,9 @@ create_item_model = api.model('Item', {
     'price': fields.Float(required=True,
                           description='The price of the Item',
                           min = 0,
-                          exclusiveMin = True)
+                          exclusiveMin = True),
+    'hold': fields.Boolean(required=True,
+                            description='The holding status of the Item')
 })
 
 # Define the model so that the docs reflect what can be sent
@@ -73,6 +75,7 @@ create_shopcart_model = api.model('Shopcart', {
     'price': fields.Float(description='The price of the Item',
                           min = 0,
                           exclusiveMin = True),
+    'hold': fields.Boolean(description='The holding status of the Item'),
     'items': fields.List(fields.Nested(create_item_model),
                          description='The list of Items (use for multiple items)')
 })
@@ -90,7 +93,16 @@ item_model = api.model('ItemModel', {
                                min = 1),
     'price': fields.Float(description='The price of the Item',
                           min = 0,
-                          exclusiveMin = True)
+                          exclusiveMin = True),
+    'hold': fields.Boolean(description='The holding status of the Item')
+})
+
+update_item_model = api.model('ItemModel', {
+    'quantity': fields.Integer(description='The quantity of the Item',
+                               min = 1),
+    'price': fields.Float(description='The price of the Item',
+                          min = 0,
+                          exclusiveMin = True)       
 })
 
 update_item_model = api.model('ItemModel', {
@@ -427,12 +439,14 @@ class ItemResource(Resource):
         item.create()
         return item.serialize(), status.HTTP_200_OK
 
+
     ######################################################################
     # DELETE AN ITEM
     ######################################################################
     @api.doc('delete_items')
     @api.response(404, 'not found')
     @api.response(204, 'deleted')
+
 
     def delete(self, shopcart_id, item_id):
         """
@@ -448,6 +462,84 @@ class ItemResource(Resource):
             pass
         app.logger.info("Making 204 response...")
         return "", status.HTTP_204_NO_CONTENT
+
+
+######################################################################
+#  PATH: /shopcarts/{id}/items/{item_id}/hold
+######################################################################
+@api.route('/shopcarts/<int:user_id>/items/<int:item_id>/hold', strict_slashes=False)
+@api.param('user_id', 'The User identifier')
+@api.param('item_id', 'The Item identifier')
+class HoldResource(Resource):
+	"""
+	HoldResource class
+
+	Allows the holding status changes of a single Item
+	PUT /shopcarts/{id}/items/{item_id}/hold - Updates an Item's holding status to True
+	"""
+
+	######################################################################
+	# HOLD AN ITEM
+	######################################################################
+	@api.doc("hold_items")
+	@api.response(404, 'Shopcart or Item not found')
+	@api.marshal_list_with(item_model)
+	def put(self, user_id, item_id):
+		shopcart = Shopcart.find_shopcart(user_id)
+		if not shopcart:
+			abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {user_id} was not found.")
+		# Make sure the item exists
+		item = Shopcart.find_item(user_id, item_id)
+		if not item:
+			abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
+		item.hold = True
+		app.logger.info("Attempting to hold item %s from shopcart %s...", item_id, user_id)
+		app.logger.info("Making 200 response...")
+		return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
+        
+######################################################################
+# RESUME AN ITEM
+######################################################################
+@app.route("/shopcarts/<shopcart_id>/items/<item_id>/resume", methods = ["PUT"])
+def resume_items(shopcart_id, item_id):
+    """
+    Resume item in shopcart {shopcart_id} with item_id {item_id}
+        from held (will be ordered when user checks out the shopcart)
+    Args:
+        shopcart_id (int): The shopcart containing the relevant item
+        item_id (int): The item to be deleted
+    Returns:
+        status code: 200 if successful, 
+        404 if the requested shopcart_id or item_id does not exist,
+        400 if data type errors.
+        message (JSON): item if successful, otherwise error messages
+    """   
+
+    try:
+        shopcart_id = int(shopcart_id)
+        assert shopcart_id >= 0
+    except (AssertionError, ValueError):
+        app.logger.error("Shopcart_id must be a non-negative integer.")
+        abort(status.HTTP_400_BAD_REQUEST, "Shopcart_id must be a non-negative integer.")
+    try:
+        item_id = int(item_id)
+        assert item_id >= 0
+    except (AssertionError, ValueError):
+        app.logger.error("Item_id must be a non-negative integer.")
+        abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
+    app.logger.info("Attempting to resume item %s from shopcart %s...", item_id, shopcart_id)
+    try:
+        item = Shopcart.find_shopcart_or_404(shopcart_id)
+    except NotFound:
+        abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {shopcart_id} was not found.")
+    try:
+        item = Shopcart.find_item_or_404(shopcart_id, item_id)
+        item.hold = False
+    except NotFound:
+        abort(status.HTTP_404_NOT_FOUND, f"item with id {item_id} was not found.")
+    app.logger.info("Making 200 response...")
+    return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
