@@ -265,7 +265,7 @@ class TestYourResourceServer(TestCase):
                 json=test_shopcart.serialize(),
                 content_type=CONTENT_TYPE_JSON
         )
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
 
     def test_create_shopcart_duplicate_item_id(self):
         """Create a Shopcart with duplicate item id"""
