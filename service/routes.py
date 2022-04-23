@@ -156,6 +156,8 @@ class ShopcartCollection(Resource):
     ######################################################################
     @api.doc('create_shopcarts')
     @api.response(400, 'Invalid posted data')
+    @api.response(409, 'Non-empty shopcart already exists at this id')
+    @api.response(201, 'Created shopcart')
     @api.expect(create_shopcart_model)
     @api.marshal_list_with(item_model, code=201)
     def post(self):
@@ -171,7 +173,7 @@ class ShopcartCollection(Resource):
         if Shopcart.find_shopcart(req["user_id"]):
             user_id = req["user_id"]
             abort(
-                status.HTTP_400_BAD_REQUEST, 
+                status.HTTP_409_CONFLICT, 
                 f"User with id '{user_id}' already has a non-empty shopcart.",
             )
         
@@ -206,6 +208,7 @@ class ShopcartCollection(Resource):
     # LIST ALL SHOPCARTS
     ######################################################################
     @api.doc('list_shopcarts')
+    @api.response(200, 'Listed all shopcarts')
     @api.marshal_list_with(list_shopcart_model)
     def get(self):
         """Returns all of the Shopcarts"""
@@ -228,6 +231,7 @@ class ShopcartResource(Resource):
     ######################################################################
     @api.doc('get_shopcarts')
     @api.marshal_list_with(item_model)
+    @api.response(200, 'Retrieved shopcart')
     def get(self, user_id):
         """
         Retrieve a single Shopcart
@@ -299,8 +303,9 @@ class ItemCollectionResource(Resource):
     @api.doc('create_items')
     @api.response(201, 'created')
     @api.response(409, 'item already in cart')
+    @api.response(400, 'invalid attributes')
     @api.expect(create_item_model)
-   
+    @api.marshal_with(item_model)
     def post(self, shopcart_id):
         """
         Create new item in shopcart {shopcart_id}.
@@ -365,6 +370,7 @@ class ItemResource(Resource):
     ######################################################################
     @api.doc('get_items')
     @api.response(404, 'not found')
+    @api.response(200, 'item retrieved')
     @api.marshal_with(item_model)
 
     def get(self, shopcart_id, item_id):
@@ -393,6 +399,8 @@ class ItemResource(Resource):
     ######################################################################
     @api.doc('update_items')
     @api.response(404, 'not found')
+    @api.response(400, 'invalid quantity or price')
+    @api.response(200, 'item updated')
     @api.expect(update_item_model)
     @api.marshal_with(item_model)
 
@@ -447,7 +455,6 @@ class ItemResource(Resource):
     @api.response(404, 'not found')
     @api.response(204, 'deleted')
 
-
     def delete(self, shopcart_id, item_id):
         """
         Delete an item{item_id} in a certain shopcart{shopcart_id}.
@@ -471,31 +478,32 @@ class ItemResource(Resource):
 @api.param('user_id', 'The User identifier')
 @api.param('item_id', 'The Item identifier')
 class HoldResource(Resource):
-	"""
-	HoldResource class
+    """
+    HoldResource class
 
-	Allows the holding status changes of a single Item
-	PUT /shopcarts/{id}/items/{item_id}/hold - Updates an Item's holding status to True
-	"""
+    Allows the holding status changes of a single Item
+    PUT /shopcarts/{id}/items/{item_id}/hold - Updates an Item's holding status to True
+    """
 
 	######################################################################
 	# HOLD AN ITEM
 	######################################################################
-	@api.doc("hold_items")
-	@api.response(404, 'Shopcart or Item not found')
-	@api.marshal_list_with(item_model)
-	def put(self, user_id, item_id):
-		shopcart = Shopcart.find_shopcart(user_id)
-		if not shopcart:
-			abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {user_id} was not found.")
-		# Make sure the item exists
-		item = Shopcart.find_item(user_id, item_id)
-		if not item:
-			abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
-		item.hold = True
-		app.logger.info("Attempting to hold item %s from shopcart %s...", item_id, user_id)
-		app.logger.info("Making 200 response...")
-		return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
+    @api.doc("hold_items")
+    @api.response(404, 'Shopcart or Item not found')
+    @api.response(200, 'Item put on hold')
+    @api.marshal_list_with(item_model)
+    def put(self, user_id, item_id):
+        shopcart = Shopcart.find_shopcart(user_id)
+        if not shopcart:
+            abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {user_id} was not found.")
+        # Make sure the item exists
+        item = Shopcart.find_item(user_id, item_id)
+        if not item:
+            abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
+        item.hold = True
+        app.logger.info("Attempting to hold item %s from shopcart %s...", item_id, user_id)
+        app.logger.info("Making 200 response...")
+        return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
         
 ######################################################################
 # RESUME AN ITEM
