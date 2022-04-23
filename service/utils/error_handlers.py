@@ -117,17 +117,17 @@ from . import status
 #         status.HTTP_500_INTERNAL_SERVER_ERROR,
 #     )
 
-@app.errorhandler(status.HTTP_409_CONFLICT)
-def conflict(error):
-    """Handles unexpected server error with HTTP_409_CONFLICT"""
-    message = str(error)
-    app.logger.error(message)
-    return make_response(
-        jsonify(
-            status=status.HTTP_409_CONFLICT,
-            error="conflict",
-            message=message,
-        ),
-        status.HTTP_409_CONFLICT,
-    )
+# @app.errorhandler(status.HTTP_409_CONFLICT)
+# def conflict(error):
+#     """Handles unexpected server error with HTTP_409_CONFLICT"""
+#     message = str(error)
+#     app.logger.error(message)
+#     return make_response(
+#         jsonify(
+#             status=status.HTTP_409_CONFLICT,
+#             error="conflict",
+#             message=message,
+#         ),
+#         status.HTTP_409_CONFLICT,
+#     )
 
