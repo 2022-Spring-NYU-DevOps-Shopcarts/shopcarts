@@ -48,7 +48,7 @@ class Shopcart(db.Model):
     price = db.Column(db.Float)
     hold = db.Column(db.Boolean)
 
-
+    
     def __repr__(self):
         return "<Product %s in Shopcart for user %s>" % (self.item_id, self.user_id)
 
@@ -98,7 +98,7 @@ class Shopcart(db.Model):
                     "Invalid type or value for positive int [user_id]: "
                     + str(type(data["user_id"])) + " with value " + str(data["user_id"])
                 )
-            if isinstance(data["item_id"], int) and data["user_id"] >= 0:
+            if isinstance(data["item_id"], int) and data["item_id"] >= 0:
                 self.item_id = data["item_id"]
             else:
                 raise DataValidationError(

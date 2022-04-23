@@ -19,4 +19,3 @@ class ItemFactory(factory.Factory):
     quantity = FuzzyInteger(1, 999)
     price = FuzzyFloat(0.1)
     hold = False
-

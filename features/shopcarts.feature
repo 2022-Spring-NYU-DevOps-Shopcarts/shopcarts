@@ -5,11 +5,10 @@ Feature: The shopcart store service back-end
 
 Background:
     Given a set of items in shopcarts
-        | user_id | item_id | item_name | quantity | price  |
-        | 1001    | 1       |  ring1    |  2       |  1998  |
-        | 1001    | 2       |  ring2    |  1       |  1.5   |
-        | 1002    | 1       |  ring1    |  3       |  3     |
-
+        | user_id | item_id | item_name | quantity | price  | hold  |
+        | 1001    | 1       |  ring1    |  2       |  1998  | False |
+        | 1001    | 2       |  ring2    |  1       |  1.5   | False |
+        | 1002    | 1       |  ring1    |  3       |  3     | False |
 ############################################################
 # CREATE SHOPCARTS
 ############################################################
@@ -94,4 +93,3 @@ Scenario: List shopcarts when there are none
     Then we should see message "Successfully listed all the shopcarts"
     And we should not see "1001" in the shopcarts table
     And we should not see "1002" in the shopcarts table
-

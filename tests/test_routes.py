@@ -265,7 +265,7 @@ class TestYourResourceServer(TestCase):
                 json=test_shopcart.serialize(),
                 content_type=CONTENT_TYPE_JSON
         )
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
 
     def test_create_shopcart_duplicate_item_id(self):
         """Create a Shopcart with duplicate item id"""
@@ -1101,6 +1101,234 @@ class TestYourResourceServer(TestCase):
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
+
+        
+    ######################################################################
+    # TEST HOLD ITEM
+    ######################################################################
+    def test_hold_item(self):
+        """ Attempts holding item for later. """
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # test hold for later
+        item_id = req["item_id"]
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
+        resp = self.app.put(
+            new_url, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+
+    def test_hold_nonexistent_itemid(self):
+        """ Attempts holding item that doesn't exist."""
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # test hold the non-exist item
+        item_id = req["item_id"] + 1 # this item doesn't exist
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
+        resp = self.app.put(
+            new_url, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND) # still same response
+
+
+    def test_hold_nonexistent_userid(self):
+        """ Attempts holding an item in the shopcart whose user_id doesn't exist."""
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # test hold when the user_id not exists
+        user_id += 1 # wrong user_id, but is valid
+        item_id = req["item_id"]
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
+        resp = self.app.put(
+            new_url, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND) # still same response
+
+
+    def test_hold_nonexistent_userid_nonexistent_itemid(self):
+        """ Attempts holding item whose user_id and item_id don't exist."""
+        # create an item first
+        test_item = ItemFactory()
+        req = test_item.serialize()
+        user_id = req.pop("user_id")
+        url = f"{BASE_URL}/{user_id}/items"
+        logging.debug(url)
+        resp = self.app.post(
+            url, json=req, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # test hold
+        user_id += 1 # wrong user_id but still valid
+        item_id = req["item_id"] + 1 # wrong item_id
+        new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
+        resp = self.app.put(
+            new_url, content_type=CONTENT_TYPE_JSON
+        )
+        logging.debug(resp)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND) # still same response
+
+
+    # def test_hold_item_negative_userid(self):
+    #     """ Attempts holding item on an invalid negative user_id"""
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+    #     # test hold for later
+    #     user_id = -1
+    #     item_id = req["item_id"]
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
+    #     resp = self.app.put(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    # def test_hold_item_nonint_userid(self):
+    #     """ Attempts holding item on an invalid non-int user_id"""
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+    #     # test hold
+    #     user_id = 1.5
+    #     item_id = req["item_id"]
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}/resume"
+    #     resp = self.app.put(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+
+    # def test_hold_item_nonint_item_id(self):
+    #     """ Attempts holding item on an invalid non-int user_id"""
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+    #     # test hold
+    #     item_id = 1.5 
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
+    #     resp = self.app.put(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+
+    # def test_hold_item_negative_itemid(self):
+    #     """ Attempts holding item on an invalid negative item_id"""
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+    #     # test hold
+    #     item_id = -1
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
+    #     resp = self.app.put(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    # def test_hold_item_nonint_userid_negative_itemid(self):
+    #     """ Attempts holding item on an invalid user_id and invalid item_id for later
+    #         not int user_id and negative item_id 
+    #     """
+    #     # create an item first
+    #     test_item = ItemFactory()
+    #     req = test_item.serialize()
+    #     user_id = req.pop("user_id")
+    #     url = f"{BASE_URL}/{user_id}/items"
+    #     logging.debug(url)
+    #     resp = self.app.post(
+    #         url, json=req, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+    #     # test hold
+    #     user_id = 1.5
+    #     item_id = -1
+    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
+    #     resp = self.app.put(
+    #         new_url, content_type=CONTENT_TYPE_JSON
+    #     )
+    #     logging.debug(resp)
+    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST) 
+
+
     ######################################################################
     # TEST RESUME ITEM
     ######################################################################
@@ -1250,7 +1478,6 @@ class TestYourResourceServer(TestCase):
         )
         logging.debug(resp)
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-    
 
     def test_resume_item_nonint_item_id(self):
         """ Attempts resuming item on an invalid non-int user_id"""
