@@ -164,7 +164,6 @@ class TestShopcart(unittest.TestCase):
         self.assertEqual(shopcart.price, 20.5)
         self.assertEqual(shopcart.hold, True)
 
-
     def test_deserialize_with_bad_hold(self):
         """Test deserialization of a Shopcart with hold info"""
         data = {"user_id" : 1, "item_id" : 2, "item_name" : "bottle", "quantity" : 2, "price" : 20.5, "hold" : 1}

@@ -518,48 +518,58 @@ class HoldResource(Resource):
         return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
         
 ######################################################################
-# RESUME AN ITEM
+#  PATH: /shopcarts/{id}/items/{item_id}/resume
 ######################################################################
-@app.route("/shopcarts/<shopcart_id>/items/<item_id>/resume", methods = ["PUT"])
-def resume_items(shopcart_id, item_id):
+@api.route('/shopcarts/<int:user_id>/items/<int:item_id>/resume')
+@api.param('user_id', 'The User identifier')
+@api.param('item_id', 'The Item identifier')
+class ResumeResource(Resource):
     """
-    Resume item in shopcart {shopcart_id} with item_id {item_id}
-        from held (will be ordered when user checks out the shopcart)
-    Args:
-        shopcart_id (int): The shopcart containing the relevant item
-        item_id (int): The item to be deleted
-    Returns:
-        status code: 200 if successful, 
-        404 if the requested shopcart_id or item_id does not exist,
-        400 if data type errors.
-        message (JSON): item if successful, otherwise error messages
-    """   
+    ResumeResource class
 
-    try:
-        shopcart_id = int(shopcart_id)
-        assert shopcart_id >= 0
-    except (AssertionError, ValueError):
-        app.logger.error("Shopcart_id must be a non-negative integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Shopcart_id must be a non-negative integer.")
-    try:
-        item_id = int(item_id)
-        assert item_id >= 0
-    except (AssertionError, ValueError):
-        app.logger.error("Item_id must be a non-negative integer.")
-        abort(status.HTTP_400_BAD_REQUEST, "Item_id must be a non-negative integer.")
-    app.logger.info("Attempting to resume item %s from shopcart %s...", item_id, shopcart_id)
-    try:
-        item = Shopcart.find_shopcart_or_404(shopcart_id)
-    except NotFound:
-        abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {shopcart_id} was not found.")
-    try:
-        item = Shopcart.find_item_or_404(shopcart_id, item_id)
+    Allows the holding status changes of a single Item
+    PUT /shopcarts/{id}/items/{item_id}/hold - Updates an Item's holding status to False
+    """
+
+    ######################################################################
+	# RESUME AN ITEM
+	######################################################################
+    @api.doc("resume_items")
+    @api.response(404, 'Shopcart or Item not found')
+    @api.response(200, 'Item resumed')
+    @api.marshal_list_with(item_model)
+    def put(self, user_id, item_id):
+        """
+        Resume item in shopcart {shopcart_id} with item_id {item_id}
+            from held (will be ordered when user checks out the shopcart)
+        Args:
+            shopcart_id (int): The shopcart containing the relevant item
+            item_id (int): The item to be deleted
+        Returns:
+            status code: 200 if successful, 
+            404 if the requested shopcart_id or item_id does not exist,
+            400 if data type errors.
+            message (JSON): item if successful, otherwise error messages
+        """   
+        app.logger.info("Attempting to resume item %s from shopcart %s...", item_id, user_id)
+        # try:
+        #     item = Shopcart.find_shopcart_or_404(user_id)
+        # except NotFound:
+        #     abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {user_id} was not found.")
+        # try:
+        #     item = Shopcart.find_item_or_404(user_id, item_id)
+        #     item.hold = False
+        # except NotFound:
+        shopcart = Shopcart.find_shopcart(user_id)
+        if not shopcart:
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {user_id} was not found.")
+        # Make sure the item exists
+        item = Shopcart.find_item(user_id, item_id)
+        if not item:
+            abort(status.HTTP_404_NOT_FOUND, f"item with id {item_id} was not found.")
         item.hold = False
-    except NotFound:
-        abort(status.HTTP_404_NOT_FOUND, f"item with id {item_id} was not found.")
-    app.logger.info("Making 200 response...")
-    return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
-
+        app.logger.info("Making 200 response...")
+        return make_response(jsonify(item.serialize()), status.HTTP_200_OK)
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
