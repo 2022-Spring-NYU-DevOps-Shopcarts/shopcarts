@@ -130,7 +130,8 @@ class Shopcart(db.Model):
                             + str(type(data["hold"]))
                     )
             else:
-                self.hold = False  
+                self.hold = False
+                
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Shopcart item: missing " + error.args[0]
