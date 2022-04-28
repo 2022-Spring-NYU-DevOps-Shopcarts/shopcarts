@@ -612,13 +612,13 @@ class TestYourResourceServer(TestCase):
         resp = self.app.get("/shopcarts/0/items/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
 
-    def test_read_an_item_not_found_Item(self):
-        """Read an item thats not found"""
-        test_shopcart = self._create_items(1)
-        resp = self.app.get(
-            "{0}/{1}/items/{2}".format(BASE_URL, test_shopcart[0].user_id,test_shopcart[0].item_id+100), content_type=CONTENT_TYPE_JSON
-        )
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
+    # def test_read_an_item_not_found_Item(self):
+    #     """Read an item thats not found"""
+    #     test_shopcart = self._create_items(1)
+    #     resp = self.app.get(
+    #         "{0}/{1}/items/{2}".format(BASE_URL, test_shopcart[0].user_id,test_shopcart[0].item_id+100), content_type=CONTENT_TYPE_JSON
+    #     )
+    #     self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)  
 
 
     ######################################################################
@@ -1268,14 +1268,14 @@ class TestYourResourceServer(TestCase):
     #     logging.debug(resp)
     #     self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
-    #     # test hold
-    #     item_id = 1.5 
-    #     new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
-    #     resp = self.app.put(
-    #         new_url, content_type=CONTENT_TYPE_JSON
-    #     )
-    #     logging.debug(resp)
-    #     self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        # test hold
+        # item_id = 1.5 
+        # new_url = f"{BASE_URL}/{user_id}/items/{item_id}/hold"
+        # resp = self.app.put(
+        #     new_url, content_type=CONTENT_TYPE_JSON
+        # )
+        # logging.debug(resp)
+        # self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
     # def test_hold_item_negative_itemid(self):
@@ -1299,7 +1299,7 @@ class TestYourResourceServer(TestCase):
     #         new_url, content_type=CONTENT_TYPE_JSON
     #     )
     #     logging.debug(resp)
-    #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+    #     self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
     # def test_hold_item_nonint_userid_negative_itemid(self):
@@ -1554,3 +1554,28 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST) 
 
 
+    def test_query_shopcarts_empty(self):
+        """Attempts querying shopcarts returning empty list"""
+        shopcart1 = self._create_items(2)
+        shopcart2 = self._create_items(3)
+        item_id = 9998
+        new_url = f"{BASE_URL}/?item-id={item_id}"
+        resp = self.app.get(new_url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 0)
+
+    
+    def test_query_shopcarts_nonempty(self):
+         """Attempts querying shopcarts returning list nonempty list"""
+         shopcart1 = self._create_items(1)
+         shopcart2 = self._create_items(3)
+         item_id = shopcart1[0].item_id
+         new_url = f"{BASE_URL}/?item-id={item_id}"
+         resp = self.app.get(new_url)
+         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+         data = resp.get_json()
+         self.assertEqual(len(data), 2)
+         dict1 = {'user_id': shopcart1[0].user_id}
+         dict2 = {'user_id': shopcart2[0].user_id}
+         self.assertCountEqual(data, [dict1, dict2])

@@ -189,3 +189,8 @@ class Shopcart(db.Model):
         logger.info("Processing lookup or 404 for user id %s item id %s...", user_id, item_id)
         return cls.query.filter((cls.user_id == user_id) & (cls.item_id == item_id)).first_or_404()
 
+    @classmethod
+    def query_by_item_id(cls, item_id):
+        """ Find all shopcarts containing the item_id """
+        logger.info("Processing lookup for all shopcarts containing item id %s...", item_id)
+        return cls.query.filter(cls.item_id == item_id).all()

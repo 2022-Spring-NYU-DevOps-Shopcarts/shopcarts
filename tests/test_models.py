@@ -294,3 +294,51 @@ class TestShopcart(unittest.TestCase):
         """Test 404 for item"""
         self.assertRaises(NotFound, Shopcart.find_item_or_404, 0, -1)
     
+    
+    def test_query_shopcarts_by_item_id_empty(self):
+        """Test return empty list when no shopcart containing the item id"""
+        shopcart1 = ItemFactory(item_id = 0)
+        shopcart2 = ItemFactory(user_id = shopcart1.user_id, item_id = 1)
+        shopcart3 = ItemFactory(user_id = shopcart1.user_id, item_id = 2)
+        shopcarts = [shopcart1, shopcart2, shopcart3]
+        for shopcart in shopcarts:
+            shopcart.create()
+        # make sure they got saved
+        self.assertEqual(len(Shopcart.all()), 3)
+        shopcart_list = Shopcart.query_by_item_id(5)
+        self.assertEqual(len(shopcart_list), 0)
+    
+
+    def test_query_shopcarts_by_item_id_single(self):
+        """Test return list of a single shopcart containing the item id"""
+        shopcart1 = ItemFactory(item_id = 0)
+        shopcart2 = ItemFactory(user_id = shopcart1.user_id, item_id = 1)
+        shopcart3 = ItemFactory(item_id = 3)
+        shopcarts = [shopcart1, shopcart2, shopcart3]
+        for shopcart in shopcarts:
+            shopcart.create()
+        # make sure they got saved
+        self.assertEqual(len(Shopcart.all()), 3)
+        shopcart_list = Shopcart.query_by_item_id(1)
+        self.assertEqual(len(shopcart_list), 1)
+        self.assertEqual(shopcart_list[0].user_id, shopcarts[1].user_id)
+
+    
+    def test_query_shopcarts_by_item_id_multiple(self):
+        """Test return list of multiple shopcarts containing the item id"""
+        shopcart1 = ItemFactory(item_id = 0)
+        shopcart2 = ItemFactory(item_id = 1)
+        shopcart3 = ItemFactory(item_id = 0)
+        shopcart4 = ItemFactory(item_id = 2)
+        shopcart5 = ItemFactory(item_id = 3)
+        shopcarts = [shopcart1, shopcart2, shopcart3, shopcart4, shopcart5]
+        for shopcart in shopcarts:
+            shopcart.create()
+        # make sure they got saved
+        self.assertEqual(len(Shopcart.all()), 5)
+        shopcart_list = Shopcart.query_by_item_id(0)
+        self.assertEqual(len(shopcart_list), 2)
+        self.assertEqual(shopcart_list[0].user_id, shopcarts[0].user_id)
+        self.assertEqual(shopcart_list[1].user_id, shopcarts[2].user_id)
+
+
