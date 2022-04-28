@@ -4,7 +4,7 @@ applications:
 - name: nyu-shopcart-service-sp2203
   path: .
   instances: 2
-  memory: 128M
+  memory: 256M
   routes:
   - route: nyu-shopcart-service-sp2203.us-south.cf.appdomain.cloud
   disk_quota: 1024M
