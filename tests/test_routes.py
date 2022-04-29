@@ -1552,3 +1552,28 @@ class TestYourResourceServer(TestCase):
     #     logging.debug(resp)
     #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_query_shopcarts_empty(self):
+        """Attempts querying shopcarts returning empty list"""
+        shopcart1 = self._create_items(2)
+        shopcart2 = self._create_items(3)
+        item_id = 9998
+        new_url = f"{BASE_URL}/?item={item_id}"
+        resp = self.app.get(new_url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(len(data), 0)
+
+    
+    def test_query_shopcarts_nonempty(self):
+         """Attempts querying shopcarts returning list nonempty list"""
+         shopcart1 = self._create_items(1)
+         shopcart2 = self._create_items(3)
+         item_id = shopcart1[0].item_id
+         new_url = f"{BASE_URL}/?item={item_id}"
+         resp = self.app.get(new_url)
+         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+         data = resp.get_json()
+         self.assertEqual(len(data), 2)
+         dict1 = {'user_id': shopcart1[0].user_id}
+         dict2 = {'user_id': shopcart2[0].user_id}
+         self.assertCountEqual(data, [dict1, dict2])
