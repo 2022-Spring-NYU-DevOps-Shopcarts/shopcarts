@@ -13,6 +13,7 @@ Usage:
     DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart
 
 """
+from attr import validate
 from werkzeug.exceptions import NotFound
 from flask import jsonify, request, url_for, make_response, abort
 from flask_restx import Api, Resource, fields, reqparse, inputs
@@ -118,7 +119,9 @@ list_shopcart_model = api.model('ShopcartModel', {
                               description='The ID of the User')
 })
 
-
+# query string arguments
+shopcart_args = reqparse.RequestParser()
+shopcart_args.add_argument('item-id', type=int, required=False, help='List shopcarts containing the item id')
 
 ######################################################################
 # Special Error Handlers
@@ -205,18 +208,27 @@ class ShopcartCollection(Resource):
         return results, status.HTTP_201_CREATED, {"Location": location_url}
 
     ######################################################################
-    # LIST ALL SHOPCARTS
+    # LIST ALL SHOPCARTS / QUERY ALL SHOPCARTS CONTAINING AN ITEM
     ######################################################################
     @api.doc('list_shopcarts')
+    @api.expect(shopcart_args, validate=True)
     @api.response(200, 'Listed all shopcarts')
     @api.marshal_list_with(list_shopcart_model)
     def get(self):
         """Returns all of the Shopcarts"""
         app.logger.info("Request for shopcart list")
-        shopcarts = Shopcart.all_shopcart()
+        args = shopcart_args.parse_args()
+        if args['item-id']:
+            app.logger.info("Filtering shopcarts by item id %s", args['item-id'])
+            shopcarts = Shopcart.query_by_item_id(args['item-id'])
+        else:
+            app.logger.info("Returning unfiltered shopcart lists")
+            shopcarts = Shopcart.all_shopcart()
+
         results = [dict(shopcart) for shopcart in shopcarts]
         app.logger.info("Returning %d shopcarts", len(results))
         return results, status.HTTP_200_OK
+
 
 
 ######################################################################

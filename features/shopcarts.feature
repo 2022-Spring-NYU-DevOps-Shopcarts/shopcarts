@@ -93,3 +93,7 @@ Scenario: List shopcarts when there are none
     Then we should see message "Successfully listed all the shopcarts"
     And we should not see "1001" in the shopcarts table
     And we should not see "1002" in the shopcarts table
+
+############################################################
+# QUERY SHOPCARTS
+############################################################

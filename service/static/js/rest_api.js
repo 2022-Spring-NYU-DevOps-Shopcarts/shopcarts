@@ -198,7 +198,7 @@ $(function () {
         let ajax = $.ajax({
             type: "GET",
             url: `/shopcarts`,
-            contentType: "application/json",
+            // contentType: "application/json",
             data: ''
         })
         ajax.done(function(res){
