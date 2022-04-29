@@ -217,9 +217,9 @@ class ShopcartCollection(Resource):
         app.logger.info("Request for shopcart list")
         shopcarts = []
         args = shopcart_args.parse_args()
-        if args['itemID']:
-            app.logger.info("Filtering shopcarts by item id %s", args['itemID'])
-            shopcarts = Shopcart.query_by_item_id(args['itemID'])
+        if args['item']:
+            app.logger.info("Filtering shopcarts by item id %s", args['item'])
+            shopcarts = Shopcart.query_by_item_id(args['item'])
         else:
             app.logger.info("Returning unfiltered shopcart lists")
             shopcarts = Shopcart.all_shopcart()
