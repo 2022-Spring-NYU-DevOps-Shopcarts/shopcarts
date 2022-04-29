@@ -119,8 +119,8 @@ list_shopcart_model = api.model('ShopcartModel', {
 })
 
 # query string arguments
-# shopcart_args = reqparse.RequestParser()
-# shopcart_args.add_argument('item', type=int, required=False, help='List shopcarts containing the item id')
+shopcart_args = reqparse.RequestParser()
+shopcart_args.add_argument('item', type=int, required=False, help='List shopcarts containing the item id')
 
 ######################################################################
 # Special Error Handlers
@@ -210,31 +210,24 @@ class ShopcartCollection(Resource):
     # LIST ALL SHOPCARTS / QUERY ALL SHOPCARTS CONTAINING AN ITEM
     ######################################################################
     @api.doc('list_shopcarts')
-    # @api.expect(shopcart_args, validate=True)
+    @api.expect(shopcart_args, validate=True)
     @api.marshal_list_with(list_shopcart_model)
-    # def get(self):
-    #     """Returns all of the Shopcarts"""
-    #     app.logger.info("Request for shopcart list")
-    #     shopcarts = []
-    #     args = shopcart_args.parse_args()
-    #     if args['item']:
-    #         app.logger.info("Filtering shopcarts by item id %s", args['item'])
-    #         shopcarts = Shopcart.query_by_item_id(args['item'])
-    #     else:
-    #         app.logger.info("Returning unfiltered shopcart lists")
-    #         shopcarts = Shopcart.all_shopcart()
-
-    #     results = [dict(shopcart) for shopcart in shopcarts]
-    #     app.logger.info("Returning %d shopcarts", len(results))
-    #     return results, status.HTTP_200_OK
     def get(self):
         """Returns all of the Shopcarts"""
         app.logger.info("Request for shopcart list")
-        shopcarts = Shopcart.all_shopcart()
+        shopcarts = []
+        args = shopcart_args.parse_args()
+        if args['itemID']:
+            app.logger.info("Filtering shopcarts by item id %s", args['itemID'])
+            shopcarts = Shopcart.query_by_item_id(args['itemID'])
+        else:
+            app.logger.info("Returning unfiltered shopcart lists")
+            shopcarts = Shopcart.all_shopcart()
+
         results = [dict(shopcart) for shopcart in shopcarts]
         app.logger.info("Returning %d shopcarts", len(results))
         return results, status.HTTP_200_OK
-
+        
 
 ######################################################################
 #  PATH: /shopcarts/{id}
