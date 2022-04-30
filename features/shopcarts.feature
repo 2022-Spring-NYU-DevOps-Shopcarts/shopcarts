@@ -6,9 +6,9 @@ Feature: The shopcart store service back-end
 Background:
     Given a set of items in shopcarts
         | user_id | item_id | item_name | quantity | price  | hold  |
-        | 1001    | 1       |  ring1    |  2       |  1998  | False |
-        | 1001    | 2       |  ring2    |  1       |  1.5   | False |
-        | 1002    | 1       |  ring1    |  3       |  3     | False |
+        | 1001    | 1       |  ring1    |  2       |  1998  | false |
+        | 1001    | 2       |  ring2    |  1       |  1.5   | false |
+        | 1002    | 1       |  ring1    |  3       |  3     | false |
 ############################################################
 # CREATE SHOPCARTS
 ############################################################
@@ -95,5 +95,14 @@ Scenario: List shopcarts when there are none
     And we should not see "1002" in the shopcarts table
 
 ############################################################
-# QUERY SHOPCARTS
+# CREATE ITEMS 
 ############################################################
+# Scenario: Create items
+#     When we visit the "home page"
+#     And we enter "1001" to the text box "User_ID" 
+#     And we enter "1" to the text box "Item_ID"
+#     And we enter "ring1" to the text box "Item_Name"
+#     And we enter "2" to the text box "Quantity"
+#     And we enter "1998" to the text box "Price"
+#     And we press the button "Add-to-Shopcart"
+#     Then we should see status code 409

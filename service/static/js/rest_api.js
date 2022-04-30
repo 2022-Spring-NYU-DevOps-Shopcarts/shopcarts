@@ -66,7 +66,7 @@ $(function () {
     // Create Item
     // ****************************************
 
-    $("#create-btn").click(function () {
+    $("#add-to-shopcart-btn").click(function () {
 
         let user_id = parseInt($("#user_id").val());
         let item_id = parseInt($("#item_id").val());
