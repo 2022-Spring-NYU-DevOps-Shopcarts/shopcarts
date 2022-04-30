@@ -6,9 +6,9 @@ Feature: The shopcart store service back-end
 Background:
     Given a set of items in shopcarts
         | user_id | item_id | item_name | quantity | price  | hold  |
-        | 1001    | 1       |  ring1    |  2       |  1998  | False |
-        | 1001    | 2       |  ring2    |  1       |  1.5   | False |
-        | 1002    | 1       |  ring1    |  3       |  3     | False |
+        | 1001    | 1       |  ring1    |  2       |  1998  | false |
+        | 1001    | 2       |  ring2    |  1       |  1.5   | false |
+        | 1002    | 1       |  ring1    |  3       |  3     | false |
 ############################################################
 # CREATE SHOPCARTS
 ############################################################
@@ -95,5 +95,39 @@ Scenario: List shopcarts when there are none
     And we should not see "1002" in the shopcarts table
 
 ############################################################
-# QUERY SHOPCARTS
+# GET ITEMS
 ############################################################
+Scenario: Get items 
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID" 
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Get-Item"
+    Then we should see "ring1" in the results
+    Then we should see "1998" in the results
+    Then we should not see "ring2" in the results
+    Then we should not see "1.5" in the results
+    Then we should not see "3" in the results
+
+Scenario: Get Items None Case 1
+    When we visit the "home page"
+    And we enter "1002" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Get-Item"
+    Then we should not see "ring1" in the results
+    Then we should not see "ring2" in the results
+    Then we should not see "1998" in the results
+    Then we should not see "1.5" in the results
+    Then we should not see "3" in the results
+    Then we should not see "false" in the results
+
+Scenario: Get Items None Case 2
+    When we visit the "home page"
+    And we enter "1003" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Get-Item"
+    Then we should not see "ring1" in the results
+    Then we should not see "ring2" in the results
+    Then we should not see "1998" in the results
+    Then we should not see "1.5" in the results
+    Then we should not see "3" in the results
+    Then we should not see "false" in the results
