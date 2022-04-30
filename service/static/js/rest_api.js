@@ -102,6 +102,49 @@ $(function () {
         });
     });
 
+    // ****************************************
+    // Retrieve Item
+    // ****************************************
+    $("#get-item-btn").click(function (){
+        let user_id = parseInt($("#user_id").val());
+        let item_id = parseInt($("#item_id").val());
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "GET",
+            url: `/shopcarts/${user_id}/items/${item_id}`,
+            contentType: "application/json",
+            data: ''
+        });
+
+        ajax.done(function(res){
+            //alert(res.toSource())
+            $("#search_results").empty();
+            let table = '<table class="table table-striped" cellpadding="10">'
+            table += '<thead><tr>'
+            table += '<th class="col-md-2">Item ID</th>'
+            table += '<th class="col-md-2">Item Name</th>'
+            table += '<th class="col-md-2">Quantity</th>'
+            table += '<th class="col-md-2">Price</th>'
+            table += '<th class="col-md-2">Hold</th>'
+            table += '</tr></thead><tbody>'
+
+            let item = res;
+            table += `<tr><td>${item.item_id}</td><td>${item.item_name}</td><td>${item.quantity}</td><td>${item.price}</td><td>${item.hold}</td></tr>`;
+            table += '</tbody></table>';
+            $("#search_results").append(table);
+            flash_message("Successfully retrieved the item")
+        });
+
+        ajax.fail(function(res){
+            clear_form_data()
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+
 
     // ****************************************
     // Update Item

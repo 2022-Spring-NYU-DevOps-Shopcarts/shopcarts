@@ -95,14 +95,18 @@ Scenario: List shopcarts when there are none
     And we should not see "1002" in the shopcarts table
 
 ############################################################
-# CREATE ITEMS 
+# GET ITEMS
 ############################################################
-# Scenario: Create items
+# Scenario: Get items
 #     When we visit the "home page"
 #     And we enter "1001" to the text box "User_ID" 
 #     And we enter "1" to the text box "Item_ID"
-#     And we enter "ring1" to the text box "Item_Name"
-#     And we enter "2" to the text box "Quantity"
-#     And we enter "1998" to the text box "Price"
-#     And we press the button "Add-to-Shopcart"
-#     Then we should see status code 409
+#     And we press the button "Get-Item"
+    # Then we should see "1" in the "item_id_result" field
+    # Then we should see "ring1" in the "item_name_result" field
+    # Then we should see "2" in the quantity field
+    # Then we should see "1998" in the price field
+    # Then we should see "false" in the hold field
+    # Then we should not see "ring2" in the item_name field
+    # Then we should not see "1" in the quantity field
+    # Then we should not see "1.5" in the price fields
