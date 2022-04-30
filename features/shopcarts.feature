@@ -97,16 +97,37 @@ Scenario: List shopcarts when there are none
 ############################################################
 # GET ITEMS
 ############################################################
-# Scenario: Get items
-#     When we visit the "home page"
-#     And we enter "1001" to the text box "User_ID" 
-#     And we enter "1" to the text box "Item_ID"
-#     And we press the button "Get-Item"
-    # Then we should see "1" in the "item_id_result" field
-    # Then we should see "ring1" in the "item_name_result" field
-    # Then we should see "2" in the quantity field
-    # Then we should see "1998" in the price field
-    # Then we should see "false" in the hold field
-    # Then we should not see "ring2" in the item_name field
-    # Then we should not see "1" in the quantity field
-    # Then we should not see "1.5" in the price fields
+Scenario: Get items 
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID" 
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Get-Item"
+    Then we should see "ring1" in the results
+    Then we should see "1998" in the results
+    Then we should not see "ring2" in the results
+    Then we should not see "1.5" in the results
+    Then we should not see "3" in the results
+
+Scenario: Get Items None Case 1
+    When we visit the "home page"
+    And we enter "1002" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Get-Item"
+    Then we should not see "ring1" in the results
+    Then we should not see "ring2" in the results
+    Then we should not see "1998" in the results
+    Then we should not see "1.5" in the results
+    Then we should not see "3" in the results
+    Then we should not see "false" in the results
+
+Scenario: Get Items None Case 2
+    When we visit the "home page"
+    And we enter "1003" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Get-Item"
+    Then we should not see "ring1" in the results
+    Then we should not see "ring2" in the results
+    Then we should not see "1998" in the results
+    Then we should not see "1.5" in the results
+    Then we should not see "3" in the results
+    Then we should not see "false" in the results
