@@ -35,7 +35,7 @@ Scenario: Create an empty shopcart
 ############################################################
 # CLEAR SHOPCARTS
 ############################################################
-Scenario: Clear a non-empty shopcart
+Scenario: Clear a non-empty shopcart Case 1
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Clear-Shopcart"
@@ -44,7 +44,7 @@ Scenario: Clear a non-empty shopcart
     Then we should not see "ring1" in the results
     And we should not see "ring2" in the results
 
-Scenario: Clear a non-empty shopcart
+Scenario: Clear a non-empty shopcart Case 2
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Clear-Shopcart"
@@ -131,3 +131,36 @@ Scenario: Get Items None Case 2
     Then we should not see "1.5" in the results
     Then we should not see "3" in the results
     Then we should not see "false" in the results
+
+############################################################
+# HOLD ITEMS
+############################################################
+Scenario: Hold Items Case 1
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Hold-For-Later"
+    Then we should see message "Successfully put item on hold"
+    When we press the button "Get-Item"
+    Then we should not see "false" in the results
+    And we should see "true" in the results
+
+Scenario: Hold Items Case 2
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Hold-For-Later"
+    Then we should see message "Successfully put item on hold"
+    When we press the button "Get-Item"
+    Then we should not see "false" in the results
+    And we should see "true" in the results
+
+Scenario: Hold Items Invalid
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we enter "true" to the text box "Item_ID"
+    And we press the button "Hold-For-Later"
+    And we enter "1001" to the text box "User_ID"
+    And we press the button "Retrieve"
+    Then we should see "false" in the results
+    And we should not see "true" in the results

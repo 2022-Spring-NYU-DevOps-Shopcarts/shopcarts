@@ -301,6 +301,48 @@ $(function () {
     });
 
     // ****************************************
+    // Hold Item
+    // ****************************************
+    $("#hold-for-later-btn").click(function (){
+        let user_id = Number($("#user_id").val());
+        let item_id = Number($("#item_id").val());
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "PUT",
+            url: `/shopcarts/${user_id}/items/${item_id}/hold`,
+            contentType: "application/json",
+            data: ''
+        });
+
+        ajax.done(function(res){
+            //alert(res.toSource())
+            $("#search_results").empty();
+            let table = '<table class="table table-striped" cellpadding="10">'
+            table += '<thead><tr>'
+            table += '<th class="col-md-2">Item ID</th>'
+            table += '<th class="col-md-2">Item Name</th>'
+            table += '<th class="col-md-2">Quantity</th>'
+            table += '<th class="col-md-2">Price</th>'
+            table += '<th class="col-md-2">Hold</th>'
+            table += '</tr></thead><tbody>'
+
+            let item = res;
+            table += `<tr><td>${item.item_id}</td><td>${item.item_name}</td><td>${item.quantity}</td><td>${item.price}</td><td>${item.hold}</td></tr>`;
+            table += '</tbody></table>';
+            $("#search_results").append(table);
+            flash_message("Successfully put item on hold")
+        });
+
+        ajax.fail(function(res){
+            clear_form_data()
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+    // ****************************************
     // Clear Shopcart
     // ****************************************
     $("#clear-shopcart-btn").click(function() {
