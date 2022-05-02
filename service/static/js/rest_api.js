@@ -152,33 +152,28 @@ $(function () {
 
     $("#update-btn").click(function () {
 
-        let pet_id = $("#pet_id").val();
-        let name = $("#pet_name").val();
-        let category = $("#pet_category").val();
-        let available = $("#pet_available").val() == "true";
-        let gender = $("#pet_gender").val();
-        let birthday = $("#pet_birthday").val();
+        let user_id = parseInt($("#user_id").val());
+        let item_id = parseInt($("#item_id").val());
+        let quantity = parseInt($("#quantity").val());
+        let price = parseFloat($("#price").val());
 
         let data = {
-            "name": name,
-            "category": category,
-            "available": available,
-            "gender": gender,
-            "birthday": birthday
+            "quantity": quantity,
+            "price": price,
         };
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
                 type: "PUT",
-                url: `/pets/${pet_id}`,
+                url: `/shopcarts/${user_id}/items/${item_id}`,
                 contentType: "application/json",
                 data: JSON.stringify(data)
             })
 
         ajax.done(function(res){
             update_form_data(res)
-            flash_message("Success")
+            flash_message(`Successfully updated the item to: ${user_id}, ${item_id}, ${quantity}, ${price}`)
         });
 
         ajax.fail(function(res){

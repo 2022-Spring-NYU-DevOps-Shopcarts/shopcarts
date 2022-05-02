@@ -443,19 +443,19 @@ class ItemResource(Resource):
         # Make sure the shopcart exists
         shopcart = Shopcart.find_shopcart(shopcart_id)
         if not shopcart:
-            abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {shopcart_id} was not found.")
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {shopcart_id} was not found.")
         # Make sure the item exists
         item = Shopcart.find_item(shopcart_id, item_id)
         if not item:
-            abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
+            abort(status.HTTP_404_NOT_FOUND, f"item with id {item_id} was not found.")
         
         # Now proceed to update
         if quantity:
             item.quantity = quantity
-            app.logger.info("item {item_id}'s quantity is changed to {quantity}")
+            app.logger.info(f"item {item_id}'s quantity is changed to {quantity}")
         if price:
             item.price = price
-            app.logger.info("item {item_id}'s price is changed to {price}")
+            app.logger.info(f"item {item_id}'s price is changed to {price}")
         item.create()
         return item.serialize(), status.HTTP_200_OK
 
