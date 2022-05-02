@@ -164,3 +164,41 @@ Scenario: Hold Items Invalid
     And we press the button "Retrieve"
     Then we should see "false" in the results
     And we should not see "true" in the results
+
+
+############################################################
+# GET ITEMS
+############################################################
+Scenario: Delete an exist item
+    When we enter "1001" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Remove"
+    Then we should see message "Successfully deleted an item"
+    When we enter "1001" to the text box "User_ID"
+    And we press the button "Retrieve"
+    Then we should see "1 ring1 2 1998" in the results
+    And we should not see "2 ring2 1 1.5" in the results
+    And we should not see "1 ring1 3 3" in the results
+
+Scenario: Delete an item when the shopcart doesn't exist
+    When we enter "1003" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Remove"
+    Then we should see message "Successfully deleted an item"
+    When we enter "1003" to the text box "User_ID"
+    And we press the button "Retrieve"
+    Then we should not see "1 ring1 2 1998" in the results
+    And we should not see "2 ring2 1 1.5" in the results
+    And we should not see "1 ring1 3 3" in the results
+
+    
+Scenario: Delete an item that doesn't exist
+    When we enter "1002" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Remove"
+    Then we should see message "Successfully deleted an item"
+    When we enter "1002" to the text box "User_ID"
+    And we press the button "Retrieve"
+    Then we should not see "1 ring1 2 1998" in the results
+    And we should not see "2 ring2 1 1.5" in the results
+    And we should see "1 ring1 3 3" in the results

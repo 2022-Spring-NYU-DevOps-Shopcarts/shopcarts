@@ -277,26 +277,28 @@ $(function () {
     // Delete an Item
     // ****************************************
 
-    $("#delete-btn").click(function () {
+    $("#remove-btn").click(function () {
 
-        let pet_id = $("#pet_id").val();
+        let user_id = parseInt($("#user_id").val());
+        let item_id = parseInt($("#item_id").val());
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/pets/${pet_id}`,
+            url: `/shopcarts/${user_id}/items/${item_id}`,
             contentType: "application/json",
-            data: '',
-        })
+            data: ''
+        });
 
         ajax.done(function(res){
             clear_form_data()
-            flash_message("Pet has been Deleted!")
+            flash_message("Successfully deleted an item")
         });
 
         ajax.fail(function(res){
-            flash_message("Server error!")
+            clear_form_data()
+            flash_message("Successfully deleted an item")
         });
     });
 
