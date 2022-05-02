@@ -42,6 +42,8 @@ Scenario: Update quantity and price of an exist item
     And we enter "2.5" to the text box "price"
     And we press the button "Update-Item"
     Then we should see message "Successfully updated the item"
+    And we should see "1 ring1 3 2.5" in the results
+    And we should not see "1 ring1 2 1998" in the results
 
 Scenario: Update an item when the shopcart doesn't exist
     When we enter "1003" to the text box "User_ID"
