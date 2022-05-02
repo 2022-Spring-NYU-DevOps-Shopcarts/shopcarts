@@ -36,54 +36,44 @@ Scenario: Create an empty shopcart
 # UPDATE Item
 ############################################################
 Scenario: Update quantity and price of an exist item
-    When we enter "1001" to the text box "User ID"
-    And we enter "1" to the text box "Item ID"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
     And we enter "3" to the text box "quantity"
     And we enter "2.5" to the text box "price"
-    And we press the button "Update Item"
-    Then we should see "[1, ring1, 3, 2.5]" in the results
-    And we should not see "[2, ring2, 1, 1.5]" in the results
-    And we should not see "[1, ring1, 3, 3]" in the results
+    And we press the button "Update-Item"
+    Then we should see message "Successfully updated the item"
 
 Scenario: Update an item when the shopcart doesn't exist
-    When we enter "1003" to the text box "User ID"
-    And we enter "1" to the text box "Item ID"
+    When we enter "1003" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
     And we enter "3" to the text box "quantity"
     And we enter "2.5" to the text box "price"
-    And we press the button "Update Item"
-    Then we should not see "[1, ring1, 2, 1998]" in the results
-    And we should not see "[2, ring2, 1, 1.5]" in the results
-    And we should not see "[1, ring1, 3, 3]" in the results
+    And we press the button "Update-Item"
+    Then we should see message "Shopcart with id 1003 was not found."
 
 Scenario: Update an item that doesn't
-    When we enter "1001" to the text box "User ID"
-    And we enter "3" to the text box "Item ID"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "3" to the text box "Item_ID"
     And we enter "3" to the text box "quantity"
     And we enter "2.5" to the text box "price"
-    And we press the button "Update Item"
-    Then we should not see "[1, ring1, 2, 1998]" in the results
-    And we should not see "[2, ring2, 1, 1.5]" in the results
-    And we should not see "[1, ring1, 3, 3]" in the results
+    And we press the button "Update-Item"
+    Then we should see message "item with id 3 was not found."
 
 Scenario: Update an item with a invalid quantity number
-    When we enter "1001" to the text box "User ID"
-    And we enter "1" to the text box "Item ID"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
     And we enter "-1" to the text box "quantity"
     And we enter "2.5" to the text box "price"
-    And we press the button "Update Item"
-    Then we should not see "[1, ring1, 2, 1998]" in the results
-    And we should not see "[2, ring2, 1, 1.5]" in the results
-    And we should not see "[1, ring1, 3, 3]" in the results
+    And we press the button "Update-Item"
+    Then we should see message "Invalid quantity."
 
 Scenario: Update an item with a invalid price number
-    When we enter "1001" to the text box "User ID"
-    And we enter "1" to the text box "Item ID"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
     And we enter "1" to the text box "quantity"
     And we enter "-5.0" to the text box "price"
-    And we press the button "Update Item"
-    Then we should not see "[1, ring1, 2, 1998]" in the results
-    And we should not see "[2, ring2, 1, 1.5]" in the results
-    And we should not see "[1, ring1, 3, 3]" in the results
+    And we press the button "Update-Item"
+    Then we should see message "Invalid price."
 
 ############################################################
 # CLEAR SHOPCARTS

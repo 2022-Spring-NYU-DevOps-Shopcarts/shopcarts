@@ -150,7 +150,7 @@ $(function () {
     // Update Item
     // ****************************************
 
-    $("#update-btn").click(function () {
+    $("#update-item-btn").click(function () {
 
         let user_id = parseInt($("#user_id").val());
         let item_id = parseInt($("#item_id").val());
@@ -173,7 +173,7 @@ $(function () {
 
         ajax.done(function(res){
             update_form_data(res)
-            flash_message(`Successfully updated the item to: ${user_id}, ${item_id}, ${quantity}, ${price}`)
+            flash_message(`Successfully updated the item`)
         });
 
         ajax.fail(function(res){
