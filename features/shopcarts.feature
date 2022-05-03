@@ -19,6 +19,7 @@ Scenario: Create an empty shopcart which is already non-empty
     Then we should see message "User with id '1001' already has a non-empty shopcart"
     When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
     Then we should see "ring1" in the results
     And we should see "ring2" in the results
 
@@ -29,6 +30,7 @@ Scenario: Create an empty shopcart
     Then we should see message "Successfully added an empty shopcart"
     When we enter "1003" to the text box "User_ID"
     And we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
     Then we should not see "ring1" in the results
     And we should not see "ring2" in the results
 
@@ -41,6 +43,7 @@ Scenario: Clear a non-empty shopcart Case 1
     And we press the button "Clear-Shopcart"
     Then we should see message "Successfully cleared the shopcart"
     When we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
     Then we should not see "ring1" in the results
     And we should not see "ring2" in the results
 
@@ -51,6 +54,7 @@ Scenario: Clear a non-empty shopcart Case 2
     Then we should see message "Successfully cleared the shopcart"
     When we enter "1002" to the text box "User_ID"
     And we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
     Then we should see "ring1" in the results
 
 ############################################################
@@ -102,6 +106,7 @@ Scenario: Get items
     And we enter "1001" to the text box "User_ID" 
     And we enter "1" to the text box "Item_ID"
     And we press the button "Get-Item"
+    Then we should see message "Successfully retrieved the item"
     Then we should see "ring1" in the results
     Then we should see "1998" in the results
     Then we should not see "ring2" in the results
@@ -113,6 +118,7 @@ Scenario: Get Items None Case 1
     And we enter "1002" to the text box "User_ID"
     And we enter "2" to the text box "Item_ID"
     And we press the button "Get-Item"
+    Then we should see message "Item with the id '2' in shopcart'1002' was not found"
     Then we should not see "ring1" in the results
     Then we should not see "ring2" in the results
     Then we should not see "1998" in the results
@@ -125,12 +131,7 @@ Scenario: Get Items None Case 2
     And we enter "1003" to the text box "User_ID"
     And we enter "1" to the text box "Item_ID"
     And we press the button "Get-Item"
-    Then we should not see "ring1" in the results
-    Then we should not see "ring2" in the results
-    Then we should not see "1998" in the results
-    Then we should not see "1.5" in the results
-    Then we should not see "3" in the results
-    Then we should not see "false" in the results
+    Then we should see message "Shopcart with id '1003' was not found"
 
 ############################################################
 # HOLD ITEMS
@@ -144,6 +145,7 @@ Scenario: Hold Items Case 1
     When we enter "1001" to the text box "User_ID"
     And we enter "2" to the text box "Item_ID"
     And we press the button "Get-Item"
+    Then we should see message "Successfully retrieved the item"
     Then we should not see "false" in the results
     And we should see "true" in the results
 
@@ -156,6 +158,7 @@ Scenario: Hold Items Case 2
     When we enter "1001" to the text box "User_ID"
     And we enter "1" to the text box "Item_ID"
     And we press the button "Get-Item"
+    Then we should see message "Successfully retrieved the item"
     Then we should not see "false" in the results
     And we should see "true" in the results
 
@@ -166,6 +169,7 @@ Scenario: Hold Items Invalid
     And we press the button "Hold-For-Later"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
     Then we should see "1 ring1 2 1998 true" in the results
     And we should see "2 ring2 1 1.5 false" in the results
 
@@ -181,6 +185,7 @@ Scenario: Resume item on held item
     When we enter "1001" to the text box "User_ID"
     And we enter "2" to the text box "Item_ID"
     And we press the button "Get-Item"
+    Then we should see message "Successfully retrieved the item"
     Then we should see "false" in the results
     And we should not see "true" in the results
 
@@ -193,6 +198,7 @@ Scenario: Resume item on item already in cart
     When we enter "1001" to the text box "User_ID"
     And we enter "1" to the text box "Item_ID"
     And we press the button "Get-Item"
+    Then we should see message "Successfully retrieved the item"
     Then we should see "false" in the results
     And we should not see "true" in the results
 
@@ -214,6 +220,7 @@ Scenario: Delete an exist item
     Then we should see message "Successfully deleted an item"
     When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
     Then we should see "1 ring1 2 1998" in the results
     And we should not see "2 ring2 1 1.5" in the results
     And we should not see "1 ring1 3 3" in the results
@@ -225,6 +232,7 @@ Scenario: Delete an item when the shopcart doesn't exist
     Then we should see message "Successfully deleted an item"
     When we enter "1003" to the text box "User_ID"
     And we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
     Then we should not see "1 ring1 2 1998" in the results
     And we should not see "2 ring2 1 1.5" in the results
     And we should not see "1 ring1 3 3" in the results
@@ -237,6 +245,7 @@ Scenario: Delete an item that doesn't exist
     Then we should see message "Successfully deleted an item"
     When we enter "1002" to the text box "User_ID"
     And we press the button "Retrieve"
+    Then we should see message "Successfully retrieved the shopcart"
     Then we should not see "1 ring1 2 1998" in the results
     And we should not see "2 ring2 1 1.5" in the results
     And we should see "1 ring1 3 3" in the results
