@@ -252,7 +252,7 @@ Scenario: Add an exist item
     And we enter "1" to the text box "Quantity"
     And we enter "2" to the text box "Price"
     And we press the button "Add-To-Shopcart"
-    Then we should see message "Shopcart with user_id '1001' already contains item with id '1'."
+    Then we should see message "Shopcart with user_id '1001' already contains item with id '1'. Do you mean Update?"
     When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
     Then we should see "1 ring1 2 1998 true" in the results
