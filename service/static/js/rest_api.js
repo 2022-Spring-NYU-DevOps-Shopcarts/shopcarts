@@ -156,12 +156,13 @@ $(function () {
         let item_id = parseInt($("#item_id").val());
         let quantity = parseInt($("#quantity").val());
         let price = parseFloat($("#price").val());
-
-        let data = {
-            "quantity": quantity,
-            "price": price,
-        };
-
+        let data = {};
+        if (!isNaN(quantity) && quantity != "") {
+            data["quantity"] = quantity;
+        }
+        if (!isNaN(price) && price != "") {
+            data["price"] = price;
+        }
         $("#flash_message").empty();
 
         let ajax = $.ajax({
