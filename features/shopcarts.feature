@@ -33,7 +33,7 @@ Scenario: Create an empty shopcart
     And we should not see "ring2" in the results
 
 ############################################################
-# UPDATE Item
+# UPDATE ITEM
 ############################################################
 Scenario: Update quantity and price of an exist item
     When we enter "1001" to the text box "User_ID"
@@ -76,6 +76,44 @@ Scenario: Update an item with a invalid price number
     And we enter "-5.0" to the text box "price"
     And we press the button "Update-Item"
     Then we should see message "Invalid price."
+
+Scenario: Update an item's quantity only
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "1" to the text box "quantity"
+    And we enter "" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Successfully updated the item"
+    And we should not see "ring2" in the results
+    And we should see "1 ring1 1 1998" in the results
+
+Scenario: Update an item's quantity only with bad quantity
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "0" to the text box "quantity"
+    And we enter "" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Successfully updated the item"
+    And we should not see "ring2" in the results
+    Then we should see message "Invalid quantity."
+
+Scenario: Update an item's price only
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "" to the text box "quantity"
+    And we enter "2000" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Successfully updated the item"
+    And we should not see "ring2" in the results
+    And we should see "1 ring1 2 2000" in the results
+
+Scenario: Update an item's price only with bad price
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "" to the text box "quantity"
+    And we enter "-1" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Invalid price"
 
 ############################################################
 # CLEAR SHOPCARTS
