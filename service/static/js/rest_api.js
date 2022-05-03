@@ -72,7 +72,7 @@ $(function () {
         let item_id = parseInt($("#item_id").val());
         let item_name = $("#item_name").val();
         let quantity = parseInt($("#quantity").val());
-        let price = parseInt($("#price").val());
+        let price = parseFloat($("#price").val());
         let hold = $("#hold").val();
 
         let data = {
@@ -277,28 +277,117 @@ $(function () {
     // Delete an Item
     // ****************************************
 
-    $("#delete-btn").click(function () {
+    $("#remove-btn").click(function () {
 
-        let pet_id = $("#pet_id").val();
+        let user_id = parseInt($("#user_id").val());
+        let item_id = parseInt($("#item_id").val());
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/pets/${pet_id}`,
+            url: `/shopcarts/${user_id}/items/${item_id}`,
             contentType: "application/json",
-            data: '',
-        })
+            data: ''
+        });
 
         ajax.done(function(res){
             clear_form_data()
-            flash_message("Pet has been Deleted!")
+            flash_message("Successfully deleted an item")
         });
 
         ajax.fail(function(res){
-            flash_message("Server error!")
+            clear_form_data()
+            flash_message("Successfully deleted an item")
         });
     });
+
+    // ****************************************
+    // Hold Item
+    // ****************************************
+    $("#hold-for-later-btn").click(function (){
+        let user_id = Number($("#user_id").val());
+        let item_id = Number($("#item_id").val());
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "PUT",
+            url: `/shopcarts/${user_id}/items/${item_id}/hold`,
+            contentType: "application/json",
+            data: ''
+        });
+
+        ajax.done(function(res){
+            // alert(res.toSource())
+            // $("#search_results").empty();
+            // let table = '<table class="table table-striped" cellpadding="10">'
+            // table += '<thead><tr>'
+            // table += '<th class="col-md-2">Item ID</th>'
+            // table += '<th class="col-md-2">Item Name</th>'
+            // table += '<th class="col-md-2">Quantity</th>'
+            // table += '<th class="col-md-2">Price</th>'
+            // table += '<th class="col-md-2">Hold</th>'
+            // table += '</tr></thead><tbody>'
+
+            // let item = res;
+            // let i = 0;
+            // table += `<tr id="row_${i}><td>${item.item_id}</td><td>${item.item_name}</td><td>${item.quantity}</td><td>${item.price}</td><td>${item.hold}</td></tr>`;
+            // table += '</tbody></table>';
+            // $("#search_results").append(table);
+            clear_form_data()
+            flash_message("Successfully put item on hold")
+        });
+
+        ajax.fail(function(res){
+            clear_form_data()
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+     // ****************************************
+     // Resume Item
+     // ****************************************
+     $("#resume-for-purchase-btn").click(function (){
+        let user_id = Number($("#user_id").val());
+        let item_id = Number($("#item_id").val());
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "PUT",
+            url: `/shopcarts/${user_id}/items/${item_id}/resume`,
+            contentType: "application/json",
+            data: ''
+        });
+
+        ajax.done(function(res){
+            // alert(res.toSource())
+            // $("#search_results").empty();
+            // let table = '<table class="table table-striped" cellpadding="10">'
+            // table += '<thead><tr>'
+            // table += '<th class="col-md-2">Item ID</th>'
+            // table += '<th class="col-md-2">Item Name</th>'
+            // table += '<th class="col-md-2">Quantity</th>'
+            // table += '<th class="col-md-2">Price</th>'
+            // table += '<th class="col-md-2">Hold</th>'
+            // table += '</tr></thead><tbody>'
+
+            // let item = res;
+            // table += `<tr><td>${item.item_id}</td><td>${item.item_name}</td><td>${item.quantity}</td><td>${item.price}</td><td>${item.hold}</td></tr>`;
+            // table += '</tbody></table>';
+            // $("#search_results").append(table);
+            clear_form_data()
+            flash_message("Successfully resumed item for purchase")
+        });
+
+        ajax.fail(function(res){
+            clear_form_data()
+            flash_message(res.responseJSON.message)
+        });
+    });
+
 
     // ****************************************
     // Clear Shopcart
