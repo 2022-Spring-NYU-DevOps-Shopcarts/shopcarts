@@ -6,9 +6,9 @@ Feature: The shopcart store service back-end
 Background:
     Given a set of items in shopcarts
         | user_id | item_id | item_name | quantity | price  | hold  |
-        | 1001    | 1       |  ring1    |  2       |  1998  | false |
+        | 1001    | 1       |  ring1    |  2       |  1998  | true  |
         | 1001    | 2       |  ring2    |  1       |  1.5   | false |
-        | 1002    | 1       |  ring1    |  3       |  3     | false |
+        | 1002    | 1       |  ring1    |  3       |  3     | true  |
 ############################################################
 # CREATE SHOPCARTS
 ############################################################
@@ -141,7 +141,9 @@ Scenario: Hold Items Case 1
     And we enter "2" to the text box "Item_ID"
     And we press the button "Hold-For-Later"
     Then we should see message "Successfully put item on hold"
-    When we press the button "Get-Item"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Get-Item"
     Then we should not see "false" in the results
     And we should see "true" in the results
 
@@ -151,7 +153,9 @@ Scenario: Hold Items Case 2
     And we enter "1" to the text box "Item_ID"
     And we press the button "Hold-For-Later"
     Then we should see message "Successfully put item on hold"
-    When we press the button "Get-Item"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Get-Item"
     Then we should not see "false" in the results
     And we should see "true" in the results
 
@@ -162,12 +166,46 @@ Scenario: Hold Items Invalid
     And we press the button "Hold-For-Later"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
+    Then we should see "1 ring1 2 1998 true" in the results
+    And we should see "2 ring2 1 1.5 false" in the results
+
+############################################################
+# RESUME ITEMS
+############################################################
+Scenario: Resume item on held item
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Resume-For-Purchase"
+    Then we should see message "Successfully resumed item for purchase"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Get-Item"
     Then we should see "false" in the results
     And we should not see "true" in the results
 
+Scenario: Resume item on item already in cart
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Resume-For-Purchase"
+    Then we should see message "Successfully resumed item for purchase"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Get-Item"
+    Then we should see "false" in the results
+    And we should not see "true" in the results
+
+Scenario: Resume item invalid item id
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we enter "true" to the text box "Item_ID"
+    And we press the button "Resume-For-Purchase"
+    Then we should not see "false" in the results
+    And we should not see "true" in the results
 
 ############################################################
-# GET ITEMS
+# DELETE ITEMS
 ############################################################
 Scenario: Delete an exist item
     When we enter "1001" to the text box "User_ID"
