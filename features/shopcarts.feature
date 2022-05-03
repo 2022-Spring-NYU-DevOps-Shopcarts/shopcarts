@@ -202,6 +202,7 @@ Scenario: Resume item on item already in cart
     Then we should see "false" in the results
     And we should not see "true" in the results
 
+
 Scenario: Resume item invalid item id
     When we visit the "home page"
     And we enter "1001" to the text box "User_ID"
