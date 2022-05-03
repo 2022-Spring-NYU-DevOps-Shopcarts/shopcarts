@@ -1557,7 +1557,7 @@ class TestYourResourceServer(TestCase):
         shopcart1 = self._create_items(2)
         shopcart2 = self._create_items(3)
         item_id = 9998
-        new_url = f"{BASE_URL}/?item-id={item_id}"
+        new_url = f"{BASE_URL}?item-id={item_id}"
         resp = self.app.get(new_url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
@@ -1569,7 +1569,7 @@ class TestYourResourceServer(TestCase):
          shopcart1 = self._create_items(1)
          shopcart2 = self._create_items(3)
          item_id = shopcart1[0].item_id
-         new_url = f"{BASE_URL}/?item-id={item_id}"
+         new_url = f"{BASE_URL}?item-id={item_id}"
          resp = self.app.get(new_url)
          self.assertEqual(resp.status_code, status.HTTP_200_OK)
          data = resp.get_json()
