@@ -6,9 +6,9 @@ Feature: The shopcart store service back-end
 Background:
     Given a set of items in shopcarts
         | user_id | item_id | item_name | quantity | price  | hold  |
-        | 1001    | 1       |  ring1    |  2       |  1998  | false |
+        | 1001    | 1       |  ring1    |  2       |  1998  | true  |
         | 1001    | 2       |  ring2    |  1       |  1.5   | false |
-        | 1002    | 1       |  ring1    |  3       |  3     | false |
+        | 1002    | 1       |  ring1    |  3       |  3     | true  |
 ############################################################
 # CREATE SHOPCARTS
 ############################################################
@@ -141,7 +141,9 @@ Scenario: Hold Items Case 1
     And we enter "2" to the text box "Item_ID"
     And we press the button "Hold-For-Later"
     Then we should see message "Successfully put item on hold"
-    When we press the button "Get-Item"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Get-Item"
     Then we should not see "false" in the results
     And we should see "true" in the results
 
@@ -151,7 +153,9 @@ Scenario: Hold Items Case 2
     And we enter "1" to the text box "Item_ID"
     And we press the button "Hold-For-Later"
     Then we should see message "Successfully put item on hold"
-    When we press the button "Get-Item"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Get-Item"
     Then we should not see "false" in the results
     And we should see "true" in the results
 
@@ -162,12 +166,46 @@ Scenario: Hold Items Invalid
     And we press the button "Hold-For-Later"
     And we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
+    Then we should see "1 ring1 2 1998 true" in the results
+    And we should see "2 ring2 1 1.5 false" in the results
+
+############################################################
+# RESUME ITEMS
+############################################################
+Scenario: Resume item on held item
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Resume-For-Purchase"
+    Then we should see message "Successfully resumed item for purchase"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Get-Item"
     Then we should see "false" in the results
     And we should not see "true" in the results
 
+Scenario: Resume item on item already in cart
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Resume-For-Purchase"
+    Then we should see message "Successfully resumed item for purchase"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Get-Item"
+    Then we should see "false" in the results
+    And we should not see "true" in the results
+
+Scenario: Resume item invalid Item_ID
+    When we visit the "home page"
+    And we enter "1001" to the text box "User_ID"
+    And we enter "true" to the text box "Item_ID"
+    And we press the button "Resume-For-Purchase"
+    Then we should not see "false" in the results
+    And we should not see "true" in the results
 
 ############################################################
-# GET ITEMS
+# DELETE ITEMS
 ############################################################
 Scenario: Delete an exist item
     When we enter "1001" to the text box "User_ID"
@@ -207,92 +245,92 @@ Scenario: Delete an item that doesn't exist
 # ADD AN ITEM IN SHOPCARTS
 ############################################################
 Scenario: Add an exist item
-    When we enter "1001" to the text box "User ID"
-    And we enter "1" to the text box "Item ID"
-    And we enter "ring" to the text box "Item Name"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "ring" to the text box "Item_Name"
     And we enter "1" to the text box "Quantity"
     And we enter "2" to the text box "Price"
     And we press the button "Add to Shopcart"
     Then we should see message "Shopcart with user_id 1001 already contains item with id 1. Do you mean Update?"
-    When we enter "1001" to the text box "User ID"
+    When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
-    Then we should see "1 ring1 2 1998 false" in the results
+    Then we should see "1 ring1 2 1998 true" in the results
     And we should see "2 ring2 1 1.5 false" in the results
-    And we should not see "1 ring1 3 3 false" in the results
+    And we should not see "1 ring1 3 3 true" in the results
     And we should not see "1 ring 1 2 false" in the results
 
 Scenario: Add an item successfully Case 1
-    When we enter "1001" to the text box "User ID"
-    And we enter "3" to the text box "Item ID"
-    And we enter "ring3" to the text box "Item Name"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "3" to the text box "Item_ID"
+    And we enter "ring3" to the text box "Item_Name"
     And we enter "1" to the text box "Quantity"
     And we enter "2" to the text box "Price"
     And we press the button "Add to Shopcart"
     Then we should see message "Successfully added an Item"
-    When we enter "1001" to the text box "User ID"
+    When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
-    Then we should see "1 ring1 2 1998 false" in the results
+    Then we should see "1 ring1 2 1998 true" in the results
     And we should see "2 ring2 1 1.5 false" in the results
     And we should see "3 ring3 1 2 false" in the results
-    And we should not see "1 ring1 3 3 false" in the results
+    And we should not see "1 ring1 3 3 true" in the results
 
 Scenario: Add an item successfully Case 2
-    When we enter "1003" to the text box "User ID"
-    And we enter "1" to the text box "Item ID"
-    And we enter "ring" to the text box "Item Name"
+    When we enter "1003" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "ring" to the text box "Item_Name"
     And we enter "1" to the text box "Quantity"
     And we enter "2" to the text box "Price"
     And we press the button "Add to Shopcart"
     Then we should see message "Successfully added an Item"
-    When we enter "1003" to the text box "User ID"
+    When we enter "1003" to the text box "User_ID"
     And we press the button "Retrieve"
-    Then we should not see "1 ring1 2 1998 false" in the results
+    Then we should not see "1 ring1 2 1998 true" in the results
     And we should not see "2 ring2 1 1.5 false" in the results
-    And we should not see "1 ring1 3 3 false" in the results
+    And we should not see "1 ring1 3 3 true" in the results
     And we should see "1 ring 1 2 false" in the results
 
-Scenario: Add an item without a vaild Item ID
-    When we enter "1001" to the text box "User ID"
-    And we enter "-1" to the text box "Item ID"
-    And we enter "ring" to the text box "Item Name"
+Scenario: Add an item without a vaild Item_ID
+    When we enter "1001" to the text box "User_ID"
+    And we enter "-1" to the text box "Item_ID"
+    And we enter "ring" to the text box "Item_Name"
     And we enter "1" to the text box "Quantity"
     And we enter "2" to the text box "Price"
     And we press the button "Add to Shopcart"
     Then we should see message "Item_id must be a non-negative integer."
-    When we enter "1001" to the text box "User ID"
+    When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
-    Then we should see "1 ring1 2 1998 false" in the results
+    Then we should see "1 ring1 2 1998 true" in the results
     And we should see "2 ring2 1 1.5 false" in the results
-    And we should not see "1 ring1 3 3 false" in the results
+    And we should not see "1 ring1 3 3 true" in the results
     And we should not see "-1 ring 1 2 false" in the results
 
 Scenario: Add an item without a vaild Quantity
-    When we enter "1001" to the text box "User ID"
-    And we enter "1" to the text box "User ID"
-    And we enter "ring" to the text box "Item Name"
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "User_ID"
+    And we enter "ring" to the text box "Item_Name"
     And we enter "0" to the text box "Quantity"
     And we enter "2" to the text box "Price"
     And we press the button "Add to Shopcart"
     Then we should see message "Quantity must be a positive integer."
-    When we enter "1001" to the text box "User ID"
+    When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
-    Then we should see "1 ring1 2 1998 false" in the results
+    Then we should see "1 ring1 2 1998 true" in the results
     And we should see "2 ring2 1 1.5 false" in the results
-    And we should not see "1 ring1 3 3 false" in the results
+    And we should not see "1 ring1 3 3 true" in the results
     And we should not see "1 ring 0 2 false" in the results
 
 Scenario: Add an item without a vaild Price
-    When we enter "1003" to the text box "User ID"
-    And we enter "1" to the text box "User ID"
-    And we enter "ring" to the text box "Item Name"
+    When we enter "1003" to the text box "User_ID"
+    And we enter "1" to the text box "User_ID"
+    And we enter "ring" to the text box "Item_Name"
     And we enter "1" to the text box "Quantity"
     And we enter "-1" to the text box "Price"
     And we press the button "Add to Shopcart"
     Then we should see message "Price must be a positive int or float."
-    When we enter "1001" to the text box "User ID"
+    When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
-    Then we should see "1 ring1 2 1998 false" in the results
+    Then we should see "1 ring1 2 1998 true" in the results
     And we should see "2 ring2 1 1.5 false" in the results
-    And we should not see "1 ring1 3 3 false" in the results
+    And we should not see "1 ring1 3 3 true" in the results
     And we should not see "1 ring 1 -1 false" in the results
 
