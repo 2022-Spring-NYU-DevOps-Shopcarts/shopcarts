@@ -211,6 +211,7 @@ class ShopcartCollection(Resource):
     # LIST ALL SHOPCARTS / QUERY ALL SHOPCARTS CONTAINING AN ITEM
     ######################################################################
     @api.doc('list_shopcarts')
+    @api.doc('search_shopcarts')
     @api.expect(shopcart_args, validate=True)
     @api.response(200, 'Listed all shopcarts')
     @api.marshal_list_with(list_shopcart_model)

@@ -420,6 +420,9 @@ $(function () {
 
         let item_id = parseInt($("#item_id").val());
         $("#flash_message").empty();
+        let data = {
+            "item-id": item_id
+        };
 
         if( isNaN(item_id)){
             flash_message("Invalid Item_ID")
@@ -430,8 +433,8 @@ $(function () {
                 type: "GET",
                 url: `/shopcarts`,
                 // contentType: "application/json",
-                data: ''
-            })
+                // data: JSON.stringify(data),
+            });
             ajax.done(function(res){
                 $("#shopcarts_results").empty();
                 let table = '<table class="table table-striped" cellpadding="10">'
@@ -440,10 +443,7 @@ $(function () {
                 table += '</tr></thead><tbody class="scrollTbody">'
                 var shopcart_list = [];
                 for(let i = 0; i < res.length; i++) {
-                    if(res[i].item_id == item_id){
-                        shopcart_list.push(res[i].user_id);  
-                    }
-                     
+                    shopcart_list.push(res[i].user_id);                  
                 }
                 shopcart_list = Array.from(new Set(shopcart_list));
                 for(let i = 0; i < shopcart_list.length; i++) {
