@@ -279,28 +279,6 @@ class ShopcartResource(Resource):
                 item.delete()
         return "", status.HTTP_204_NO_CONTENT
 
-######################################################################
-# UPDATE A SHOPCART (#TODO: TO BE FIXED)
-######################################################################
-# @app.route("/shopcarts/<int:shopcart_id>", methods = ["PUT"])
-# def update_shopcarts(shopcart_id):
-    """
-    Updates shopcart with the relevant shopcart_id to quantity
-
-    Args:
-        shopcart_id (int): The shopcart to be updated
-        body of API call (JSON): 
-            item_id (int)
-            quantity (int) 
-            item_name 
-            price (float)
-
-    Returns:
-        status code: 200 if successful, 404 if cart not found,
-            406 if data type errors.
-        message (JSON): new state of shopcart or empty if cart not found
-    """
-
 
 ######################################################################
 #  PATH: /shopcarts/{id}/items

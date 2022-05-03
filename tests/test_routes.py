@@ -652,8 +652,8 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-    def test_update_item_bad_quantity_negative(self):
-        """ Attempts updating an item with a negative quantity. """
+    def test_update_item_bad_quantity_zero(self):
+        """ Attempts updating an item with 0 as quantity. """
         # create an item first
         test_item = ItemFactory()
         req = test_item.serialize()
@@ -667,7 +667,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
         # test updating with a negative quantity
-        req["quantity"] = -1
+        req["quantity"] = 0
         req.pop("item_name")
         item_id = req.pop("item_id")
         new_url = f"{BASE_URL}/{user_id}/items/{item_id}"
