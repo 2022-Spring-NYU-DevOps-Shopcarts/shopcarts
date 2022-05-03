@@ -431,7 +431,7 @@ class ItemResource(Resource):
         if quantity:
             item.quantity = quantity
             app.logger.info(f"item {item_id}'s quantity is changed to {quantity}")
-        if price:
+        if price != None and price >= 0:
             item.price = price
             app.logger.info(f"item {item_id}'s price is changed to {price}")
         item.create()

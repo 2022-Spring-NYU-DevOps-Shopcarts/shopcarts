@@ -156,13 +156,28 @@ $(function () {
         let item_id = parseInt($("#item_id").val());
         let quantity = parseInt($("#quantity").val());
         let price = parseFloat($("#price").val());
+        
+        // alert($("#price").val())
         let data = {};
-        if (!isNaN(quantity) && quantity != "") {
+        if ($("#quantity").val() == "0") {
+            data["quantity"] = 0;
+        }
+        else if (!isNaN(quantity)) {
             data["quantity"] = quantity;
         }
-        if (!isNaN(price) && price != "") {
+        else if ($("#quantity").val() != "") {
+            data["quantity"] = $("#quantity").val()
+        }
+        if ($("#price").val() == "0") {
+            data["price"] = 0.0;
+        }
+        else if (!isNaN(price)) {
             data["price"] = price;
         }
+        else if($("#price").val() != "") {
+            data["price"] = $("#price").val()
+        }
+        // alert(data["price"])
         $("#flash_message").empty();
 
         let ajax = $.ajax({
