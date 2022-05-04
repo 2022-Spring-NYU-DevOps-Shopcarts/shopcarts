@@ -35,6 +35,87 @@ Scenario: Create an empty shopcart
     And we should not see "ring2" in the results
 
 ############################################################
+# UPDATE ITEM
+############################################################
+Scenario: Update quantity and price of an exist item
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "3" to the text box "quantity"
+    And we enter "2.5" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Successfully updated the item"
+    And we should see "1 ring1 3 2.5" in the results
+    And we should not see "1 ring1 2 1998" in the results
+
+Scenario: Update an item when the shopcart doesn't exist
+    When we enter "1003" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "3" to the text box "quantity"
+    And we enter "2.5" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Shopcart with id 1003 was not found."
+
+Scenario: Update an item that doesn't exist
+    When we enter "1001" to the text box "User_ID"
+    And we enter "3" to the text box "Item_ID"
+    And we enter "3" to the text box "quantity"
+    And we enter "2.5" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "item with id 3 was not found."
+
+Scenario: Update an item with a invalid quantity number
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "-0.5" to the text box "quantity"
+    And we enter "2.5" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Invalid quantity."
+
+Scenario: Update an item with a invalid price number
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "1" to the text box "quantity"
+    And we enter "-0.1" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Invalid price."
+
+Scenario: Update an item's quantity only
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "1" to the text box "quantity"
+    And we enter "" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Successfully updated the item"
+    And we should not see "ring2" in the results
+    And we should see "1 ring1 1 1998" in the results
+
+Scenario: Update an item's quantity only with bad quantity
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "0" to the text box "quantity"
+    And we enter "" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Invalid quantity."
+
+Scenario: Update an item's price only
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "" to the text box "quantity"
+    And we enter "0" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Successfully updated the item"
+    And we should not see "ring2" in the results
+    And we should see "1 ring1 2 0" in the results
+
+Scenario: Update an item's price only with bad price
+    When we enter "1001" to the text box "User_ID"
+    And we enter "1" to the text box "Item_ID"
+    And we enter "" to the text box "quantity"
+    And we enter "-1" to the text box "price"
+    And we press the button "Update-Item"
+    Then we should see message "Invalid price."
+
+############################################################
 # CLEAR SHOPCARTS
 ############################################################
 Scenario: Clear a non-empty shopcart Case 1
@@ -167,7 +248,8 @@ Scenario: Hold Items Invalid
     And we enter "1001" to the text box "User_ID"
     And we enter "true" to the text box "Item_ID"
     And we press the button "Hold-For-Later"
-    And we enter "1001" to the text box "User_ID"
+    Then we should see message "item with id"
+    When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
     Then we should see message "Successfully retrieved the shopcart"
     Then we should see "1 ring1 2 1998 true" in the results
@@ -349,3 +431,32 @@ Scenario: Add an item without a vaild Price
     And we should not see "1 ring1 3 3 true" in the results
     And we should not see "1 ring 1 -1 false" in the results
 
+############################################################
+# Search Shopcarts
+############################################################
+Scenario: Search shopcarts successfully case 1
+    When we visit the "home page"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Search-Shopcarts"
+    Then we should see message "Successfully listed search results."
+    And we should see "1001" in the shopcarts table
+    And we should see "1002" in the shopcarts table
+    And we should not see "1003" in the shopcarts table
+    
+Scenario: Search shopcarts successfully case 2
+    When we visit the "home page"
+    And we enter "3" to the text box "Item_ID"
+    And we press the button "Search-Shopcarts"
+    Then we should see message "Successfully listed search results"
+    And we should not see "1001" in the shopcarts table
+    And we should not see "1002" in the shopcarts table
+    And we should not see "1003" in the shopcarts table
+
+Scenario: Search shopcarts successfully case 3
+    When we visit the "home page"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Search-Shopcarts"
+    Then we should see message "Successfully listed search results"
+    And we should see "1001" in the shopcarts table
+    And we should not see "1002" in the shopcarts table
+    And we should not see "1003" in the shopcarts table
