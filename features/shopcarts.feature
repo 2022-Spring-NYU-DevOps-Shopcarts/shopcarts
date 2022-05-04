@@ -248,7 +248,8 @@ Scenario: Hold Items Invalid
     And we enter "1001" to the text box "User_ID"
     And we enter "true" to the text box "Item_ID"
     And we press the button "Hold-For-Later"
-    And we enter "1001" to the text box "User_ID"
+    Then we should see message "item with id"
+    When we enter "1001" to the text box "User_ID"
     And we press the button "Retrieve"
     Then we should see message "Successfully retrieved the shopcart"
     Then we should see "1 ring1 2 1998 true" in the results

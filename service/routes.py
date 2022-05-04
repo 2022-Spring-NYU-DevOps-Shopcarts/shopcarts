@@ -485,11 +485,11 @@ class HoldResource(Resource):
     def put(self, user_id, item_id):
         shopcart = Shopcart.find_shopcart(user_id)
         if not shopcart:
-            abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {user_id} was not found.")
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {user_id} was not found.")
         # Make sure the item exists
         item = Shopcart.find_item(user_id, item_id)
         if not item:
-            abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
+            abort(status.HTTP_404_NOT_FOUND, f"item with id {item_id} was not found.")
         item.hold = True
         app.logger.info("Attempting to hold item %s from shopcart %s...", item_id, user_id)
         app.logger.info("Making 200 response...")
