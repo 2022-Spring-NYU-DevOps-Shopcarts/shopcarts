@@ -2,6 +2,7 @@
 Version: 1.1
 
 [![Build Status](https://github.com/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/actions/workflows/tdd.yml/badge.svg)](https://github.com/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/actions)
+[![Build Status](https://github.com/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/actions/workflows/bdd.yml/badge.svg)](https://github.com/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/actions)
 [![codecov](https://codecov.io/gh/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/branch/main/graph/badge.svg?token=YU8G34H0HW)](https://codecov.io/gh/2022-Spring-NYU-DevOps-Shopcarts/shopcarts)
 
 Resource URLs: ```/shopcarts```, ```/shopcarts/<user-id>```, ```/shopcarts/<user-id>/items```, ```/shopcarts/<user-id>/items/<item-id>```
