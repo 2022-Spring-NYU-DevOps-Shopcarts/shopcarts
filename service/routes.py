@@ -262,7 +262,6 @@ class ShopcartResource(Resource):
     def delete(self, user_id):
         """
         Delete a single Shopcart
-        This endpoint will return a Shopcart based on its id
         """
         app.logger.info("Request to delete shopcart with id: %s", user_id)
         
@@ -435,7 +434,6 @@ class ItemResource(Resource):
     # DELETE AN ITEM
     ######################################################################
     @api.doc('delete_items')
-    @api.response(404, 'not found')
     @api.response(204, 'deleted')
 
     def delete(self, shopcart_id, item_id):
@@ -476,6 +474,10 @@ class HoldResource(Resource):
     @api.response(200, 'Item put on hold')
     @api.marshal_list_with(item_model)
     def put(self, user_id, item_id):
+        """
+        Hold an item in shopcart {shopcart_id} with item_id {item_id}
+        (won't be ordered when user checks out the shopcart)
+        """   
         shopcart = Shopcart.find_shopcart(user_id)
         if not shopcart:
             abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {user_id} was not found.")
@@ -499,7 +501,7 @@ class ResumeResource(Resource):
     ResumeResource class
 
     Allows the holding status changes of a single Item
-    PUT /shopcarts/{id}/items/{item_id}/hold - Updates an Item's holding status to False
+    PUT /shopcarts/{id}/items/{item_id}/resume - Updates an Item's holding status to False
     """
 
     ######################################################################
@@ -513,14 +515,6 @@ class ResumeResource(Resource):
         """
         Resume item in shopcart {shopcart_id} with item_id {item_id}
             from held (will be ordered when user checks out the shopcart)
-        Args:
-            shopcart_id (int): The shopcart containing the relevant item
-            item_id (int): The item to be deleted
-        Returns:
-            status code: 200 if successful, 
-            404 if the requested shopcart_id or item_id does not exist,
-            400 if data type errors.
-            message (JSON): item if successful, otherwise error messages
         """   
         app.logger.info("Attempting to resume item %s from shopcart %s...", item_id, user_id)
         shopcart = Shopcart.find_shopcart(user_id)
