@@ -11,6 +11,7 @@ user_id + item_id serves as the compound primary key in our Shopcart-Item table
 item_name: name of an item
 quantity: quantity of an item
 price: price of an item
+hold: whether the item is on hold
 """
 import logging
 from flask_sqlalchemy import SQLAlchemy

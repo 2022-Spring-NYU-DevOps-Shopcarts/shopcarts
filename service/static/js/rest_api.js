@@ -437,6 +437,10 @@ $(function () {
         });
     });
 
+    
+    // ****************************************
+    // Query Shopcart
+    // ****************************************
     $("#search-shopcarts-btn").click(function () {
 
         let item_id = $("#item_id").val();
