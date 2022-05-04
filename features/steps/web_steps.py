@@ -54,6 +54,13 @@ def step_impl(context, element_name, text_string):
     element.clear()
     element.send_keys(text_string)
 
+@when('We enter "" to the text box "{element_name}"')
+def step_impl(context, element_name):
+    element_id = element_name.lower()
+    element = context.driver.find_element_by_id(element_id)
+    element.clear()
+    element.send_keys("")
+
 @when('We select "{text}" in the "{element_name}" dropdown')
 def step_impl(context, text, element_name):
     element_id = element_name.lower()

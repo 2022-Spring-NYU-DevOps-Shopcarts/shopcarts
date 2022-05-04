@@ -279,28 +279,6 @@ class ShopcartResource(Resource):
                 item.delete()
         return "", status.HTTP_204_NO_CONTENT
 
-######################################################################
-# UPDATE A SHOPCART (#TODO: TO BE FIXED)
-######################################################################
-# @app.route("/shopcarts/<int:shopcart_id>", methods = ["PUT"])
-# def update_shopcarts(shopcart_id):
-    """
-    Updates shopcart with the relevant shopcart_id to quantity
-
-    Args:
-        shopcart_id (int): The shopcart to be updated
-        body of API call (JSON): 
-            item_id (int)
-            quantity (int) 
-            item_name 
-            price (float)
-
-    Returns:
-        status code: 200 if successful, 404 if cart not found,
-            406 if data type errors.
-        message (JSON): new state of shopcart or empty if cart not found
-    """
-
 
 ######################################################################
 #  PATH: /shopcarts/{id}/items
@@ -443,19 +421,19 @@ class ItemResource(Resource):
         # Make sure the shopcart exists
         shopcart = Shopcart.find_shopcart(shopcart_id)
         if not shopcart:
-            abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {shopcart_id} was not found.")
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {shopcart_id} was not found.")
         # Make sure the item exists
         item = Shopcart.find_item(shopcart_id, item_id)
         if not item:
-            abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
+            abort(status.HTTP_404_NOT_FOUND, f"item with id {item_id} was not found.")
         
         # Now proceed to update
         if quantity:
             item.quantity = quantity
-            app.logger.info("item {item_id}'s quantity is changed to {quantity}")
-        if price:
+            app.logger.info(f"item {item_id}'s quantity is changed to {quantity}")
+        if price != None and price >= 0:
             item.price = price
-            app.logger.info("item {item_id}'s price is changed to {price}")
+            app.logger.info(f"item {item_id}'s price is changed to {price}")
         item.create()
         return item.serialize(), status.HTTP_200_OK
 
@@ -507,11 +485,11 @@ class HoldResource(Resource):
     def put(self, user_id, item_id):
         shopcart = Shopcart.find_shopcart(user_id)
         if not shopcart:
-            abort(status.HTTP_404_NOT_FOUND, "Shopcart with id {user_id} was not found.")
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {user_id} was not found.")
         # Make sure the item exists
         item = Shopcart.find_item(user_id, item_id)
         if not item:
-            abort(status.HTTP_404_NOT_FOUND, "item with id {item_id} was not found.")
+            abort(status.HTTP_404_NOT_FOUND, f"item with id {item_id} was not found.")
         item.hold = True
         app.logger.info("Attempting to hold item %s from shopcart %s...", item_id, user_id)
         app.logger.info("Making 200 response...")
