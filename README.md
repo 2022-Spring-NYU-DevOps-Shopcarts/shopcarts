@@ -1,6 +1,9 @@
 ## Shopcarts Service
 Version: 1.1
 
+[![Build Status](https://github.com/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/actions/workflows/workflow.yml/badge.svg)](https://github.com/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/actions)
+
+
 Resource URLs: ```/shopcarts```, ```/shopcarts/<user-id>```, ```/shopcarts/<user-id>/items```, ```/shopcarts/<user-id>/items/<item-id>```
 
 Allows different users to store items in their shopcarts.
