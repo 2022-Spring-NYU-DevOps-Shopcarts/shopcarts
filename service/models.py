@@ -194,4 +194,4 @@ class Shopcart(db.Model):
     def query_by_item_id(cls, item_id):
         """ Find all shopcarts containing the item_id """
         logger.info("Processing lookup for all shopcarts containing item id %s...", item_id)
-        return cls.query.filter(cls.item_id == item_id).all()
+        return cls.query.filter(cls.item_id == item_id).with_entities(cls.user_id).distinct().all()
