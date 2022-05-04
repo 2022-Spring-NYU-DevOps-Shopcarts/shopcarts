@@ -431,3 +431,32 @@ Scenario: Add an item without a vaild Price
     And we should not see "1 ring1 3 3 true" in the results
     And we should not see "1 ring 1 -1 false" in the results
 
+############################################################
+# Search Shopcarts
+############################################################
+Scenario: Search shopcarts successfully case 1
+    When we visit the "home page"
+    And we enter "1" to the text box "Item_ID"
+    And we press the button "Search-Shopcarts"
+    Then we should see message "Successfully listed search results."
+    And we should see "1001" in the shopcarts table
+    And we should see "1002" in the shopcarts table
+    And we should not see "1003" in the shopcarts table
+    
+Scenario: Search shopcarts successfully case 2
+    When we visit the "home page"
+    And we enter "3" to the text box "Item_ID"
+    And we press the button "Search-Shopcarts"
+    Then we should see message "Successfully listed search results"
+    And we should not see "1001" in the shopcarts table
+    And we should not see "1002" in the shopcarts table
+    And we should not see "1003" in the shopcarts table
+
+Scenario: Search shopcarts successfully case 3
+    When we visit the "home page"
+    And we enter "2" to the text box "Item_ID"
+    And we press the button "Search-Shopcarts"
+    Then we should see message "Successfully listed search results"
+    And we should see "1001" in the shopcarts table
+    And we should not see "1002" in the shopcarts table
+    And we should not see "1003" in the shopcarts table
