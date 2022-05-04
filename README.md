@@ -1,6 +1,9 @@
 ## Shopcarts Service
 Version: 1.1
 
+[![Build Status](https://github.com/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/actions/workflows/tdd.yml/badge.svg)](https://github.com/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/actions)
+[![codecov](https://codecov.io/gh/2022-Spring-NYU-DevOps-Shopcarts/shopcarts/branch/main/graph/badge.svg?token=YU8G34H0HW)](https://codecov.io/gh/2022-Spring-NYU-DevOps-Shopcarts/shopcarts)
+
 Resource URLs: ```/shopcarts```, ```/shopcarts/<user-id>```, ```/shopcarts/<user-id>/items```, ```/shopcarts/<user-id>/items/<item-id>```
 
 Allows different users to store items in their shopcarts.
@@ -29,6 +32,8 @@ Test via ```nosetests``` and (after starting local server) ```behave```.
             
     GET    on /shopcarts: returns all of the shopcarts.
     
+    GET    on /shopcarts?item-id=x: return all shopcarts containing the item with item id equal to x
+    
     GET    on /shopcarts/<user-id>: returns items in <user-id> shopcart.
     
     DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart.
@@ -49,9 +54,4 @@ Test via ```nosetests``` and (after starting local server) ```behave```.
                 price: float/int
             
     DELETE on /shopcarts/<user-id>/items/<item_id>: deletes an <item_id> item in a certain <user-id> shopcart
-    
-### To be implemented:
-    PUT    on /shopcarts/<user-id>: batch update items in <user-id> shopcart.
-        Expects JSON body data:
-            tbd
     
