@@ -66,7 +66,7 @@ Scenario: Update an item that doesn't exist
 Scenario: Update an item with a invalid quantity number
     When we enter "1001" to the text box "User_ID"
     And we enter "1" to the text box "Item_ID"
-    And we enter "quantity" to the text box "quantity"
+    And we enter "-0.5" to the text box "quantity"
     And we enter "2.5" to the text box "price"
     And we press the button "Update-Item"
     Then we should see message "Invalid quantity."
@@ -75,7 +75,7 @@ Scenario: Update an item with a invalid price number
     When we enter "1001" to the text box "User_ID"
     And we enter "1" to the text box "Item_ID"
     And we enter "1" to the text box "quantity"
-    And we enter "price" to the text box "price"
+    And we enter "-0.1" to the text box "price"
     And we press the button "Update-Item"
     Then we should see message "Invalid price."
 
