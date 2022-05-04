@@ -1,16 +1,9 @@
 """
 name: Shopcarts Service
 version: 1.0
-resource URLs: /shopcarts/<user-id>
-
 Allows different users to store items in their shopcarts.
-
-Usage: 
-    POST   on /shopcarts: creates new shopcart based on body data
-    GET    on /shopcarts: returns list of all shopcarts
-    PUT    on /shopcarts/<user-id>: add/delete items in <user-id> shopcart
-    GET    on /shopcarts/<user-id>: returns items in <user-id> shopcart
-    DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart
+See http://nyu-shopcart-service-sp2203.us-south.cf.appdomain.cloud/apidocs
+for documentation.
 
 """
 from attr import validate
@@ -121,7 +114,7 @@ list_shopcart_model = api.model('ShopcartModel', {
 
 # query string arguments
 shopcart_args = reqparse.RequestParser()
-shopcart_args.add_argument('item-id', type=int, required=False, help='List shopcarts containing the item id')
+shopcart_args.add_argument('item-id', type=int, required=False, help='Optional, to list shopcarts containing the item id')
 
 ######################################################################
 # Special Error Handlers
@@ -215,7 +208,7 @@ class ShopcartCollection(Resource):
     @api.response(200, 'Listed all shopcarts')
     @api.marshal_list_with(list_shopcart_model)
     def get(self):
-        """Returns all of the Shopcarts"""
+        """Returns all of the Shopcarts OR only those with the given item-id"""
         app.logger.info("Request for shopcart list")
         args = shopcart_args.parse_args()
         if args['item-id']:
@@ -530,14 +523,6 @@ class ResumeResource(Resource):
             message (JSON): item if successful, otherwise error messages
         """   
         app.logger.info("Attempting to resume item %s from shopcart %s...", item_id, user_id)
-        # try:
-        #     item = Shopcart.find_shopcart_or_404(user_id)
-        # except NotFound:
-        #     abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {user_id} was not found.")
-        # try:
-        #     item = Shopcart.find_item_or_404(user_id, item_id)
-        #     item.hold = False
-        # except NotFound:
         shopcart = Shopcart.find_shopcart(user_id)
         if not shopcart:
             abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id {user_id} was not found.")
