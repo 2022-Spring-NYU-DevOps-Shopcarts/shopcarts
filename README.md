@@ -32,6 +32,8 @@ Test via ```nosetests``` and (after starting local server) ```behave```.
             
     GET    on /shopcarts: returns all of the shopcarts.
     
+    GET    on /shopcarts?item-id=x: return all shopcarts containing the item with item id equal to x
+    
     GET    on /shopcarts/<user-id>: returns items in <user-id> shopcart.
     
     DELETE on /shopcarts/<user-id>: deletes <user-id> shopcart.
@@ -52,9 +54,4 @@ Test via ```nosetests``` and (after starting local server) ```behave```.
                 price: float/int
             
     DELETE on /shopcarts/<user-id>/items/<item_id>: deletes an <item_id> item in a certain <user-id> shopcart
-    
-### To be implemented:
-    PUT    on /shopcarts/<user-id>: batch update items in <user-id> shopcart.
-        Expects JSON body data:
-            tbd
     
