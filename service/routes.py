@@ -7,6 +7,7 @@ for documentation.
 
 """
 from attr import validate
+from isort import code
 from werkzeug.exceptions import NotFound
 from flask import jsonify, request, url_for, make_response, abort
 from flask_restx import Api, Resource, fields, reqparse, inputs
@@ -287,7 +288,7 @@ class ItemCollectionResource(Resource):
     @api.response(409, 'item already in cart')
     @api.response(400, 'invalid attributes')
     @api.expect(create_item_model)
-    @api.marshal_with(item_model)
+    @api.marshal_with(item_model, code=201)
     def post(self, shopcart_id):
         """
         Create new item in shopcart {shopcart_id}.
